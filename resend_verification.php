@@ -18,7 +18,7 @@ function buildVerificationEmail($name, $email, $token, $extraParams = '') {
     $verifyUrl = "http://localhost/vcsms_v_1.4/verify.php?email=" . urlencode($email) . "&token=$token" . $extraParams;
 
     // Change to your actual hosted logo path
-    $clinicLogo = "http://localhost/vcsms_v_1.4/assets/vetcaresys_logo.png"; 
+    $clinicLogo = "http://localhost/vcsms_v_1.4/assets/img/VetCareSystemLogo.png"; 
 
     return "
     <div style='font-family: Arial, sans-serif; padding:20px; background:#f4f6f9;'>
