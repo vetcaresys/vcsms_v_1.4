@@ -398,7 +398,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php if (!empty($existingClinic['logo'])): ?>
                             <div class="mt-2">
                                 <label class="form-label">Current Logo:</label><br>
-                                <img src="<?= htmlspecialchars($existingClinic['logo']) ?>"
+                                <img src="../<?= htmlspecialchars($existingClinic['logo']) ?>"
                                     alt="Clinic Logo"
                                     style="max-width: 150px; max-height: 150px; border: 1px solid #ccc; padding: 5px; border-radius: 8px;">
                             </div>
