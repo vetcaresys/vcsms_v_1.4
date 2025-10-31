@@ -300,7 +300,7 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <tr>
                                         <td>
                                             <?php if (!empty($clinic['logo'])): ?>
-                                                <img src="<?= htmlspecialchars($clinic['logo']) ?>" 
+                                                <img src="../<?= htmlspecialchars($clinic['logo']) ?>" 
                                                     alt="Clinic Logo"
                                                     style="width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid #ccc;">
                                             <?php else: ?>
@@ -313,7 +313,7 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <td><?= htmlspecialchars($clinic['owner_address']) ?></td>
                                         <td>
                                             <?php if (!empty($clinic['business_permit'])): ?>
-                                                <a href="<?= htmlspecialchars($clinic['business_permit']) ?>" 
+                                                <a href="../<?= htmlspecialchars($clinic['business_permit']) ?>" 
                                                     target="_blank" 
                                                     class="btn btn-info btn-sm">
                                                     <i class="bi bi-file-earmark-text"></i> View Permit
