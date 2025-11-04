@@ -328,7 +328,7 @@ $inquiries = $stmt->fetchColumn();
               <hr class="dropdown-divider">
             </li>
             <li>
-              <form method="POST" action="logout.php" id="logoutForm" class="m-0">
+              <form method="POST" action="../logout.php" id="logoutForm" class="m-0">
                 <button class="dropdown-item text-danger" type="submit" id="logoutBtn">
                   <i class="bi bi-box-arrow-right"></i> Logout
                 </button>
