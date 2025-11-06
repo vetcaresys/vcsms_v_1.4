@@ -28,10 +28,10 @@ $profilePicPath = "../uploads/profiles/" . $profilePic . "?t=" . time();
 // Handle add pet
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_pet'])) {
     $pet_name = $_POST['pet_name'];
-    $breed = $_POST['breed'];
+    $breed = ($_POST['breed'] === "Other") ? $_POST['other_breed'] : $_POST['breed'];
     $birth_date = $_POST['birth_date'];
     $description = $_POST['description'];
-    $status = $_POST['status'];
+    $status = "alive";
     $date_of_death = !empty($_POST['date_of_death']) ? $_POST['date_of_death'] : null;
     $photo_path = '';
 
@@ -84,10 +84,10 @@ if (isset($_GET['delete'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_pet'])) {
     $pet_id = $_POST['pet_id'];
     $pet_name = $_POST['pet_name'];
-    $breed = $_POST['breed'];
+    $breed = ($_POST['breed'] === "Other") ? $_POST['other_breed'] : $_POST['breed'];
     $birth_date = $_POST['birth_date'];
     $description = $_POST['description'];
-    $status = $_POST['status'];
+    $status = "alive";
     $date_of_death = !empty($_POST['date_of_death']) ? $_POST['date_of_death'] : null;
     $photo_path = null;
 
@@ -167,148 +167,7 @@ if (!empty($contact)) {
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
-
-    <style>
-        /* 🌟 Global Reset */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fb;
-            color: #2e2e2e;
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* 🧭 Navbar */
-        .navbar {
-            background: linear-gradient(90deg, #0d6efd, #007bff);
-            font-family: 'Poppins', sans-serif;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.25rem;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-brand img {
-            width: 38px;
-            height: 38px;
-            object-fit: cover;
-            border-radius: 50%;
-            background: #fff;
-            padding: 3px;
-            margin-right: 10px;
-            transition: transform 0.2s ease;
-        }
-
-        .navbar-brand img:hover {
-            transform: scale(1.08);
-        }
-
-        .nav-link {
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: #ffc107 !important;
-        }
-
-        /* 🧾 Cards */
-        .card {
-            border: none;
-            border-radius: 12px;
-            background: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-title {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            color: #0d6efd;
-        }
-
-        /* 🧍 Modal */
-        .modal-content {
-            border-radius: 15px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-header {
-            border-radius: 15px 15px 0 0;
-            background: linear-gradient(90deg, #0d6efd, #007bff);
-            color: white;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        /* ⚡ SweetAlert */
-        .swal2-popup {
-            font-family: 'Inter', sans-serif !important;
-            border-radius: 15px !important;
-        }
-
-        /* 🧠 Responsive Footer */
-        footer {
-            background-color: #212529;
-            color: #fff;
-            text-align: center;
-            padding: 15px 0;
-            font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
-            margin-top: auto;
-        }
-
-        /* ✨ Dashboard Stats Grid */
-        #dashboardStats .card {
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        #dashboardStats .card h5 {
-            color: #495057;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        #dashboardStats .display-6 {
-            font-weight: 700;
-        }
-
-        /* Keep navbar links always white */
-        .navbar-dark .navbar-nav .nav-link {
-            color: white !important;
-        }
-
-        .navbar-dark .navbar-nav .nav-link:hover,
-        .navbar-dark .navbar-nav .nav-link:focus,
-        .navbar-dark .navbar-nav .nav-link.active {
-            color: white !important;
-        }
-    </style>
+    <link rel="stylesheet" href="css/manage_pets.css">
 
 </head>
 
@@ -381,8 +240,33 @@ if (!empty($contact)) {
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Breed</label>
-                                <input type="text" name="breed" class="form-control" required>
+                                <select name="breed" class="form-select" id="breedSelect" required
+                                    onchange="toggleOtherBreed()">
+                                    <option value="">Select Breed</option>
+                                    <option value="Aspin">Aspin (Asong Pinoy)</option>
+                                    <option value="Labrador Retriever">Labrador Retriever</option>
+                                    <option value="German Shepherd">German Shepherd</option>
+                                    <option value="Golden Retriever">Golden Retriever</option>
+                                    <option value="Shih Tzu">Shih Tzu</option>
+                                    <option value="Pomeranian">Pomeranian</option>
+                                    <option value="Chihuahua">Chihuahua</option>
+                                    <option value="Siberian Husky">Siberian Husky</option>
+                                    <option value="Pug">Pug</option>
+                                    <option value="Beagle">Beagle</option>
+                                    <option value="Dachshund">Dachshund</option>
+                                    <option value="Rottweiler">Rottweiler</option>
+                                    <option value="Pitbull">Pitbull</option>
+                                    <option value="Bulldog">Bulldog</option>
+                                    <option value="Mixed Breed">Mixed Breed</option>
+                                    <option value="Other">Other (specify)</option>
+                                </select>
                             </div>
+
+                            <div class="col-md-6" id="otherBreedInput" style="display: none;">
+                                <label class="form-label">Specify Breed</label>
+                                <input type="text" name="other_breed" class="form-control" placeholder="Enter breed">
+                            </div>
+
                             <div class="col-md-6">
                                 <label class="form-label">Birth Date</label>
                                 <input type="date" name="birth_date" class="form-control" required>
@@ -390,19 +274,6 @@ if (!empty($contact)) {
                             <div class="col-md-6">
                                 <label class="form-label">Upload Photo</label>
                                 <input type="file" name="photo" class="form-control" accept="image/*">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-select" required onchange="toggleDeathDate(this)">
-                                    <option value="alive" selected>Alive</option>
-                                    <option value="deceased">Deceased</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6 deceased-date" style="display:none;">
-                                <label class="form-label">Date of Death</label>
-                                <input type="date" name="date_of_death" class="form-control">
                             </div>
 
                             <div class="col-12">
@@ -482,15 +353,18 @@ if (!empty($contact)) {
                                             <?php endif; ?>
                                         </td>
 
-                                        <td>
-                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                                data-bs-target="#editPetModal<?= $pet['pet_id']; ?>">
-                                                <i class="bi bi-pencil-square"></i> Edit
-                                            </button>
-                                            <a href="?delete=<?= $pet['pet_id']; ?>" class="btn btn-sm btn-danger"
-                                                onclick="return confirmDelete(event, <?= $pet['pet_id']; ?>)">
-                                                <i class="bi bi-trash"></i> Delete
-                                            </a>
+                                        <td class="action-cell">
+                                            <div class="action-buttons">
+                                                <button class="btn-action edit" data-bs-toggle="modal"
+                                                    data-bs-target="#editPetModal<?= $pet['pet_id']; ?>">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+
+                                                <button class="btn-action delete"
+                                                    onclick="return confirmDelete(event, <?= $pet['pet_id']; ?>)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -521,11 +395,52 @@ if (!empty($contact)) {
                                 <input type="text" name="pet_name" class="form-control"
                                     value="<?= htmlspecialchars($pet['pet_name']); ?>" required>
                             </div>
+                            <?php
+                            $breeds = [
+                                "Aspin",
+                                "Labrador Retriever",
+                                "German Shepherd",
+                                "Golden Retriever",
+                                "Shih Tzu",
+                                "Pomeranian",
+                                "Chihuahua",
+                                "Siberian Husky",
+                                "Pug",
+                                "Beagle",
+                                "Dachshund",
+                                "Rottweiler",
+                                "Pitbull",
+                                "Bulldog",
+                                "Mixed Breed"
+                            ];
+
+                            $currentBreed = $pet['breed'];
+                            $isOther = !in_array($currentBreed, $breeds);
+                            ?>
+
                             <div class="col-md-6">
                                 <label class="form-label">Breed</label>
-                                <input type="text" name="breed" class="form-control"
-                                    value="<?= htmlspecialchars($pet['breed']); ?>" required>
+                                <select name="breed" class="form-select breedSelect" required
+                                    onchange="toggleOtherBreedEdit(this)">
+                                    <option value="">Select Breed</option>
+
+                                    <?php foreach ($breeds as $b): ?>
+                                        <option value="<?= $b ?>" <?= $currentBreed == $b ? 'selected' : '' ?>>
+                                            <?= $b ?>
+                                        </option>
+                                    <?php endforeach; ?>
+
+                                    <option value="Other" <?= $isOther ? 'selected' : '' ?>>Other (specify)</option>
+                                </select>
                             </div>
+
+                            <div class="col-md-6 otherBreedInput" style="display: <?= $isOther ? 'block' : 'none' ?>;">
+                                <label class="form-label">Specify Breed</label>
+                                <input type="text" name="other_breed" class="form-control"
+                                    value="<?= $isOther ? htmlspecialchars($currentBreed) : '' ?>" placeholder="Enter breed"
+                                    <?= $isOther ? 'required' : '' ?>>
+                            </div>
+
                             <div class="col-md-6">
                                 <label class="form-label">Birth Date</label>
                                 <input type="date" name="birth_date" class="form-control"
@@ -534,8 +449,9 @@ if (!empty($contact)) {
                             <div class="col-md-6">
                                 <label class="form-label">Upload New Photo</label>
                                 <input type="file" name="photo" class="form-control" accept="image/*">
+                                <br>
                                 <?php if ($pet['photo']): ?>
-                                    <small>Current: <img src="<?= $pet['photo']; ?>" width="50"></small>
+                                    <small>Current: <img src="../uploads/pets/<?= $pet['photo']; ?>" width="50"></small>
                                 <?php endif; ?>
                             </div>
                             <div class="col-md-6">
@@ -557,6 +473,9 @@ if (!empty($contact)) {
                             </div>
                         </div>
                         <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
                             <button type="submit" name="update_pet" class="btn btn-success">
                                 <i class="bi bi-save"></i> Save Changes
                             </button>
@@ -761,6 +680,41 @@ if (!empty($contact)) {
             });
         });
     </script>
+
+    <!-- others selection in the breed part -->
+    <script>
+        function toggleOtherBreed() {
+            const breedSelect = document.getElementById("breedSelect");
+            const otherInput = document.getElementById("otherBreedInput");
+
+            if (breedSelect.value === "Other") {
+                otherInput.style.display = "block";
+                otherInput.querySelector("input").required = true;
+            } else {
+                otherInput.style.display = "none";
+                otherInput.querySelector("input").required = false;
+                otherInput.querySelector("input").value = "";
+            }
+        }
+    </script>
+
+    <script>
+        function toggleOtherBreedEdit(select) {
+            const modalBody = select.closest('.modal-body');
+            const otherContainer = modalBody.querySelector('.otherBreedInput');
+            const input = otherContainer.querySelector('input');
+
+            if (select.value === "Other") {
+                otherContainer.style.display = "block";
+                input.required = true;
+            } else {
+                otherContainer.style.display = "none";
+                input.required = false;
+                input.value = ""; // clears previously typed text kay nipili na siya ug existing breed
+            }
+        }
+    </script>
+
 </body>
 
 </html>
