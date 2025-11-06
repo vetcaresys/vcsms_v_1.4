@@ -51,7 +51,7 @@ function sendAppointmentEmail($pdo, $appointment_id, $clinic_id, $status = null)
     $clinicName = htmlspecialchars($appointment['clinic_name']);
     $clinicAddress = htmlspecialchars($appointment['address']);
 
-    $mapLink = "https://www.google.com/maps/search/?api=1&query=" . urlencode($clinicAddress);
+    $mapLink = "https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=" . urlencode($clinicAddress);
     $statusText = $status ? "has been <strong>" . htmlspecialchars(ucfirst($status)) . "</strong>" : "details have been updated";
 
     // PHPMailer setup
