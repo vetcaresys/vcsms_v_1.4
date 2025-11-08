@@ -19,20 +19,26 @@ $stmt = $pdo->prepare("
         a.status,
         c.clinic_name,
         cs.service_name,
-        p.pet_name
+        p.pet_name,
+        s.name AS doctor_name,
+        d.specialization
     FROM appointments a
     LEFT JOIN clinics c ON a.clinic_id = c.clinic_id
     LEFT JOIN clinic_services cs ON a.service_id = cs.service_id
     LEFT JOIN pets p ON a.pet_id = p.pet_id
-    WHERE a.owner_id = ?
+    LEFT JOIN staff s ON a.doctor_id = s.staff_id
+    LEFT JOIN doctors d ON s.staff_id = d.staff_id
+    WHERE p.owner_id = ?
     ORDER BY a.appointment_date ASC
 ");
 $stmt->execute([$owner_id]);
+
+
 $appointments = [];
 
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $startTime = $row['appointment_start'] ? date('H:i', strtotime($row['appointment_start'])) : '';
-    $endTime = $row['appointment_end'] ? date('H:i', strtotime($row['appointment_end'])) : '';
+    $startTime = $row['appointment_start'] ? date('h:i A', strtotime($row['appointment_start'])) : '';
+    $endTime = $row['appointment_end'] ? date('h:i A', strtotime($row['appointment_end'])) : '';
 
     $appointments[] = [
         'id' => $row['appointment_id'],
@@ -42,10 +48,12 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             'clinic' => $row['clinic_name'],
             'service' => $row['service_name'],
             'pet' => $row['pet_name'],
-            'time' => trim($startTime . ' - ' . $endTime),
-            'status' => $row['status']
+            'doctor' => $row['doctor_name'] ?? 'Not assigned',
+            'specialization' => $row['specialization'] ?? 'N/A',
+            'time' => trim($startTime . ($endTime ? ' - ' . $endTime : '')),
+            'status' => ucfirst($row['status'])
         ],
-        'color' => match($row['status']) {
+        'color' => match (strtolower($row['status'])) {
             'approved' => '#0d6efd',
             'completed' => '#198754',
             'cancelled' => '#dc3545',

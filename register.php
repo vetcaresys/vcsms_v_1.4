@@ -226,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="mb-3">
           <label class="form-label">Role</label>
           <select name="role" class="form-select" required>
-            <option value="">-- Select Role --</option>
+            <option value="">Select Role</option>
             <option value="pet_owner">Pet Owner</option>
             <option value="clinic_owner">Clinic Owner</option>
           </select>

@@ -22,6 +22,10 @@ $stmt = $pdo->prepare("SELECT * FROM staff WHERE staff_id = ?");
 $stmt->execute([$doctor_id]);
 $doctor = $stmt->fetch(PDO::FETCH_ASSOC);
 
+$docInfoStmt = $pdo->prepare("SELECT * FROM doctors WHERE staff_id = ?");
+$docInfoStmt->execute([$doctor_id]);
+$doctorInfo = $docInfoStmt->fetch(PDO::FETCH_ASSOC);
+
 $name = htmlspecialchars($doctor['name']);
 $profilePic = !empty($doctor['profile_picture']) ? $doctor['profile_picture'] : 'default.png';
 $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
@@ -120,6 +124,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle text-start">
                                 <tbody>
+                                    <!-- Staff Info -->
                                     <tr>
                                         <th width="35%">Email</th>
                                         <td><?= htmlspecialchars($doctor['email']) ?></td>
@@ -135,6 +140,24 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                     <tr>
                                         <th>Clinic</th>
                                         <td><?= htmlspecialchars($_SESSION['clinic_name'] ?? 'N/A') ?></td>
+                                    </tr>
+
+                                    <!-- Doctor Info -->
+                                    <tr>
+                                        <th>Specialization</th>
+                                        <td><?= htmlspecialchars($doctorInfo['specialization'] ?? 'N/A') ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Education</th>
+                                        <td><?= htmlspecialchars($doctorInfo['education'] ?? 'N/A') ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Years of Experience</th>
+                                        <td><?= htmlspecialchars($doctorInfo['experience'] ?? 'N/A') ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>License Number</th>
+                                        <td><?= htmlspecialchars($doctorInfo['license_no'] ?? 'N/A') ?></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -188,6 +211,34 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                 <label class="form-label">Profile Picture</label>
                                 <input type="file" name="profile_picture" class="form-control">
                             </div>
+
+                            <hr>
+                            <h6 class="fw-bold mt-3">Doctor Details</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Specialization</label>
+                                <input type="text" name="specialization" class="form-control"
+                                    value="<?= htmlspecialchars($doctorInfo['specialization'] ?? '') ?>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Educational Background</label>
+                                <input type="text" name="education" class="form-control"
+                                    value="<?= htmlspecialchars($doctorInfo['education'] ?? '') ?>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Years of Experience</label>
+                                <input type="text" name="experience" class="form-control"
+                                    value="<?= htmlspecialchars($doctorInfo['experience'] ?? '') ?>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">License Number</label>
+                                <input type="text" name="license_no" class="form-control"
+                                    value="<?= htmlspecialchars($doctorInfo['license_no'] ?? '') ?>">
+                            </div>
+
                         </div>
                         <div class="modal-footer d-flex">
                             <button type="button" class="btn btn-success" onclick="submitProfileForm()">

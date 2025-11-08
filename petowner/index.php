@@ -101,12 +101,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
 
-        <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 
     <style>
-        #calendar { max-width: 100%; margin: 0 auto; }
-        .fc-daygrid-event { font-size: 0.85rem; font-weight: 500; }
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .fc-daygrid-event {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
     </style>
 
     <style>
@@ -238,7 +245,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         #dashboardStats .display-6 {
             font-weight: 700;
         }
-
     </style>
 </head>
 
@@ -332,23 +338,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </main>
 
     <div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow-sm p-3">
-                <h4 class="text-primary fw-bold mb-3">My Appointment Calendar</h4>
-                <div id="calendar"></div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow-sm p-3">
+                    <h4 class="text-primary fw-bold mb-3">My Appointment Calendar</h4>
+                    <div id="calendar"></div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <h5 class="text-primary fw-bold mb-3">Appointment Details</h5>
-                <div id="appointmentDetails" class="text-muted">
-                    <em>Select a date to view details.</em>
+            <div class="col-md-4">
+                <div class="card shadow-sm p-3">
+                    <h5 class="text-primary fw-bold mb-3">Appointment Details</h5>
+                    <div id="appointmentDetails" class="text-muted">
+                        <em>Select a date to view details.</em>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Profile Modal -->
     <div class="modal fade" id="profileModal" tabindex="-1">
@@ -561,67 +567,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     </script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var calendarEl = document.getElementById('calendar');
-    var detailsEl = document.getElementById('appointmentDetails');
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+            const detailsEl = document.getElementById('appointmentDetails');
 
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        themeSystem: 'bootstrap5',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: ''
-        },
-        events: 'fetch_appointments.php',
-        eventColor: '#dc3545',
-        eventClick: function (info) {
-            const event = info.event;
-            const date = new Date(event.start).toLocaleDateString();
-            detailsEl.innerHTML = `
-                <div class="border p-3 rounded bg-light">
-                    <h6 class="fw-bold text-danger mb-2">${event.title}</h6>
-                    <p><strong>Date:</strong> ${date}</p>
-                    <p><strong>Time:</strong> ${event.extendedProps.time || 'Not set'}</p>
-                    <p><strong>Clinic:</strong> ${event.extendedProps.clinic}</p>
-                    <p><strong>Status:</strong> ${event.extendedProps.status}</p>
-                </div>
-            `;
-        },
-        dateClick: function (info) {
-            const clickedDate = info.dateStr;
-            const eventsOnDay = calendar.getEvents().filter(e => e.startStr.startsWith(clickedDate));
-            if (eventsOnDay.length === 0) {
-                detailsEl.innerHTML = `<div class="alert alert-info">No appointments on ${clickedDate}.</div>`;
-            } else {
-                let html = `<h6 class="fw-bold text-primary mb-2">Appointments on ${clickedDate}:</h6>`;
-                eventsOnDay.forEach(e => {
-                    html += `
-                        <div class="border p-2 rounded mb-2">
-                            <strong>${e.title}</strong><br>
-                            Clinic: ${e.extendedProps.clinic}<br>
-                            Status: <span class="badge bg-${getStatusColor(e.extendedProps.status)}">${e.extendedProps.status}</span>
-                        </div>`;
-                });
-                detailsEl.innerHTML = html;
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                themeSystem: 'bootstrap5',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: ''
+                },
+                events: 'fetch_appointments.php',
+                eventColor: '#0d6efd',
+                eventClick: function (info) {
+                    const e = info.event.extendedProps;
+                    const date = new Date(info.event.start).toLocaleDateString();
+
+                    document.getElementById('appointmentDetails').innerHTML = `
+        <div class="border rounded p-3 bg-light">
+            <h6 class="fw-bold text-primary mb-2">${info.event.title}</h6>
+            <p><i class="bi bi-calendar-event"></i> <strong>Date:</strong> ${date}</p>
+            <p><i class="bi bi-clock"></i> <strong>Time:</strong> ${e.time || 'Not set'}</p>
+            <p><i class="bi bi-hospital"></i> <strong>Clinic:</strong> ${e.clinic}</p>
+            <p><i class="bi bi-person-badge"></i> <strong>Doctor:</strong> ${e.doctor} (${e.specialization})</p>
+            <p><i class="bi bi-heart-pulse"></i> <strong>Service:</strong> ${e.service}</p>
+            <p><i class="bi bi-clipboard2-check"></i> <strong>Status:</strong> 
+                <span class="badge bg-${getStatusColor(e.status)}">${e.status}</span>
+            </p>
+        </div>
+    `;
+                },
+
+                dateClick: function (info) {
+                    const clickedDate = info.dateStr;
+                    const eventsOnDay = calendar.getEvents().filter(e => e.startStr.startsWith(clickedDate));
+
+                    if (eventsOnDay.length === 0) {
+                        detailsEl.innerHTML = `<div class="alert alert-info">No appointments on ${clickedDate}.</div>`;
+                        return;
+                    }
+
+                    let html = `<h6 class="fw-bold text-primary mb-3">Appointments on ${clickedDate}:</h6>`;
+                    eventsOnDay.forEach(e => {
+                        const props = e.extendedProps;
+                        html += `
+                    <div class="border p-2 rounded mb-2 bg-light">
+                        <strong>${e.title}</strong><br>
+                        🏥 ${props.clinic}<br>
+                        👨‍⚕️ ${props.doctor} (${props.specialization})<br>
+                        ⏰ ${props.time}<br>
+                        📋 <span class="badge bg-${getStatusColor(props.status)}">${props.status}</span>
+                    </div>`;
+                    });
+                    detailsEl.innerHTML = html;
+                }
+            });
+
+            calendar.render();
+
+            function getStatusColor(status) {
+                switch (status.toLowerCase()) {
+                    case 'pending': return 'warning';
+                    case 'approved': return 'primary';
+                    case 'completed': return 'success';
+                    case 'cancelled': return 'danger';
+                    default: return 'secondary';
+                }
             }
-        }
-    });
-
-    calendar.render();
-
-    function getStatusColor(status) {
-        switch (status.toLowerCase()) {
-            case 'pending': return 'warning';
-            case 'approved': return 'primary';
-            case 'completed': return 'success';
-            case 'cancelled': return 'danger';
-            default: return 'secondary';
-        }
-    }
-});
-</script>
+        });
+    </script>
 
 </body>
 

@@ -10,6 +10,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'pet_owner') {
 
 $user_id = $_SESSION['user_id'];
 $owner_name = htmlspecialchars($_SESSION['name']);
+// for get_doctors.php
+$doctor_id = !empty($_POST['doctor_id']) ? $_POST['doctor_id'] : null;
 
 // 🐾 Fetch pets of the owner
 $pets_stmt = $pdo->prepare("SELECT * FROM pets WHERE owner_id = ?");
@@ -34,14 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
     $message = $_POST['message'];
 
     $insert = $pdo->prepare("
-    INSERT INTO appointments 
-    (clinic_id, pet_id, service_id, doctor_id, residence, phone, message, updated_by, appointment_date, status)
-    VALUES (?, ?, ?, NULL, ?, ?, ?, NULL, ?, 'pending')
-    ");
+INSERT INTO appointments 
+(clinic_id, pet_id, service_id, doctor_id, residence, phone, message, updated_by, appointment_date, status)
+VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
+");
     $insert->execute([
         $clinic_id,
         $pet_id,
         $service_id,
+        $doctor_id,
         $residence,
         $phone,
         $message,
@@ -555,11 +558,29 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
                     <div class="col-md-6">
                         <label class="form-label">Select Your Pet *</label>
                         <select name="pet_id" class="form-select" required>
-                            <option value="">-- Select Pet --</option>
+                            <option value="">Select Pet</option>
                             <?php foreach ($pets as $pet): ?>
                                 <option value="<?= $pet['pet_id'] ?>"><?= htmlspecialchars($pet['pet_name']) ?></option>
                             <?php endforeach; ?>
                         </select>
+                    </div>
+
+                    <!-- Doctor (Optional) -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-primary">
+                            <i class="bi bi-person-badge"></i> Select Doctor (Optional)
+                        </label>
+
+                        <div class="input-group shadow-sm rounded">
+                            <select id="doctorSelect" name="doctor_id" class="form-select border-start-0">
+                                <option value="">Select Doctor</option>
+                            </select>
+                        </div>
+
+                        <div id="doctorSpecialization" class="form-text mt-2 ps-2 text-secondary fst-italic"
+                            style="display:none; font-size: 0.9rem;">
+                            <!-- Specialization will show here -->
+                        </div>
                     </div>
 
                     <!-- Message -->
@@ -733,6 +754,41 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
                     serviceSelect.disabled = true;
                     serviceSelect.innerHTML = '<option value="">Error loading services</option>';
                 });
+        });
+    </script>
+
+    <script>
+        // for the get_doctors.php
+        document.getElementById('clinicSelect').addEventListener('change', function () {
+            const clinicId = this.value;
+            const doctorSelect = document.getElementById('doctorSelect');
+
+            if (!clinicId) {
+                doctorSelect.innerHTML = '<option value="">-- Optional: Select Doctor --</option>';
+                doctorSelect.disabled = true;
+                return;
+            }
+
+            fetch('get_doctors.php?clinic_id=' + clinicId)
+                .then(res => res.json())
+                .then(data => {
+                    const doctorSelect = document.getElementById('doctorSelect');
+                    doctorSelect.innerHTML = '<option value="">Select Doctor</option>';
+
+                    if (data.length > 0) {
+                        doctorSelect.disabled = false;
+                        data.forEach(doctor => {
+                            const opt = document.createElement('option');
+                            opt.value = doctor.doctor_id; // make sure this matches your PHP output
+                            opt.textContent = doctor.name + " (" + doctor.specialization + ")";
+                            doctorSelect.appendChild(opt);
+                        });
+                    } else {
+                        doctorSelect.disabled = true;
+                        doctorSelect.innerHTML = '<option value="">No doctors available</option>';
+                    }
+                });
+
         });
     </script>
 

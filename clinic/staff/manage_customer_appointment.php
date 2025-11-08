@@ -308,14 +308,14 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                             data-id="<?= $appt['appointment_id']; ?>">
                                             <i class="bi bi-eye"></i> View
                                         </a>
-                                        <a href="#" class="btn btn-sm btn-warning me-1" data-bs-toggle="modal"
+                                        <!-- <a href="#" class="btn btn-sm btn-warning me-1" data-bs-toggle="modal"
                                             data-bs-target="#editAppointmentModal" data-id="<?= $appt['appointment_id'] ?>"
                                             data-date="<?= date('Y-m-d', strtotime($appt['appointment_date'])) ?>"
                                             data-start="<?= date('H:i', strtotime($appt['appointment_start'])) ?>"
                                             data-end="<?= date('H:i', strtotime($appt['appointment_end'])) ?>"
                                             data-doctor="<?= htmlspecialchars($appt['doctor_id'] ?? '') ?>">
                                             <i class="bi bi-pencil-square"></i> Edit
-                                        </a>
+                                        </a> -->
                                         <a href="?update=<?= $appt['appointment_id']; ?>&status=approved"
                                             class="btn btn-sm btn-success me-1"
                                             onclick="return confirm('Approve this appointment?')">Approve</a>

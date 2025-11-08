@@ -14,6 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $contact_number = trim($_POST['contact_number']);
+    $specialization = trim($_POST['specialization'] ?? '');
+    $education = trim($_POST['education'] ?? '');
+    $experience = trim($_POST['experience'] ?? '');
+    $license_no = trim($_POST['license_no'] ?? '');
     $profile_picture = null;
 
     // ✅ Handle profile picture upload (if any)
@@ -40,18 +44,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // ✅ Update staff table (doctor profile)
+    // ✅ Update staff table (name, email, contact, picture)
     if ($profile_picture) {
-        $stmt = $pdo->prepare("UPDATE staff SET name = ?, email = ?, contact_number = ?, profile_picture = ? WHERE staff_id = ?");
+        $stmt = $pdo->prepare("
+            UPDATE staff 
+            SET name = ?, email = ?, contact_number = ?, profile_picture = ? 
+            WHERE staff_id = ?
+        ");
         $stmt->execute([$name, $email, $contact_number, $profile_picture, $doctor_id]);
     } else {
-        $stmt = $pdo->prepare("UPDATE staff SET name = ?, email = ?, contact_number = ? WHERE staff_id = ?");
+        $stmt = $pdo->prepare("
+            UPDATE staff 
+            SET name = ?, email = ?, contact_number = ? 
+            WHERE staff_id = ?
+        ");
         $stmt->execute([$name, $email, $contact_number, $doctor_id]);
     }
 
-    // ✅ Update session values (so navbar updates immediately)
+    // ✅ Check if doctor record exists
+    $check = $pdo->prepare("SELECT COUNT(*) FROM doctors WHERE staff_id = ?");
+    $check->execute([$doctor_id]);
+    $exists = $check->fetchColumn();
+
+    if ($exists) {
+        // 🔄 Update existing doctor details
+        $updateDoc = $pdo->prepare("
+            UPDATE doctors 
+            SET specialization = ?, education = ?, experience = ?, license_no = ?
+            WHERE staff_id = ?
+        ");
+        $updateDoc->execute([$specialization, $education, $experience, $license_no, $doctor_id]);
+    } else {
+        // ➕ Insert new doctor record
+        $insertDoc = $pdo->prepare("
+            INSERT INTO doctors (staff_id, specialization, education, experience, license_no)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        $insertDoc->execute([$doctor_id, $specialization, $education, $experience, $license_no]);
+    }
+
+    // ✅ Update session so navbar reflects new name
     $_SESSION['name'] = $name;
 
     header("Location: index.php?profile_updated=1");
     exit;
 }
+?>

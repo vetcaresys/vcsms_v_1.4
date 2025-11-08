@@ -8,7 +8,7 @@ if (!isset($_GET['clinic_id'])) {
 
 $clinic_id = $_GET['clinic_id'];
 
-// Fetch clinic schedule
+// Fetch clinic schedule from your existing table
 $stmt = $pdo->prepare("
   SELECT day_of_week, open_time, close_time, status
   FROM clinic_schedules
@@ -23,26 +23,50 @@ if (!$schedules) {
   exit;
 }
 
+// Group consecutive open days with the same time range
+$grouped = [];
+$current = null;
+
+foreach ($schedules as $row) {
+  if (strtolower($row['status']) !== 'open') continue;
+
+  $day = $row['day_of_week'];
+  $time = "{$row['open_time']}-{$row['close_time']}";
+
+  if (!$current) {
+    $current = ['days' => [$day], 'time' => $time];
+  } elseif ($current['time'] === $time) {
+    $current['days'][] = $day;
+  } else {
+    $grouped[] = $current;
+    $current = ['days' => [$day], 'time' => $time];
+  }
+}
+
+if ($current) $grouped[] = $current;
+
+// Output neatly formatted description
 echo '<div class="p-2">';
 echo '<h6 class="fw-semibold text-primary mb-2"><i class="bi bi-clock"></i> Clinic Weekly Schedule</h6>';
 echo '<ul class="list-group">';
 
-foreach ($schedules as $s) {
-  $day = htmlspecialchars($s['day_of_week']);
-  $open = $s['open_time'] ? date("h:i A", strtotime($s['open_time'])) : '—';
-  $close = $s['close_time'] ? date("h:i A", strtotime($s['close_time'])) : '—';
-  
-  $isOpen = strtolower($s['status']) === 'open';
-  $statusBadge = $isOpen
-    ? "<span class='badge bg-success ms-2'>Open</span>"
-    : "<span class='badge bg-secondary ms-2'>Closed</span>";
+foreach ($grouped as $g) {
+  $days = $g['days'];
+  $time = explode('-', $g['time']);
+  $open = date("h:i A", strtotime($time[0]));
+  $close = date("h:i A", strtotime($time[1]));
+
+  // Display combined day range or comma-separated list
+  if (count($days) > 2) {
+    $dayLabel = reset($days) . ' – ' . end($days);
+  } else {
+    $dayLabel = implode(', ', $days);
+  }
 
   echo "
     <li class='list-group-item d-flex justify-content-between align-items-center'>
-      <strong>$day</strong>
-      <div>
-        $open - $close $statusBadge
-      </div>
+      <strong>{$dayLabel}</strong>
+      <span>{$open} – {$close}</span>
     </li>
   ";
 }
