@@ -20,7 +20,11 @@ function getLogoPath($logo)
     }
 
     // point to correct uploads/logos folder
+    if (strpos($logo, 'uploads/logos/') !== false) {
+        return $logo; // already a full path
+    }
     return "uploads/logos/" . basename($logo);
+
 }
 ?>
 <!DOCTYPE html>
@@ -383,13 +387,13 @@ function getLogoPath($logo)
                         document.getElementById('clinicName').innerText = data.clinic_name;
                         document.getElementById('clinicAddress').innerText = data.address;
                         document.getElementById('clinicContact').innerText = data.contact_info || 'No contact info';
-                        document.getElementById('clinicLogo').src = data.logo ? `uploads/logos/${data.logo}` : 'assets/default-clinic.jpg';
+                        document.getElementById('clinicLogo').src = data.logo || 'assets/default-clinic.jpg';
 
                         // Schedules
                         const schedList = document.getElementById('clinicSchedule');
                         schedList.innerHTML = '';
                         data.schedules.forEach(s => {
-                            schedList.innerHTML += `<li>${s.day_of_week}: ${s.open_time} - ${s.close_time}</li>`;
+                            schedList.innerHTML += `<li>${s.day_range}: ${s.open_time} - ${s.close_time}</li>`;
                         });
 
                         // Services
