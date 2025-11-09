@@ -347,7 +347,34 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
                     <li class="nav-item"><a href="book_appointment.php" class="nav-link active">Book Appointment</a>
                     </li>
                 </ul>
-                <div class="dropdown ms-auto">
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown">
+                            <i class="bi bi-bell-fill" style="font-size: 1.35rem;"></i>
+                            <span id="notif_count"
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                style="font-size: 0.65rem; padding: 3px 6px;">
+                            </span>
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end p-2"
+                            style="width: 320px; max-height: 400px;" id="notif_list_container">
+                            
+                            <li class="d-flex justify-content-between align-items-center mb-2 px-2">
+                                <h6 class="mb-0">Notifications</h6>
+                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;" disabled>
+                                    Mark all as read
+                                </button>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
+                                <li class="text-center text-muted">Loading...</li>
+                            </div>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="dropdowns">
                     <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
                         id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile" class="rounded-circle me-2"
@@ -963,6 +990,106 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
                 }
             });
         });
+    </script>
+    <script>
+         document.addEventListener("DOMContentLoaded", function() {
+        loadAdminNotifications();
+        
+        // Load when bell icon is clicked
+        document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
+        
+        // 💡 NEW: Listener for Mark All button
+        document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
+    });
+
+    function loadAdminNotifications() {
+        fetch(`../petowner_fetch_notifications.php?user_id=` + `<?=($user_id) ?>`)
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById("notif_list");
+                const count = document.getElementById("notif_count");
+                const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
+                
+                list.innerHTML = "";
+                let unreadCount = 0;
+
+                if (!data || data.length === 0) {
+                    list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
+                    count.textContent = "";
+                    markAllBtn.disabled = true; // Disable button if no notifs
+                    return;
+                }
+
+                data.forEach(n => {
+                    if (n.status === "unread") unreadCount++;
+
+                    list.innerHTML += `
+                        <li>
+                            <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
+                            data-id="${n.notif_id}">
+                                <div>
+                                    <strong>${n.subject}</strong><br>
+                                    <small class="text-muted">${n.message}</small>
+                                </div>
+                                ${n.status === "unread" ? `<span class="badge bg-danger ms-2">New</span>` : ""}
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-0"></li>
+                    `;
+                });
+
+                count.textContent = unreadCount > 0 ? unreadCount : "";
+                markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
+            });
+    }
+
+    // 💡 NEW: Function to mark all notifications as read
+    function markAllAsRead() {
+        Swal.fire({
+            title: 'Mark all as read?',
+            text: "All current unread notifications will be marked as read.",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, Mark All'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Fetch the new PHP endpoint to update the database
+                fetch(`../petowner_mark_all_as_read.php?user_id=` + `<?=($user_id) ?>`, { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire('Success!', 'All notifications marked as read.', 'success');
+                            // Reload the notifications immediately after success
+                            loadAdminNotifications(); 
+                        } else {
+                            Swal.fire('Error!', 'Could not mark all as read.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        Swal.fire('Error!', 'Network or server issue.', 'error');
+                    });
+            }
+        });
+    }
+
+    // Mark as read when opening a notification (Your original function, updated for clarity)
+    document.addEventListener("click", function(e) {
+        if (e.target.closest(".notif-item")) {
+            const notifItem = e.target.closest(".notif-item");
+            const id = notifItem.dataset.id;
+            
+            // Only send the request if it's currently marked as unread
+            if (notifItem.classList.contains('bg-light')) {
+                fetch(`../../mark_as_read.php?id=${id}`);
+                // Simple visual update after click
+                notifItem.classList.remove('bg-light');
+                notifItem.querySelector('.badge')?.remove();
+                loadAdminNotifications(); // Reload count
+            }
+        }
+    });
     </script>
 </body>
 
