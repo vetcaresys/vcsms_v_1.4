@@ -757,7 +757,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Only send the request if it's currently marked as unread
             if (notifItem.classList.contains('bg-light')) {
-                fetch(`../../mark_as_read.php?id=${id}`);
+                fetch(`../mark_as_read.php?id=${id}`);
                 // Simple visual update after click
                 notifItem.classList.remove('bg-light');
                 notifItem.querySelector('.badge')?.remove();
