@@ -335,6 +335,45 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     });
     </script>
+<script>
+    /**
+     * Function to silently execute the PHP reminder script via AJAX.
+     * It uses the Fetch API, which is the modern standard for making web requests.
+     */
+    function runReminderCheck() {
+        // The URL of your PHP file that contains the reminder logic
+        const phpScriptUrl = '../check_reminders.php';
 
+        fetch(phpScriptUrl, {
+            method: 'GET', // We are just running the script, so GET is fine
+            cache: 'no-cache' // Important: ensures the browser always fetches the latest logic
+        })
+        .then(response => {
+            // Optional: Check if the response was successful (HTTP 200)
+            if (!response.ok) {
+                console.error(`Reminder script failed with status: ${response.status}`);
+            }
+            // Since the PHP script only modifies the database and echoes output 
+            // (which we ignore here), we don't usually need to process the response text.
+            // console.log('Reminder check executed successfully.');
+        })
+        .catch(error => {
+            // Log any network or fetch errors
+            console.error('Network error during reminder check:', error);
+        });
+    }
+
+    // 1. Run the function immediately when the admin page loads
+    runReminderCheck();
+
+    // 2. Set the interval to run the function every 10 seconds (10000 milliseconds)
+    const intervalInMilliseconds = 10000; 
+
+    setInterval(runReminderCheck, intervalInMilliseconds);
+
+    // Optional: Log a message to the console for debugging
+    console.log(`Reminder script set to run every ${intervalInMilliseconds / 1000} seconds.`);
+
+</script>
 </body>
 </html>

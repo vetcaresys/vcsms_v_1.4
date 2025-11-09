@@ -52,21 +52,6 @@ VALUES (?, ?,?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
         $appointment_date
     ]);
 
-    $check = $pdo->prepare("
-    SELECT * FROM appointments 
-    WHERE owner_id = ? 
-      AND clinic_id = ? 
-      AND appointment_date = ? 
-      AND status IN ('pending', 'approved')
-    ");
-    $check->execute([$user_id, $clinic_id, $appointment_date]);
-
-    if ($check->rowCount() > 0) {
-        $_SESSION['error'] = "You already have a booking on this date. Cancel it first before rebooking.";
-        header("Location: book_appointment.php?clinic_id=$clinic_id");
-        exit;
-    }
-
     $stmt = $pdo->prepare("
         INSERT INTO notifications 
             (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
@@ -85,6 +70,22 @@ VALUES (?, ?,?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
         'unread',                            // status
         date('Y-m-d H:i:s')                  // created_at
     ]);
+    
+    $check = $pdo->prepare("
+    SELECT * FROM appointments 
+    WHERE owner_id = ? 
+      AND clinic_id = ? 
+      AND appointment_date = ? 
+      AND status IN ('pending', 'approved')
+    ");
+    $check->execute([$user_id, $clinic_id, $appointment_date]);
+
+    if ($check->rowCount() > 0) {
+        $_SESSION['error'] = "You already have a booking on this date. Cancel it first before rebooking.";
+        header("Location: book_appointment.php?clinic_id=$clinic_id");
+        exit;
+    }
+
 
     $_SESSION['booking_msg'] = $insert->rowCount() ? 'success' : 'error';
     header('Location: book_appointment.php');

@@ -12,7 +12,7 @@ date_default_timezone_set('Asia/Manila');
 
 // ✅ Staff authentication
 if (!isset($_SESSION['staff_id']) || $_SESSION['role'] !== 'staff') {
-    header('Location: ../clinic/staff/login.php');
+    header('Location: ../index.php');
     exit;
 }
 
@@ -148,7 +148,7 @@ if (isset($_GET['update']) && isset($_GET['status'])) {
     // 4. Insert Notification using the formatted variables
     $notification_message = "Your appointment has been " . htmlspecialchars($new_status) . " for {$formatted_date} from {$formatted_start} to {$formatted_end}.";
     $notification_subject = ucfirst($new_status) . " Appointment Confirmation"; // Better subject
-
+    $clean_schedule_date = substr($appointment_date, 0, 10);
     $notifStmt = $pdo->prepare("
         INSERT INTO notifications 
             (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
@@ -161,8 +161,8 @@ if (isset($_GET['update']) && isset($_GET['status'])) {
         $notification_message,// message
         $notification_subject,// subject
         'manage_customer_appointment.php', // link (Suggested link)
-        $appointment_date,// schedule_date (Raw date is better here)
-        'sms', // Assuming you want to send an SMS
+        $clean_schedule_date,// schedule_date (Raw date is better here)
+        '1', // Assuming you want to send an SMS
         $phone, // number
         'unread', // status
         date('Y-m-d H:i:s') // created_at
