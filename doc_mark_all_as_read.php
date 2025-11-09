@@ -16,7 +16,7 @@ try {
         UPDATE notifications
         SET status = 'read'
         WHERE status = 'unread'
-        AND (role = 'admin' )
+        AND (role = 'doctor' OR role = 'staff')
     ";
 
     $stmt = $pdo->prepare($sql);

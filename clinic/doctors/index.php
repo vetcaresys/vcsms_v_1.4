@@ -424,7 +424,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         }).then((result) => {
             if (result.isConfirmed) {
                 // Fetch the new PHP endpoint to update the database
-                fetch("../../mark_all_as_read.php", { method: 'POST' })
+                fetch("../../doc_mark_all_as_read.php", { method: 'POST' })
                     .then(response => {
                         if (response.ok) {
                             Swal.fire('Success!', 'All notifications marked as read.', 'success');
