@@ -12,7 +12,7 @@ try {
     $stmt = $pdo->prepare("
         SELECT notif_id, subject, message, link, status, created_at
         FROM notifications
-        WHERE role = 'employee' OR role = 'doctor'  -- MODIFIED WHERE CLAUSE
+        WHERE role = 'employee' OR role = 'staff'  -- MODIFIED WHERE CLAUSE
         ORDER BY 
             CASE WHEN status = 'unread' THEN 0 ELSE 1 END,
             created_at DESC

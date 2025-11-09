@@ -66,6 +66,24 @@ VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
         exit;
     }
 
+    $stmt = $pdo->prepare("
+        INSERT INTO notifications 
+            (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    $stmt->execute([
+        $user_id,                            // user_id
+        'employee',                             // role
+        $message,  // message
+        'Book Appointment',                          // subject
+        null,                                // link
+        $appointment_date,                                // schedule_date
+        null,                                // sms
+        $phone,                                // number
+        'unread',                            // status
+        date('Y-m-d H:i:s')                  // created_at
+    ]);
 
     $_SESSION['booking_msg'] = $insert->rowCount() ? 'success' : 'error';
     header('Location: book_appointment.php');
