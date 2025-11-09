@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointment Calendar</title>
+<style>
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f2f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+  }
+
+  .container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  /* Calendar Section */
+  .calendar {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 20px;
+    width: 65%;
+  }
+
+  .calendar header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .calendar h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .calendar button {
+    background: #007bff;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  .calendar button:hover {
+    background: #0056b3;
+  }
+
+  .days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: left;
+    gap: 10px;
+  }
+
+  .day {
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    background: #f8f9fa;
+    cursor: pointer;
+    min-height: 100px;
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .day:hover {
+    background: #007bff22;
+    transform: scale(1.02);
+  }
+
+  .day-number {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+  }
+
+  .today {
+    background: #007bff;
+    color: white;
+  }
+
+  .selected {
+    background: #ffc107;
+    color: black;
+    font-weight: bold;
+  }
+
+  .mini-appt {
+    font-size: 0.7rem;
+    color: #444;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Appointment Panel */
+  .appointments {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 20px;
+    width: 35%;
+  }
+
+  .appointments h3 {
+    margin-top: 0;
+    color: #007bff;
+  }
+
+  .appointment {
+    background: #e9ecef;
+    border-left: 5px solid #007bff;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .no-appointments {
+    color: #666;
+    font-style: italic;
+    margin-top: 10px;
+  }
+
+  .add-form {
+    margin-top: 20px;
+  }
+
+  .add-form input, .add-form button {
+    padding: 10px;
+    font-size: 1rem;
+  }
+
+  .add-form input {
+    width: 70%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  .add-form button {
+    width: 25%;
+    background: #28a745;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .add-form button:hover {
+    background: #218838;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="calendar">
+    <header>
+      <button id="prev">&#8592;</button>
+      <h2 id="monthYear"></h2>
+      <button id="next">&#8594;</button>
+    </header>
+    <div class="days" id="calendarDays"></div>
+  </div>
+
+  <div class="appointments">
+    <h3 id="selectedDate">Select a date</h3>
+    <div id="appointmentList"></div>
+
+    <div class="add-form" id="addForm" style="display:none;">
+      <input type="text" id="newAppointment" placeholder="New appointment...">
+      <button onclick="addAppointment()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const monthYear = document.getElementById('monthYear');
+const calendarDays = document.getElementById('calendarDays');
+const selectedDateDisplay = document.getElementById('selectedDate');
+const appointmentList = document.getElementById('appointmentList');
+const addForm = document.getElementById('addForm');
+const newAppointment = document.getElementById('newAppointment');
+
+let date = new Date();
+let selectedDate = null;
+let appointments = JSON.parse(localStorage.getItem('appointments')) || {};
+
+function renderCalendar() {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const today = new Date();
+
+  monthYear.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+  calendarDays.innerHTML = '';
+
+  // Empty cells before first day
+  for (let i = 0; i < firstDay.getDay(); i++) {
+    const empty = document.createElement('div');
+    calendarDays.appendChild(empty);
+  }
+
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const dayDiv = document.createElement('div');
+    dayDiv.classList.add('day');
+
+    const fullDate = `${year}-${month + 1}-${day}`;
+
+    // Highlight today
+    if (
+      day === today.getDate() &&
+      month === today.getMonth() &&
+      year === today.getFullYear()
+    ) {
+      dayDiv.classList.add('today');
+    }
+
+    // Highlight selected date
+    if (fullDate === selectedDate) {
+      dayDiv.classList.add('selected');
+    }
+
+    const number = document.createElement('div');
+    number.classList.add('day-number');
+    number.textContent = day;
+    dayDiv.appendChild(number);
+
+    // Mini appointment previews
+    const dayAppointments = appointments[fullDate] || [];
+    dayAppointments.slice(0, 3).forEach(appt => {
+      const mini = document.createElement('span');
+      mini.classList.add('mini-appt');
+      mini.textContent = "• " + appt;
+      dayDiv.appendChild(mini);
+    });
+
+    if (dayAppointments.length > 3) {
+      const more = document.createElement('span');
+      more.classList.add('mini-appt');
+      more.textContent = `+${dayAppointments.length - 3} more`;
+      dayDiv.appendChild(more);
+    }
+
+    dayDiv.addEventListener('click', () => selectDate(fullDate));
+    calendarDays.appendChild(dayDiv);
+  }
+}
+
+function selectDate(dateKey) {
+  selectedDate = dateKey;
+  renderCalendar();
+  displayAppointments();
+}
+
+function displayAppointments() {
+  selectedDateDisplay.textContent = `Appointments on ${selectedDate}`;
+  const dayAppointments = appointments[selectedDate] || [];
+  appointmentList.innerHTML = '';
+
+  if (dayAppointments.length === 0) {
+    appointmentList.innerHTML = '<p class="no-appointments">No appointments yet.</p>';
+  } else {
+    dayAppointments.forEach(appt => {
+      const div = document.createElement('div');
+      div.className = 'appointment';
+      div.textContent = appt;
+      appointmentList.appendChild(div);
+    });
+  }
+
+  addForm.style.display = 'block';
+}
+
+function addAppointment() {
+  const apptText = newAppointment.value.trim();
+  if (apptText === '') return;
+
+  if (!appointments[selectedDate]) appointments[selectedDate] = [];
+  appointments[selectedDate].push(apptText);
+
+  localStorage.setItem('appointments', JSON.stringify(appointments));
+  newAppointment.value = '';
+  displayAppointments();
+  renderCalendar(); // Update previews immediately
+}
+
+document.getElementById('prev').onclick = () => {
+  date.setMonth(date.getMonth() - 1);
+  renderCalendar();
+};
+document.getElementById('next').onclick = () => {
+  date.setMonth(date.getMonth() + 1);
+  renderCalendar();
+};
+
+renderCalendar();
+</script>
+
+</body>
+</html>

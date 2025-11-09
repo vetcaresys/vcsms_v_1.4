@@ -72,6 +72,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             VALUES (NULL, ?, ?, ?, ?, NULL, NULL, ?, ?, 'pending')
         ");
     $stmt->execute([$user_id, $clinicName, $clinicAddr, $clinicContact, $logoPath, $permitPath]);
+
+    $stmt = $pdo->prepare("
+        INSERT INTO notifications 
+            (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    $stmt->execute([
+        $user_id,                            // user_id
+        'admin',                             // role
+        'Registration request for ' . $clinicName,  // message
+        'Register',                          // subject
+        null,                                // link
+        null,                                // schedule_date
+        null,                                // sms
+        null,                                // number
+        'unread',                            // status
+        date('Y-m-d H:i:s')                  // created_at
+    ]);
+
   }
 
   // ✅ Send Verification Email

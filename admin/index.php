@@ -36,13 +36,11 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Google Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
 
     <style>
-        /* 🌟 Global Styles */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8f9fb;
@@ -50,7 +48,6 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
             line-height: 1.6;
         }
 
-        /* 🧭 Navbar */
         .navbar {
             background: linear-gradient(90deg, #0d6efd, #007bff);
             font-family: 'Poppins', sans-serif;
@@ -67,160 +64,12 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
             align-items: center;
         }
 
-        .navbar-brand img {
-            width: 38px;
-            height: 38px;
-            object-fit: cover;
-            border-radius: 50%;
-            background: #fff;
-            padding: 3px;
-            margin-right: 10px;
-            transition: transform 0.2s ease;
-        }
-
-        .navbar-brand img:hover {
-            transform: scale(1.08);
-        }
-
-        /* Links */
-        .nav-link {
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
         .nav-link:hover {
             color: #ffc107 !important;
         }
 
-        /* 🧾 Summary Cards */
-        .summary-card {
-            border: none;
-            border-radius: 12px;
-            background: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .summary-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .summary-card h5 {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        .summary-card h2 {
-            font-weight: 700;
-            font-size: 2rem;
-        }
-
-        /* 💼 Tables */
-        .table {
-            border-radius: 10px;
-            overflow: hidden;
-            font-size: 0.95rem;
-        }
-
-        .table thead {
-            background-color: #0d6efd;
-            color: white;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
         .table tbody tr:hover {
             background-color: #f2f7ff;
-        }
-
-        /* 🪄 Buttons */
-        .btn {
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        /* 🧩 Modals */
-        .modal-content {
-            border-radius: 15px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-header {
-            border-radius: 15px 15px 0 0;
-            background: linear-gradient(90deg, #0d6efd, #007bff);
-            color: white;
-        }
-
-        .modal-title {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        /* 🧍 Form */
-        .form-label {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        /* ⚡ Sweet alert pop */
-        .swal2-popup {
-            font-family: 'Inter', sans-serif !important;
-            border-radius: 15px !important;
-        }
-
-        /* 🌈 Badges */
-        .badge {
-            font-size: 0.85rem;
-            padding: 6px 10px;
-            border-radius: 8px;
-        }
-
-        /* 🐾 Page Titles */
-        h4.text-primary {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            color: #0d6efd !important;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* 📦 Footer vibe */
-        .container-footer {
-            text-align: center;
-            margin-top: 50px;
-            font-size: 0.9rem;
-            color: #777;
-        }
-
-        /* 🧭 Datatables */
-        div.dataTables_wrapper .dataTables_filter input {
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
-        div.dataTables_wrapper .dataTables_length select {
-            border-radius: 6px;
-        }
-
-        /* 🧁 Animations */
-        .card,
-        .modal-content {
-            transition: all 0.25s ease-in-out;
         }
     </style>
 </head>
@@ -228,13 +77,11 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body class="d-flex flex-column min-vh-100">
 
     <?php if (isset($_SESSION['success'])): ?>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             Swal.fire({
                 title: 'Success!',
                 text: '<?= addslashes($_SESSION['success']) ?>',
                 icon: 'success',
-                confirmButtonColor: '#3085d6',
                 timer: 2000,
                 showConfirmButton: false
             });
@@ -242,34 +89,41 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php unset($_SESSION['success']);
     endif; ?>
 
-    <!-- Navbar -->
+    <!-- ✅ Updated Navbar with Notification Bell -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">VetCareSys Admin</a>
-            <div class="ms-auto">
-                <form method="POST" action="logout.php" id="logoutForm" class="d-inline">
-                    <button type="submit" class="btn btn-light btn-sm" id="logoutBtn">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </button>
-                </form>
-            </div>
+
+            <ul class="navbar-nav ms-auto align-items-center">
+
+                <!-- 🔔 Notification Bell -->
+                <li class="nav-item dropdown me-3">
+                    <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown">
+                        <i class="bi bi-bell-fill" style="font-size: 1.35rem;"></i>
+                        <span id="notif_count"
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                            style="font-size: 0.65rem; padding: 3px 6px;">
+                        </span>
+                    </a>
+
+                    <!-- Notification Dropdown -->
+                    <ul class="dropdown-menu dropdown-menu-end p-2"
+                        style="width: 320px; max-height: 400px; overflow-y: auto;" id="notif_list">
+                        <li class="text-center text-muted">No notifications</li>
+                    </ul>
+                </li>
+
+                <!-- Logout -->
+                <li class="nav-item">
+                    <form method="POST" action="logout.php" id="logoutForm" class="d-inline">
+                        <button type="submit" class="btn btn-light btn-sm" id="logoutBtn">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
         </div>
     </nav>
-
-    <?php if (isset($_SESSION['message'])): ?>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script>
-            Swal.fire({
-                title: 'Notification',
-                text: "<?= addslashes($_SESSION['message']) ?>",
-                icon: 'success',
-                confirmButtonColor: '#3085d6',
-                timer: 2500,
-                showConfirmButton: false
-            });
-        </script>
-        <?php unset($_SESSION['message']); ?>
-    <?php endif; ?>
 
     <!-- Main Content -->
     <div class="container my-4 flex-grow-1">
@@ -277,9 +131,7 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <p class="text-muted">Manage clinics and approve or reject applications here.</p>
 
         <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white fw-bold">
-                Pending Clinic Approvals
-            </div>
+            <div class="card-header bg-primary text-white fw-bold">Pending Clinic Approvals</div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-hover align-middle mb-0">
@@ -300,7 +152,7 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <tr>
                                         <td>
                                             <?php if (!empty($clinic['logo'])): ?>
-                                                <img src="../<?= htmlspecialchars($clinic['logo']) ?>" 
+                                                <img src="../<?= htmlspecialchars($clinic['logo']) ?>"
                                                     alt="Clinic Logo"
                                                     style="width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid #ccc;">
                                             <?php else: ?>
@@ -313,15 +165,13 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <td><?= htmlspecialchars($clinic['owner_address']) ?></td>
                                         <td>
                                             <?php if (!empty($clinic['business_permit'])): ?>
-                                                <a href="../<?= htmlspecialchars($clinic['business_permit']) ?>" 
-                                                    target="_blank" 
-                                                    class="btn btn-info btn-sm">
+                                                <a href="../<?= htmlspecialchars($clinic['business_permit']) ?>"
+                                                    target="_blank" class="btn btn-info btn-sm">
                                                     <i class="bi bi-file-earmark-text"></i> View Permit
                                                 </a>
                                             <?php else: ?>
                                                 <span class="text-muted">No file</span>
                                             <?php endif; ?>
-                                        </td>
                                         </td>
                                         <td>
                                             <a href="admin_action.php?id=<?= $clinic['clinic_id'] ?>&action=approve"
@@ -345,10 +195,8 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- Footer -->
     <footer class="bg-dark text-white py-3 mt-auto">
         <div class="container text-center small">
             All Rights Reserved. &copy; 2025 VetCareSys
@@ -358,9 +206,8 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        document.getElementById('logoutBtn').addEventListener('click', function (e) {
-            e.preventDefault(); // Prevent form from submitting instantly
-
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
             Swal.fire({
                 title: 'Are you sure you want to logout?',
                 text: "You’ll be logged out of your current session.",
@@ -372,12 +219,65 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 cancelButtonText: 'No, stay here'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Submit the form only if confirmed
                     document.getElementById('logoutForm').submit();
                 }
             });
         });
     </script>
-</body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            loadAdminNotifications();
 
+            // Load when bell icon is clicked
+            document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
+        });
+
+        function loadAdminNotifications() {
+            fetch("../fetch_notifications.php")
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById("notif_list");
+                    const count = document.getElementById("notif_count");
+
+                    list.innerHTML = "";
+                    let unreadCount = 0;
+
+                    if (!data || data.length === 0) {
+                        list.innerHTML = `<li class="text-center text-muted">No notifications</li>`;
+                        count.textContent = "";
+                        return;
+                    }
+
+                    data.forEach(n => {
+                        if (n.status === "unread") unreadCount++;
+
+                        list.innerHTML += `
+                            <li>
+                                <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item"
+                                data-id="${n.notif_id}">
+                                    <div>
+                                        <strong>${n.subject}</strong><br>
+                                        <small class="text-muted">${n.message}</small>
+                                    </div>
+                                    ${n.status === "unread" ? `<span class="badge bg-danger">New</span>` : ""}
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                        `;
+                    });
+
+                    count.textContent = unreadCount > 0 ? unreadCount : "";
+                });
+        }
+
+        // Mark as read when opening a notification
+        document.addEventListener("click", function(e) {
+            if (e.target.closest(".notif-item")) {
+                const id = e.target.closest(".notif-item").dataset.id;
+                fetch(`mark_as_read.php?id=${id}`);
+            }
+        });
+    </script>
+
+</body>
 </html>
