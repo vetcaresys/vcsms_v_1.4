@@ -104,18 +104,74 @@ Thank you for trusting VetCareSys.";
         error_log("Mailer Error: {$mail->ErrorInfo}");
     }
 }
-
 // --- Handle GET status update (Approve/Cancel) ---
 if (isset($_GET['update']) && isset($_GET['status'])) {
     $appointment_id = $_GET['update'];
     $new_status = $_GET['status'];
 
-    $stmt = $pdo->prepare("UPDATE appointments SET status = ? WHERE appointment_id = ? AND clinic_id = ?");
-    $stmt->execute([$new_status, $appointment_id, $clinic_id]);
+    // 1. Fetch ALL required appointment details (including date/time and owner_id)
+    $stmt = $pdo->prepare("
+        SELECT 
+            owner_id, appointment_date, appointment_start, appointment_end, phone 
+        FROM appointments 
+        WHERE appointment_id = ? AND clinic_id = ?
+    ");
+    $stmt->execute([$appointment_id, $clinic_id]);
+    $appointment_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Stop execution if appointment is not found
+    if (!$appointment_data) {
+        // You might want to redirect or show an error here
+        header('Location: some_error_page.php?error=notfound');
+        exit;
+    }
+
+    // Extract variables from fetched data
+    $petowner_id = $appointment_data['owner_id'];
+    $appointment_date = $appointment_data['appointment_date']; // Raw date
+    $appointment_start = $appointment_data['appointment_start']; // Raw start time
+    $appointment_end = $appointment_data['appointment_end']; // Raw end time
+    $phone = $appointment_data['phone']; // Phone number
+
+    // Format the date/time for the notification message
+    $formatted_date = date("F j, Y", strtotime($appointment_date));
+    $formatted_start = date("g:i A", strtotime($appointment_start));
+    $formatted_end = date("g:i A", strtotime($appointment_end));
+    
+    // 2. Update the status
+    $updateStmt = $pdo->prepare("UPDATE appointments SET status = ? WHERE appointment_id = ? AND clinic_id = ?");
+    $updateStmt->execute([$new_status, $appointment_id, $clinic_id]);
+
+    // 3. Send Email (it will fetch its own details for the email body)
     sendAppointmentEmail($pdo, $appointment_id, $clinic_id, $new_status);
-}
+    
+    // 4. Insert Notification using the formatted variables
+    $notification_message = "Your appointment has been " . htmlspecialchars($new_status) . " for {$formatted_date} from {$formatted_start} to {$formatted_end}.";
+    $notification_subject = ucfirst($new_status) . " Appointment Confirmation"; // Better subject
 
+    $notifStmt = $pdo->prepare("
+        INSERT INTO notifications 
+            (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    $notifStmt->execute([
+        $petowner_id, // user_id
+        'pet_owner', // role
+        $notification_message,// message
+        $notification_subject,// subject
+        'manage_customer_appointment.php', // link (Suggested link)
+        $appointment_date,// schedule_date (Raw date is better here)
+        'sms', // Assuming you want to send an SMS
+        $phone, // number
+        'unread', // status
+        date('Y-m-d H:i:s') // created_at
+    ]);
+
+    // Redirect back to the main page after processing
+    header('Location: ' . $_SERVER['HTTP_REFERER'] ?? 'index.php');
+    exit;
+}
 // --- Handle POST edit from modal ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $appointment_id = $_POST['appointment_id'];
@@ -776,7 +832,6 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 
                 data.forEach(n => {
                     if (n.status === "unread") unreadCount++;
-
                     list.innerHTML += `
                         <li>
                             <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
