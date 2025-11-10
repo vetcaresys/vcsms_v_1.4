@@ -43,6 +43,22 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- FullCalendar CSS + JS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+    <style>
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .fc-daygrid-event {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+    </style>
+
 
     <link rel="stylesheet" href="css/index.css">
 </head>
@@ -76,16 +92,19 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                             </span>
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end p-2"
-                            style="width: 320px; max-height: 400px;" id="notif_list_container">
-                            
+                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 320px; max-height: 400px;"
+                            id="notif_list_container">
+
                             <li class="d-flex justify-content-between align-items-center mb-2 px-2">
                                 <h6 class="mb-0">Notifications</h6>
-                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;" disabled>
+                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none"
+                                    style="font-size: 0.8rem;" disabled>
                                     Mark all as read
                                 </button>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
 
                             <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
                                 <li class="text-center text-muted">Loading...</li>
@@ -94,7 +113,8 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                     </li>
                 </ul>
 
-                <div class="dropdown"> <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                <div class="dropdown"> <a href="#"
+                        class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
                         id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile" class="rounded-circle me-2"
                             width="35" height="35">
@@ -109,14 +129,14 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                         <li>
                             <form method="POST" action="../logout.php" class="m-0">
                                 <button class="dropdown-item text-danger" type="submit"><i
-                                    class="bi bi-box-arrow-right"></i> Logout</button>
-                        </form>
-                    </li>
-                </ul>
+                                        class="bi bi-box-arrow-right"></i> Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold text-dark">Doctor Dashboard</h2>
@@ -126,6 +146,27 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         <div class="row g-4" id="dashboard-widgets">
             <!-- Realtime doctor cards -->
         </div>
+
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card shadow-sm p-3">
+                        <h4 class="text-primary fw-bold mb-3">My Appointment Calendar</h4>
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm p-3">
+                        <h5 class="text-primary fw-bold mb-3">Appointment Details</h5>
+                        <div id="appointmentDetails" class="text-muted">
+                            <em>Select a date to view details.</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Profile Modal -->
@@ -291,11 +332,11 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
     <div class="col-md-3">
       <div class="card shadow-sm border-0">
         <div class="card-body d-flex align-items-center">
-          <div class="me-3 bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
+          <div class="me-3 bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
             <i class="bi bi-hourglass-split fs-4"></i>
           </div>
           <div>
-            <h6 class="mb-1 text-muted">Pending Appts</h6>
+            <h6 class="mb-1 text-muted">Pending Appointments</h6>
             <h4 class="mb-0">${data.pending || 0}</h4>
           </div>
         </div>
@@ -309,7 +350,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             <i class="bi bi-calendar-check fs-4"></i>
           </div>
           <div>
-            <h6 class="mb-1 text-muted">Today’s Appts</h6>
+            <h6 class="mb-1 text-muted">Today’s Appointments</h6>
             <h4 class="mb-0">${data.today || 0}</h4>
           </div>
         </div>
@@ -343,11 +384,25 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         </div>
       </div>
     </div>
+
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body d-flex align-items-center">
+          <div class="me-3 bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
+            <i class="bi bi-journal-medical fs-4"></i>
+          </div>
+          <div>
+            <h6 class="mb-1 text-muted">Records Added</h6>
+            <h4 class="mb-0">${data.records || 0}</h4>
+          </div>
+        </div>
+      </div>
+    </div>
   `;
         }
-
         loadDashboard();
         setInterval(loadDashboard, 15000);
+
     </script>
 
     <script>
@@ -359,39 +414,39 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             document.getElementById("editProfile").style.display = editMode ? "block" : "none";
         }
     </script>
-<script>
-         document.addEventListener("DOMContentLoaded", function() {
-        loadAdminNotifications();
-        
-        // Load when bell icon is clicked
-        document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
-        
-        // 💡 NEW: Listener for Mark All button
-        document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
-    });
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            loadAdminNotifications();
 
-    function loadAdminNotifications() {
-        fetch("../../doc_fetch_notifications.php")
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById("notif_list");
-                const count = document.getElementById("notif_count");
-                const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
-                
-                list.innerHTML = "";
-                let unreadCount = 0;
+            // Load when bell icon is clicked
+            document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
 
-                if (!data || data.length === 0) {
-                    list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
-                    count.textContent = "";
-                    markAllBtn.disabled = true; // Disable button if no notifs
-                    return;
-                }
+            // 💡 NEW: Listener for Mark All button
+            document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
+        });
 
-                data.forEach(n => {
-                    if (n.status === "unread") unreadCount++;
+        function loadAdminNotifications() {
+            fetch("../../doc_fetch_notifications.php")
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById("notif_list");
+                    const count = document.getElementById("notif_count");
+                    const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
 
-                    list.innerHTML += `
+                    list.innerHTML = "";
+                    let unreadCount = 0;
+
+                    if (!data || data.length === 0) {
+                        list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
+                        count.textContent = "";
+                        markAllBtn.disabled = true; // Disable button if no notifs
+                        return;
+                    }
+
+                    data.forEach(n => {
+                        if (n.status === "unread") unreadCount++;
+
+                        list.innerHTML += `
                         <li>
                             <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
                             data-id="${n.notif_id}">
@@ -404,60 +459,133 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                         </li>
                         <li><hr class="dropdown-divider my-0"></li>
                     `;
-                });
-
-                count.textContent = unreadCount > 0 ? unreadCount : "";
-                markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
-            });
-    }
-
-    // 💡 NEW: Function to mark all notifications as read
-    function markAllAsRead() {
-        Swal.fire({
-            title: 'Mark all as read?',
-            text: "All current unread notifications will be marked as read.",
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, Mark All'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Fetch the new PHP endpoint to update the database
-                fetch("../../doc_mark_all_as_read.php", { method: 'POST' })
-                    .then(response => {
-                        if (response.ok) {
-                            Swal.fire('Success!', 'All notifications marked as read.', 'success');
-                            // Reload the notifications immediately after success
-                            loadAdminNotifications(); 
-                        } else {
-                            Swal.fire('Error!', 'Could not mark all as read.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        Swal.fire('Error!', 'Network or server issue.', 'error');
                     });
+
+                    count.textContent = unreadCount > 0 ? unreadCount : "";
+                    markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
+                });
+        }
+
+        // 💡 NEW: Function to mark all notifications as read
+        function markAllAsRead() {
+            Swal.fire({
+                title: 'Mark all as read?',
+                text: "All current unread notifications will be marked as read.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Mark All'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Fetch the new PHP endpoint to update the database
+                    fetch("../../doc_mark_all_as_read.php", { method: 'POST' })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire('Success!', 'All notifications marked as read.', 'success');
+                                // Reload the notifications immediately after success
+                                loadAdminNotifications();
+                            } else {
+                                Swal.fire('Error!', 'Could not mark all as read.', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                            Swal.fire('Error!', 'Network or server issue.', 'error');
+                        });
+                }
+            });
+        }
+
+        // Mark as read when opening a notification (Your original function, updated for clarity)
+        document.addEventListener("click", function (e) {
+            if (e.target.closest(".notif-item")) {
+                const notifItem = e.target.closest(".notif-item");
+                const id = notifItem.dataset.id;
+
+                // Only send the request if it's currently marked as unread
+                if (notifItem.classList.contains('bg-light')) {
+                    fetch(`../../mark_as_read.php?id=${id}`);
+                    // Simple visual update after click
+                    notifItem.classList.remove('bg-light');
+                    notifItem.querySelector('.badge')?.remove();
+                    loadAdminNotifications(); // Reload count
+                }
             }
         });
-    }
+    </script>
 
-    // Mark as read when opening a notification (Your original function, updated for clarity)
-    document.addEventListener("click", function(e) {
-        if (e.target.closest(".notif-item")) {
-            const notifItem = e.target.closest(".notif-item");
-            const id = notifItem.dataset.id;
-            
-            // Only send the request if it's currently marked as unread
-            if (notifItem.classList.contains('bg-light')) {
-                fetch(`../../mark_as_read.php?id=${id}`);
-                // Simple visual update after click
-                notifItem.classList.remove('bg-light');
-                notifItem.querySelector('.badge')?.remove();
-                loadAdminNotifications(); // Reload count
+    <!-- for the calendar -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+            const detailsEl = document.getElementById('appointmentDetails');
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                themeSystem: 'bootstrap5',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: ''
+                },
+                events: 'fetch_doctor_appointments.php',
+                eventColor: '#0d6efd',
+
+                eventClick: function (info) {
+                    const e = info.event.extendedProps;
+                    const date = new Date(info.event.start).toLocaleDateString();
+                    detailsEl.innerHTML = `
+        <div class="border rounded p-3 bg-light">
+          <h6 class="fw-bold text-primary mb-2">${info.event.title}</h6>
+          <p><i class="bi bi-calendar-event"></i> <strong>Date:</strong> ${date}</p>
+          <p><i class="bi bi-clock"></i> <strong>Time:</strong> ${e.time || 'N/A'}</p>
+          <p><i class="bi bi-hospital"></i> <strong>Clinic:</strong> ${e.clinic}</p>
+          <p><i class="bi bi-person"></i> <strong>Owner:</strong> ${e.owner}</p>
+          <p><i class="bi bi-heart-pulse"></i> <strong>Service:</strong> ${e.service}</p>
+          <p><i class="bi bi-clipboard2-check"></i> <strong>Status:</strong>
+            <span class="badge bg-${getStatusColor(e.status)}">${e.status}</span>
+          </p>
+        </div>
+      `;
+                },
+
+                dateClick: function (info) {
+                    const clickedDate = info.dateStr;
+                    const eventsOnDay = calendar.getEvents().filter(e => e.startStr.startsWith(clickedDate));
+                    if (eventsOnDay.length === 0) {
+                        detailsEl.innerHTML = `<div class="alert alert-info">No appointments on ${clickedDate}.</div>`;
+                        return;
+                    }
+
+                    let html = `<h6 class="fw-bold text-primary mb-3">Appointments on ${clickedDate}:</h6>`;
+                    eventsOnDay.forEach(e => {
+                        const props = e.extendedProps;
+                        html += `
+          <div class="border p-2 rounded mb-2 bg-light">
+            <strong>${e.title}</strong><br>
+            👤 ${props.owner}<br>
+            🏥 ${props.clinic}<br>
+            ⏰ ${props.time || 'N/A'}<br>
+            📋 <span class="badge bg-${getStatusColor(props.status)}">${props.status}</span>
+          </div>`;
+                    });
+                    detailsEl.innerHTML = html;
+                }
+            });
+
+            calendar.render();
+
+            function getStatusColor(status) {
+                switch (status.toLowerCase()) {
+                    case 'pending': return 'warning';
+                    case 'approved': return 'primary';
+                    case 'completed': return 'success';
+                    case 'cancelled': return 'danger';
+                    default: return 'secondary';
+                }
             }
-        }
-    });
+        });
     </script>
 
 </body>

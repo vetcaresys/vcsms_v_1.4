@@ -47,7 +47,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- Google Fonts -->
@@ -59,203 +59,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
     rel="stylesheet">
-
-  <style>
-    /* 🌟 Global Styles */
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8f9fb;
-      color: #2e2e2e;
-      line-height: 1.6;
-      background: linear-gradient(135deg, #f0f4ff, #ffffff);
-      min-height: 100vh;
-    }
-
-    /* 🧭 Navbar */
-    .navbar {
-      background: linear-gradient(90deg, #0d6efd, #007bff);
-      font-family: 'Poppins', sans-serif;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar-brand {
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-    }
-
-    .navbar-brand img {
-      width: 38px;
-      height: 38px;
-      object-fit: cover;
-      border-radius: 50%;
-      background: #fff;
-      padding: 3px;
-      margin-right: 10px;
-      transition: transform 0.2s ease;
-    }
-
-    .navbar-brand img:hover {
-      transform: scale(1.08);
-    }
-
-    /* Links */
-    .nav-link {
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    .nav-link:hover {
-      color: #ffc107 !important;
-    }
-
-    /* 🧾 Summary Cards */
-    .summary-card {
-      border: none;
-      border-radius: 12px;
-      background: #fff;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .summary-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .summary-card h5 {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-    }
-
-    .summary-card h2 {
-      font-weight: 700;
-      font-size: 2rem;
-    }
-
-    /* 💼 Tables */
-    .table {
-      border-radius: 10px;
-      overflow: hidden;
-      font-size: 0.95rem;
-    }
-
-    .table thead {
-      background-color: #0d6efd;
-      color: white;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-    }
-
-    .table tbody tr:hover {
-      background-color: #f2f7ff;
-    }
-
-    /* 🪄 Buttons */
-    .btn {
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-
-    .btn:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    /* 🧩 Modals */
-    .modal-content {
-      border-radius: 15px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .modal-header {
-      border-radius: 15px 15px 0 0;
-      background: linear-gradient(90deg, #0d6efd, #007bff);
-      color: white;
-    }
-
-    .modal-title {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-    }
-
-    /* 🧍 Form */
-    .form-label {
-      font-weight: 600;
-      color: #333;
-    }
-
-    .form-control {
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-
-    /* ⚡ Sweet alert pop */
-    .swal2-popup {
-      font-family: 'Inter', sans-serif !important;
-      border-radius: 15px !important;
-    }
-
-    /* 🌈 Badges */
-    .badge {
-      font-size: 0.85rem;
-      padding: 6px 10px;
-      border-radius: 8px;
-    }
-
-    /* 🐾 Page Titles */
-    h4.text-primary {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      color: #0d6efd !important;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    /* 📦 Footer vibe */
-    .container-footer {
-      text-align: center;
-      margin-top: 50px;
-      font-size: 0.9rem;
-      color: #777;
-    }
-
-    /* 🧭 Datatables */
-    div.dataTables_wrapper .dataTables_filter input {
-      border-radius: 8px;
-      border: 1px solid #ddd;
-    }
-
-    div.dataTables_wrapper .dataTables_length select {
-      border-radius: 6px;
-    }
-
-    /* 🧁 Animations */
-    .card,
-    .modal-content {
-      transition: all 0.25s ease-in-out;
-    }
-
-    @media (max-width: 576px) {
-      .navbar-brand img {
-        width: 28px;
-        height: 28px;
-      }
-
-      .dropdown-toggle strong {
-        display: none;
-        /* hide name on very small screens */
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="includes/css/manage_inventory.css">
 </head>
 
 <body>
@@ -288,33 +92,36 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             <a href="manage_inventory.php" class="nav-link text-white">Inventory</a>
           </li>
         </ul>
-<ul class="navbar-nav mb-2 mb-lg-0">
-                    <li class="nav-item dropdown me-3">
-                        <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown">
-                            <i class="bi bi-bell-fill" style="font-size: 1.35rem;"></i>
-                            <span id="notif_count"
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                style="font-size: 0.65rem; padding: 3px 6px;">
-                            </span>
-                        </a>
+        <ul class="navbar-nav mb-2 mb-lg-0">
+          <li class="nav-item dropdown me-3">
+            <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown">
+              <i class="bi bi-bell-fill" style="font-size: 1.35rem;"></i>
+              <span id="notif_count"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                style="font-size: 0.65rem; padding: 3px 6px;">
+              </span>
+            </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end p-2"
-                            style="width: 320px; max-height: 400px;" id="notif_list_container">
-                            
-                            <li class="d-flex justify-content-between align-items-center mb-2 px-2">
-                                <h6 class="mb-0">Notifications</h6>
-                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;" disabled>
-                                    Mark all as read
-                                </button>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
+            <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 320px; max-height: 400px;"
+              id="notif_list_container">
 
-                            <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
-                                <li class="text-center text-muted">Loading...</li>
-                            </div>
-                        </ul>
-                    </li>
-                </ul>
+              <li class="d-flex justify-content-between align-items-center mb-2 px-2">
+                <h6 class="mb-0">Notifications</h6>
+                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none"
+                  style="font-size: 0.8rem;" disabled>
+                  Mark all as read
+                </button>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+
+              <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
+                <li class="text-center text-muted">Loading...</li>
+              </div>
+            </ul>
+          </li>
+        </ul>
         <!-- Profile -->
         <div class="dropdown">
           <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
@@ -351,7 +158,6 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
       });
     </script>
     <?php unset($_SESSION['flash']); endif; ?>
-
 
   <div class="container my-5">
 
@@ -546,7 +352,6 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
               <label class="form-label">Category Name</label>
               <input list="categoryList" name="category_name" class="form-control" placeholder="Type or select category"
                 required>
-
               <datalist id="categoryList">
                 <option value="Vitamins">
                 <option value="Food">
@@ -562,7 +367,6 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                 <option value="Pet Beds">
               </datalist>
             </div>
-
             <div class="modal-footer">
               <button type="submit" name="add_category" class="btn btn-success">Add</button>
             </div>
@@ -572,16 +376,10 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
     </div>
 
     <br>
-
     <!-- Inventory Table -->
     <div class="card shadow-sm">
-
       <div class="card-body">
-
-
         <div class="d-flex justify-content-between align-items-center mb-3">
-
-
           <h4 class="text-primary"><i class="bi bi-archive"></i> Inventory</h4>
           <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addItemModal">
             <i class="bi bi-plus-circle"></i> Add Item
@@ -625,10 +423,8 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                   <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
                     data-bs-target="#editItemModal<?= $item['item_id'] ?>">✏️</button>
 
-                  <?php if ($item['status'] !== 'available'): ?>
                     <button class="btn btn-sm btn-success" data-bs-toggle="modal"
-                      data-bs-target="#restockModal<?= $item['item_id'] ?>">🔄 Restock</button>
-                  <?php endif; ?>
+                    data-bs-target="#restockModal<?= $item['item_id'] ?>">🔄 Restock</button>
 
                   <button class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $item['item_id'] ?>)">🗑</button>
                 </td>
@@ -719,9 +515,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
               </div>
             <?php endforeach; ?>
           </tbody>
-
         </table>
-
       </div>
     </div>
   </div>
@@ -886,7 +680,6 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
       });
     }
 
-
     function confirmDeleteCategory(id) {
       Swal.fire({
         title: 'Delete Category?',
@@ -927,39 +720,39 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
       }
     }
   </script>
-<script>
-         document.addEventListener("DOMContentLoaded", function() {
-        loadAdminNotifications();
-        
-        // Load when bell icon is clicked
-        document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
-        
-        // 💡 NEW: Listener for Mark All button
-        document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      loadAdminNotifications();
+
+      // Load when bell icon is clicked
+      document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
+
+      // 💡 NEW: Listener for Mark All button
+      document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
     });
 
     function loadAdminNotifications() {
-        fetch("../../emp_fetch_notifications.php")
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById("notif_list");
-                const count = document.getElementById("notif_count");
-                const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
-                
-                list.innerHTML = "";
-                let unreadCount = 0;
+      fetch("../../emp_fetch_notifications.php")
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById("notif_list");
+          const count = document.getElementById("notif_count");
+          const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
 
-                if (!data || data.length === 0) {
-                    list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
-                    count.textContent = "";
-                    markAllBtn.disabled = true; // Disable button if no notifs
-                    return;
-                }
+          list.innerHTML = "";
+          let unreadCount = 0;
 
-                data.forEach(n => {
-                    if (n.status === "unread") unreadCount++;
+          if (!data || data.length === 0) {
+            list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
+            count.textContent = "";
+            markAllBtn.disabled = true; // Disable button if no notifs
+            return;
+          }
 
-                    list.innerHTML += `
+          data.forEach(n => {
+            if (n.status === "unread") unreadCount++;
+
+            list.innerHTML += `
                         <li>
                             <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
                             data-id="${n.notif_id}">
@@ -972,61 +765,61 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                         </li>
                         <li><hr class="dropdown-divider my-0"></li>
                     `;
-                });
+          });
 
-                count.textContent = unreadCount > 0 ? unreadCount : "";
-                markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
-            });
+          count.textContent = unreadCount > 0 ? unreadCount : "";
+          markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
+        });
     }
 
     // 💡 NEW: Function to mark all notifications as read
     function markAllAsRead() {
-        Swal.fire({
-            title: 'Mark all as read?',
-            text: "All current unread notifications will be marked as read.",
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, Mark All'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Fetch the new PHP endpoint to update the database
-                fetch("../../emp_mark_all_as_read.php", { method: 'POST' })
-                    .then(response => {
-                        if (response.ok) {
-                            Swal.fire('Success!', 'All notifications marked as read.', 'success');
-                            // Reload the notifications immediately after success
-                            loadAdminNotifications(); 
-                        } else {
-                            Swal.fire('Error!', 'Could not mark all as read.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        Swal.fire('Error!', 'Network or server issue.', 'error');
-                    });
-            }
-        });
+      Swal.fire({
+        title: 'Mark all as read?',
+        text: "All current unread notifications will be marked as read.",
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Mark All'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Fetch the new PHP endpoint to update the database
+          fetch("../../emp_mark_all_as_read.php", { method: 'POST' })
+            .then(response => {
+              if (response.ok) {
+                Swal.fire('Success!', 'All notifications marked as read.', 'success');
+                // Reload the notifications immediately after success
+                loadAdminNotifications();
+              } else {
+                Swal.fire('Error!', 'Could not mark all as read.', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Fetch error:', error);
+              Swal.fire('Error!', 'Network or server issue.', 'error');
+            });
+        }
+      });
     }
 
     // Mark as read when opening a notification (Your original function, updated for clarity)
-    document.addEventListener("click", function(e) {
-        if (e.target.closest(".notif-item")) {
-            const notifItem = e.target.closest(".notif-item");
-            const id = notifItem.dataset.id;
-            
-            // Only send the request if it's currently marked as unread
-            if (notifItem.classList.contains('bg-light')) {
-                fetch(`../../mark_as_read.php?id=${id}`);
-                // Simple visual update after click
-                notifItem.classList.remove('bg-light');
-                notifItem.querySelector('.badge')?.remove();
-                loadAdminNotifications(); // Reload count
-            }
+    document.addEventListener("click", function (e) {
+      if (e.target.closest(".notif-item")) {
+        const notifItem = e.target.closest(".notif-item");
+        const id = notifItem.dataset.id;
+
+        // Only send the request if it's currently marked as unread
+        if (notifItem.classList.contains('bg-light')) {
+          fetch(`../../mark_as_read.php?id=${id}`);
+          // Simple visual update after click
+          notifItem.classList.remove('bg-light');
+          notifItem.querySelector('.badge')?.remove();
+          loadAdminNotifications(); // Reload count
         }
+      }
     });
-    </script>
+  </script>
 </body>
 
 </html>
