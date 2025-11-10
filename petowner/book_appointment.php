@@ -70,7 +70,7 @@ VALUES (?, ?,?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
         'unread',                            // status
         date('Y-m-d H:i:s')                  // created_at
     ]);
-    
+
     $check = $pdo->prepare("
     SELECT * FROM appointments 
     WHERE owner_id = ? 
@@ -1083,7 +1083,7 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
             
             // Only send the request if it's currently marked as unread
             if (notifItem.classList.contains('bg-light')) {
-                fetch(`../../mark_as_read.php?id=${id}`);
+                fetch(`../mark_as_read.php?id=${id}`);
                 // Simple visual update after click
                 notifItem.classList.remove('bg-light');
                 notifItem.querySelector('.badge')?.remove();
