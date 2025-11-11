@@ -10,7 +10,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
 
 try {
     $stmt = $pdo->prepare("
-        SELECT notif_id, subject, message, link, status, created_at
+        SELECT 
+            notif_id, 
+            subject, 
+            message, 
+            link, 
+            status, 
+            -- ✅ Date for the top left
+            DATE_FORMAT(created_at, '%M %e, %Y') AS display_date,
+            -- ✅ Time for the top right
+            DATE_FORMAT(created_at, '%h:%i %p') AS display_time
         FROM notifications
         WHERE role = 'admin'
         ORDER BY 
@@ -25,3 +34,4 @@ try {
 } catch (Exception $e) {
     echo json_encode(["error" => $e->getMessage()]);
 }
+?>
