@@ -128,8 +128,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $_SESSION['msg'] = "Branch registered successfully!";
-header("Location: manage_clinic.php");
-exit;
+    header("Location: manage_clinic.php");
+    exit;
 
 }
 
@@ -386,51 +386,60 @@ exit;
         <form method="POST" enctype="multipart/form-data">
             <div class="mb-3">
                 <label class="form-label">Branch Name</label>
-                <input type="text" name="clinic_name" class="form-control" required pattern="^[A-Za-z\s\-\&]{3,50}$"
+                <input type="text" name="clinic_name" class="form-control" required
+                    placeholder="ex. Paws & Claws Veterinary Clinic" pattern="^[A-Za-z\s\-\&]{3,50}$"
                     title="Branch name should be 3–50 characters and letters only.">
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Branch Address</label>
-                <input type="text" name="address" class="form-control" required minlength="5" maxlength="100">
+                <input type="text" name="address" class="form-control" required minlength="5" maxlength="100"
+                    placeholder="ex. Brgy. Makawa, Aloran, Misamis Occidental">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Contact Info</label>
-                <input type="text" name="contact_info" class="form-control" pattern="[0-9]{11}" maxlength="11"
-                    title="Please enter exactly 11 digits" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                <label class="form-label">Contact Number</label>
+                <input type="text" name="contact_info" class="form-control" placeholder="ex. 09123456789"
+                    pattern="[0-9]{11}" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                     required>
             </div>
 
             <hr>
             <h5>Branch Login Credentials</h5>
+
             <div class="mb-3">
                 <label class="form-label">Branch Email (Login)</label>
-                <input type="email" name="email" class="form-control" required>
+                <input type="email" name="email" class="form-control" required placeholder="ex. branch@email.com">
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Branch Password</label>
                 <input type="password" name="password" class="form-control" required minlength="8"
-                    pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
+                    placeholder="At least 8 chars: Aresfast@123" pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
                     title="Password must be at least 8 characters, include uppercase, lowercase, number, and special character.">
             </div>
 
             <hr>
             <h5>Uploads</h5>
+
             <div class="mb-3">
-                <label class="form-label">Branch Logo</label>
+                <label class="form-label">Branch Logo
+                    <small class="text-muted">(JPG, JPEG, or PNG only, max 2MB)</small>
+                </label>
                 <input type="file" name="logo" class="form-control" accept="image/*">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Business Permit (Image/PDF)</label>
+                <label class="form-label">Business Permit (Image/PDF)
+                    <small class="text-muted">(Accepted: JPG, JPEG, PNG, or PDF)</small>
+                </label>
                 <input type="file" name="business_permit" class="form-control" accept="image/*,.pdf">
             </div>
 
             <button type="submit" class="btn btn-success">Register Branch</button>
             <a href="manage_clinic.php" class="btn btn-secondary">Cancel</a>
         </form>
+
     </div>
     <br><br>
     <!-- Profile Modal -->
