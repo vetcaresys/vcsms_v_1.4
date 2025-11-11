@@ -151,8 +151,8 @@ if (isset($_GET['update']) && isset($_GET['status'])) {
     $clean_schedule_date = substr($appointment_date, 0, 10);
     $notifStmt = $pdo->prepare("
         INSERT INTO notifications 
-            (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (user_id, role, message, subject, schedule_date, sms, number, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $notifStmt->execute([
@@ -160,7 +160,6 @@ if (isset($_GET['update']) && isset($_GET['status'])) {
         'pet_owner', // role
         $notification_message,// message
         $notification_subject,// subject
-        'manage_customer_appointment.php', // link (Suggested link)
         $clean_schedule_date,// schedule_date (Raw date is better here)
         '1', // Assuming you want to send an SMS
         $phone, // number

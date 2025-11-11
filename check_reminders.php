@@ -22,7 +22,8 @@ function run_reminder_check($pdo) {
             message, 
             subject, 
             link, 
-            schedule_date 
+            schedule_date,
+            number 
         FROM 
             `notifications` 
         WHERE 
@@ -45,9 +46,9 @@ function run_reminder_check($pdo) {
         // FIX 2: Correct PDO placeholders and variable names for bindValue/execute
         $sql_insert = "
             INSERT INTO `notifications` 
-            (`user_id`, `role`, `message`, `subject`, `link`, `status`, `sms`, `created_at`) 
+            (`user_id`, `role`, `message`, `subject`, `link`, `status`,`schedule_date`, `sms`, `number`, `created_at`) 
             VALUES 
-            (?, ?, ?, ?, ?, 'unread', '0', ?)
+            (?, ?, ?, ?, ?, 'unread',?, '2',?, ?)
         ";
         $stmt_insert = $pdo->prepare($sql_insert);
         
@@ -73,6 +74,8 @@ function run_reminder_check($pdo) {
                 $reminder_message, 
                 $reminder_subject, 
                 $row['link'], 
+                $row['schedule_date'],
+                $row['number'], 
                 $current_datetime
             ]);
 
