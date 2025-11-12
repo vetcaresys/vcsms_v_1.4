@@ -34,13 +34,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
     $residence = $_POST['residence'];
     $phone = $_POST['phone'];
     $message = $_POST['message'];
+    $doctor_id = !empty($_POST['doctor_id']) ? $_POST['doctor_id'] : null;
 
+    // 🔎 Check first if a pending/approved appointment already exists
+    $check = $pdo->prepare("
+        SELECT * FROM appointments 
+        WHERE owner_id = ? 
+          AND clinic_id = ? 
+          AND appointment_date = ? 
+          AND status IN ('pending', 'approved')
+    ");
+    $check->execute([$user_id, $clinic_id, $appointment_date]);
+
+    if ($check->rowCount() > 0) {
+        $_SESSION['error'] = "You already have a booking on this date. Cancel it first before rebooking.";
+        header("Location: book_appointment.php?clinic_id=$clinic_id");
+        exit;
+    }
+
+    // ✅ Insert appointment if no conflicts
     $insert = $pdo->prepare("
-INSERT INTO appointments 
-(clinic_id, pet_id,owner_id, service_id, doctor_id, residence, phone, message, updated_by, appointment_date, status)
-VALUES (?, ?,?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
-");
-    $insert->execute([
+        INSERT INTO appointments 
+        (clinic_id, pet_id, owner_id, service_id, doctor_id, residence, phone, message, updated_by, appointment_date, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
+    ");
+    $inserted = $insert->execute([
         $clinic_id,
         $pet_id,
         $user_id,
@@ -52,45 +70,35 @@ VALUES (?, ?,?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
         $appointment_date
     ]);
 
-    $stmt = $pdo->prepare("
-        INSERT INTO notifications 
+    // 🔔 Insert notification
+    if ($inserted) {
+        $stmt = $pdo->prepare("
+            INSERT INTO notifications 
             (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $user_id,          // user_id
+            'employee',        // role
+            $message,          // message
+            'Book Appointment',// subject
+            null,              // link
+            $appointment_date, // schedule_date
+            null,              // sms
+            $phone,            // number
+            'unread',          // status
+            date('Y-m-d H:i:s')// created_at
+        ]);
 
-    $stmt->execute([
-        $user_id,                            // user_id
-        'employee',                             // role
-        $message,  // message
-        'Book Appointment',                          // subject
-        null,                                // link
-        $appointment_date,                                // schedule_date
-        null,                                // sms
-        $phone,                                // number
-        'unread',                            // status
-        date('Y-m-d H:i:s')                  // created_at
-    ]);
-
-    $check = $pdo->prepare("
-    SELECT * FROM appointments 
-    WHERE owner_id = ? 
-      AND clinic_id = ? 
-      AND appointment_date = ? 
-      AND status IN ('pending', 'approved')
-    ");
-    $check->execute([$user_id, $clinic_id, $appointment_date]);
-
-    if ($check->rowCount() > 0) {
-        $_SESSION['error'] = "You already have a booking on this date. Cancel it first before rebooking.";
-        header("Location: book_appointment.php?clinic_id=$clinic_id");
-        exit;
+        $_SESSION['booking_msg'] = 'success';
+    } else {
+        $_SESSION['booking_msg'] = 'error';
     }
 
-
-    $_SESSION['booking_msg'] = $insert->rowCount() ? 'success' : 'error';
     header('Location: book_appointment.php');
     exit;
 }
+
 
 // 👤 Fetch user info
 $user_stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
@@ -162,21 +170,28 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
-        <link rel="stylesheet" href="css/book_appointment.css">
+    <link rel="stylesheet" href="css/book_appointment.css">
 
 </head>
 
 <body class="bg-light">
 
-    <?php if (isset($_SESSION['booking_msg'])): ?>
-        <script>
-            Swal.fire({
-                icon: '<?= $_SESSION['booking_msg'] === "success" ? "success" : "error" ?>',
-                title: '<?= $_SESSION['booking_msg'] === "success" ? "Appointment booked!" : "Booking failed." ?>',
-                text: '<?= $_SESSION['booking_msg'] === "success" ? "Please wait for approval." : "Please try again later." ?>'
-            });
-        </script>
-        <?php unset($_SESSION['booking_msg']); endif; ?>
+<?php if (isset($_SESSION['booking_msg'])): ?>
+<script>
+    Swal.fire({
+        icon: '<?= $_SESSION['booking_msg'] === "success" ? "success" : "error" ?>',
+        title: '<?= $_SESSION['booking_msg'] === "success" ? "Appointment booked!" : "Booking failed." ?>',
+        text: '<?= $_SESSION['booking_msg'] === "success" 
+            ? "Please wait for approval." 
+            : ($_SESSION['booking_error_text'] ?? "Please try again later.") ?>'
+    });
+</script>
+<?php 
+unset($_SESSION['booking_msg']); 
+unset($_SESSION['booking_error_text']);
+endif; ?>
+
+
 
 
     <!-- Navbar -->
@@ -203,16 +218,19 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
                             </span>
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end p-2"
-                            style="width: 320px; max-height: 400px;" id="notif_list_container">
-                            
+                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 320px; max-height: 400px;"
+                            id="notif_list_container">
+
                             <li class="d-flex justify-content-between align-items-center mb-2 px-2">
                                 <h6 class="mb-0">Notifications</h6>
-                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;" disabled>
+                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none"
+                                    style="font-size: 0.8rem;" disabled>
                                     Mark all as read
                                 </button>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
 
                             <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
                                 <li class="text-center text-muted">Loading...</li>
@@ -838,38 +856,38 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
         });
     </script>
     <script>
-         document.addEventListener("DOMContentLoaded", function() {
-        loadAdminNotifications();
-        
-        // Load when bell icon is clicked
-        document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
-        
-        // 💡 NEW: Listener for Mark All button
-        document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
-    });
+        document.addEventListener("DOMContentLoaded", function () {
+            loadAdminNotifications();
 
-    function loadAdminNotifications() {
-        fetch(`../petowner_fetch_notifications.php?user_id=` + `<?=($user_id) ?>`)
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById("notif_list");
-                const count = document.getElementById("notif_count");
-                const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
-                
-                list.innerHTML = "";
-                let unreadCount = 0;
+            // Load when bell icon is clicked
+            document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
 
-                if (!data || data.length === 0) {
-                    list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
-                    count.textContent = "";
-                    markAllBtn.disabled = true; // Disable button if no notifs
-                    return;
-                }
+            // 💡 NEW: Listener for Mark All button
+            document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
+        });
 
-                data.forEach(n => {
-                    if (n.status === "unread") unreadCount++;
+        function loadAdminNotifications() {
+            fetch(`../petowner_fetch_notifications.php?user_id=` + `<?= ($user_id) ?>`)
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById("notif_list");
+                    const count = document.getElementById("notif_count");
+                    const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
 
-                    list.innerHTML += `
+                    list.innerHTML = "";
+                    let unreadCount = 0;
+
+                    if (!data || data.length === 0) {
+                        list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
+                        count.textContent = "";
+                        markAllBtn.disabled = true; // Disable button if no notifs
+                        return;
+                    }
+
+                    data.forEach(n => {
+                        if (n.status === "unread") unreadCount++;
+
+                        list.innerHTML += `
                         <li>
                             <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
                             data-id="${n.notif_id}">
@@ -882,60 +900,60 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
                         </li>
                         <li><hr class="dropdown-divider my-0"></li>
                     `;
-                });
-
-                count.textContent = unreadCount > 0 ? unreadCount : "";
-                markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
-            });
-    }
-
-    // 💡 NEW: Function to mark all notifications as read
-    function markAllAsRead() {
-        Swal.fire({
-            title: 'Mark all as read?',
-            text: "All current unread notifications will be marked as read.",
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, Mark All'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Fetch the new PHP endpoint to update the database
-                fetch(`../petowner_mark_all_as_read.php?user_id=` + `<?=($user_id) ?>`, { method: 'POST' })
-                    .then(response => {
-                        if (response.ok) {
-                            Swal.fire('Success!', 'All notifications marked as read.', 'success');
-                            // Reload the notifications immediately after success
-                            loadAdminNotifications(); 
-                        } else {
-                            Swal.fire('Error!', 'Could not mark all as read.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        Swal.fire('Error!', 'Network or server issue.', 'error');
                     });
+
+                    count.textContent = unreadCount > 0 ? unreadCount : "";
+                    markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
+                });
+        }
+
+        // 💡 NEW: Function to mark all notifications as read
+        function markAllAsRead() {
+            Swal.fire({
+                title: 'Mark all as read?',
+                text: "All current unread notifications will be marked as read.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Mark All'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Fetch the new PHP endpoint to update the database
+                    fetch(`../petowner_mark_all_as_read.php?user_id=` + `<?= ($user_id) ?>`, { method: 'POST' })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire('Success!', 'All notifications marked as read.', 'success');
+                                // Reload the notifications immediately after success
+                                loadAdminNotifications();
+                            } else {
+                                Swal.fire('Error!', 'Could not mark all as read.', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                            Swal.fire('Error!', 'Network or server issue.', 'error');
+                        });
+                }
+            });
+        }
+
+        // Mark as read when opening a notification (Your original function, updated for clarity)
+        document.addEventListener("click", function (e) {
+            if (e.target.closest(".notif-item")) {
+                const notifItem = e.target.closest(".notif-item");
+                const id = notifItem.dataset.id;
+
+                // Only send the request if it's currently marked as unread
+                if (notifItem.classList.contains('bg-light')) {
+                    fetch(`../mark_as_read.php?id=${id}`);
+                    // Simple visual update after click
+                    notifItem.classList.remove('bg-light');
+                    notifItem.querySelector('.badge')?.remove();
+                    loadAdminNotifications(); // Reload count
+                }
             }
         });
-    }
-
-    // Mark as read when opening a notification (Your original function, updated for clarity)
-    document.addEventListener("click", function(e) {
-        if (e.target.closest(".notif-item")) {
-            const notifItem = e.target.closest(".notif-item");
-            const id = notifItem.dataset.id;
-            
-            // Only send the request if it's currently marked as unread
-            if (notifItem.classList.contains('bg-light')) {
-                fetch(`../mark_as_read.php?id=${id}`);
-                // Simple visual update after click
-                notifItem.classList.remove('bg-light');
-                notifItem.querySelector('.badge')?.remove();
-                loadAdminNotifications(); // Reload count
-            }
-        }
-    });
     </script>
 </body>
 

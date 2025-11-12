@@ -24,6 +24,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_item'])) {
     $location = trim($_POST['location']);
     $notes = trim($_POST['notes']);
 
+    // 🚫 Prevent negative cost or selling price
+    if ($cost_price < 0 || $selling_price < 0) {
+        $_SESSION['flash'] = [
+            'type' => 'error',
+            'message' => 'Cost Price and Selling Price cannot be negative!'
+        ];
+        header("Location: manage_inventory.php");
+        exit;
+    }
+
+    // 🚫 Prevent setting expiration before today
+    if (!empty($expiration_date) && strtotime($expiration_date) < strtotime(date('Y-m-d'))) {
+        $_SESSION['flash'] = [
+            'type' => 'error',
+            'message' => 'Expiration date cannot be earlier than today.'
+        ];
+        header("Location: manage_inventory.php");
+        exit;
+    }
+
     // 🔍 Get previous quantity
     $stmt_prev = $pdo->prepare("SELECT quantity FROM inventory WHERE item_id = ?");
     $stmt_prev->execute([$item_id]);

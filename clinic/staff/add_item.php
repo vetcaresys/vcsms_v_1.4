@@ -21,6 +21,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_item'])) {
   $location = trim($_POST['location']);
   $notes = trim($_POST['notes']);
 
+  // 🚫 Check expiration date (must not be earlier than today)
+  if (!empty($expiration_date) && strtotime($expiration_date) < strtotime(date('Y-m-d'))) {
+    $_SESSION['flash'] = [
+      'type' => 'error',
+      'message' => 'Expiration date cannot be earlier than today.'
+    ];
+    header("Location: manage_inventory.php");
+    exit;
+  }
+
+  // 🚫 Prevent negative cost or selling price
+  if ($cost_price < 0 || $selling_price < 0) {
+    $_SESSION['flash'] = [
+      'type' => 'error',
+      'message' => 'Cost and Selling Price cannot be negative values.'
+    ];
+    header("Location: manage_inventory.php");
+    exit;
+  }
+
+  // 🚫 Check if item name already exists in this clinic
+  $check = $pdo->prepare("
+    SELECT COUNT(*) 
+    FROM inventory 
+    WHERE clinic_id = ? AND LOWER(item_name) = LOWER(?)
+  ");
+  $check->execute([$clinic_id, $item_name]);
+  if ($check->fetchColumn() > 0) {
+    $_SESSION['flash'] = [
+      'type' => 'error',
+      'message' => 'Item name already exists in your inventory.'
+    ];
+    header("Location: manage_inventory.php");
+    exit;
+  }
+
   // 🧮 Determine status
   if ($quantity <= 0) {
     $status = 'out_of_stock';
@@ -52,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_item'])) {
       $status
     ]);
 
-    // 🧠 Log the add action (✅ INSIDE the same block)
+    // 🧠 Log the add action
     $item_id = $pdo->lastInsertId();
     $log = $pdo->prepare("
       INSERT INTO inventory_activity_log 
