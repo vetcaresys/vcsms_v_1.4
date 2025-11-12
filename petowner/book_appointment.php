@@ -2,6 +2,9 @@
 session_start();
 require '../config.php';
 
+// Enable detailed error reporting for PDO
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 // 🔒 Only pet owners allowed
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'pet_owner') {
     header('Location: ../login.php');
@@ -9,9 +12,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'pet_owner') {
 }
 
 $user_id = $_SESSION['user_id'];
-$owner_name = htmlspecialchars($_SESSION['name']);
-// for get_doctors.php
-$doctor_id = !empty($_POST['doctor_id']) ? $_POST['doctor_id'] : null;
+$owner_name = htmlspecialchars($_SESSION['name'] ?? '');
 
 // 🐾 Fetch pets of the owner
 $pets_stmt = $pdo->prepare("SELECT * FROM pets WHERE owner_id = ?");
@@ -27,78 +28,94 @@ $clinics = $pdo->query("
 
 // 📝 Handle appointment booking
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
-    $clinic_id = $_POST['clinic_id'];
-    $pet_id = $_POST['pet_id'];
-    $service_id = $_POST['service_id'];
-    $appointment_date = $_POST['appointment_date'];
-    $residence = $_POST['residence'];
-    $phone = $_POST['phone'];
-    $message = $_POST['message'];
-    $doctor_id = !empty($_POST['doctor_id']) ? $_POST['doctor_id'] : null;
+    try {
+        $clinic_id = $_POST['clinic_id'] ?? null;
+        $pet_id = $_POST['pet_id'] ?? null;
+        $service_id = $_POST['service_id'] ?? null;
+        $appointment_date = $_POST['appointment_date'] ?? null;
+        $residence = trim($_POST['residence'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $message = trim($_POST['message'] ?? '');
+        $doctor_id = !empty($_POST['doctor_id']) ? $_POST['doctor_id'] : null;
 
-    // 🔎 Check first if a pending/approved appointment already exists
-    $check = $pdo->prepare("
-        SELECT * FROM appointments 
-        WHERE owner_id = ? 
-          AND clinic_id = ? 
-          AND appointment_date = ? 
-          AND status IN ('pending', 'approved')
-    ");
-    $check->execute([$user_id, $clinic_id, $appointment_date]);
+        // Validate required fields
+        if (!$clinic_id || !$pet_id || !$service_id || !$appointment_date || !$phone) {
+            $_SESSION['booking_msg'] = 'error';
+            $_SESSION['booking_error_text'] = 'Please fill in all required fields.';
+            header('Location: book_appointment.php');
+            exit;
+        }
 
-    if ($check->rowCount() > 0) {
-        $_SESSION['error'] = "You already have a booking on this date. Cancel it first before rebooking.";
-        header("Location: book_appointment.php?clinic_id=$clinic_id");
-        exit;
-    }
-
-    // ✅ Insert appointment if no conflicts
-    $insert = $pdo->prepare("
-        INSERT INTO appointments 
-        (clinic_id, pet_id, owner_id, service_id, doctor_id, residence, phone, message, updated_by, appointment_date, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
-    ");
-    $inserted = $insert->execute([
-        $clinic_id,
-        $pet_id,
-        $user_id,
-        $service_id,
-        $doctor_id,
-        $residence,
-        $phone,
-        $message,
-        $appointment_date
-    ]);
-
-    // 🔔 Insert notification
-    if ($inserted) {
-        $stmt = $pdo->prepare("
-            INSERT INTO notifications 
-            (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        // 🔎 Check if a pending/approved appointment already exists (same date & service)
+        $check = $pdo->prepare("
+            SELECT * FROM appointments 
+            WHERE owner_id = ? 
+              AND clinic_id = ? 
+              AND appointment_date = ? 
+              AND service_id = ? 
+              AND status IN ('pending', 'approved')
         ");
-        $stmt->execute([
-            $user_id,          // user_id
-            'employee',        // role
-            $message,          // message
-            'Book Appointment',// subject
-            null,              // link
-            $appointment_date, // schedule_date
-            null,              // sms
-            $phone,            // number
-            'unread',          // status
-            date('Y-m-d H:i:s')// created_at
+        $check->execute([$user_id, $clinic_id, $appointment_date, $service_id]);
+
+        if ($check->rowCount() > 0) {
+            $_SESSION['booking_msg'] = 'error';
+            $_SESSION['booking_error_text'] = 'You already have a booking for this service on this date.';
+            header("Location: book_appointment.php?clinic_id=$clinic_id");
+            exit;
+        }
+
+        // ✅ Insert appointment
+        $insert = $pdo->prepare("
+            INSERT INTO appointments 
+            (clinic_id, pet_id, owner_id, service_id, doctor_id, residence, phone, message, updated_by, appointment_date, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
+        ");
+
+        $inserted = $insert->execute([
+            $clinic_id,
+            $pet_id,
+            $user_id,
+            $service_id,
+            $doctor_id,
+            $residence,
+            $phone,
+            $message,
+            $appointment_date
         ]);
 
-        $_SESSION['booking_msg'] = 'success';
-    } else {
+        if ($inserted) {
+            // 🔔 Create notification for employee/admin
+            $notif = $pdo->prepare("
+                INSERT INTO notifications 
+                (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $notif->execute([
+                $user_id,
+                'employee',
+                $message ?: 'New appointment request.',
+                'Book Appointment',
+                null,
+                $appointment_date,
+                null,
+                $phone,
+                'unread',
+                date('Y-m-d H:i:s')
+            ]);
+
+            $_SESSION['booking_msg'] = 'success';
+        } else {
+            $_SESSION['booking_msg'] = 'error';
+            $_SESSION['booking_error_text'] = 'Failed to insert appointment.';
+        }
+    } catch (PDOException $e) {
         $_SESSION['booking_msg'] = 'error';
+        $_SESSION['booking_error_text'] = 'Database error: ' . $e->getMessage();
     }
 
     header('Location: book_appointment.php');
     exit;
 }
-
 
 // 👤 Fetch user info
 $user_stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
@@ -108,7 +125,7 @@ $user = $user_stmt->fetch(PDO::FETCH_ASSOC);
 // Profile picture
 $profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'default.png';
 $profilePicPath = "../uploads/profiles/" . $profilePic . "?t=" . time();
-$name = htmlspecialchars($user['name']);
+$name = htmlspecialchars($user['name'] ?? '');
 
 // Format contact number
 $contact = $user['contact_number'] ?? '';
@@ -123,7 +140,7 @@ if (!empty($contact)) {
     $contact = 'N/A';
 }
 
-// 🗓️ Pending/cancellable appointments
+// 🗓️ Pending Appointments
 $pendingStmt = $pdo->prepare("
     SELECT a.appointment_id, a.status, a.appointment_date, a.appointment_start, a.appointment_end,
            p.pet_name, c.clinic_name, s.service_name
@@ -137,7 +154,7 @@ $pendingStmt = $pdo->prepare("
 $pendingStmt->execute([$user_id]);
 $pendingAppointments = $pendingStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// ✅ Approved appointments
+// ✅ Approved Appointments
 $approvedStmt = $pdo->prepare("
     SELECT a.appointment_id, a.status, a.appointment_date, a.appointment_start, a.appointment_end,
            p.pet_name, c.clinic_name, s.service_name
@@ -151,6 +168,7 @@ $approvedStmt = $pdo->prepare("
 $approvedStmt->execute([$user_id]);
 $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
