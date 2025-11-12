@@ -163,7 +163,7 @@ $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <tr>
                                         <td>
                                             <?php if (!empty($clinic['logo'])): ?>
-                                                <img src="../<?= htmlspecialchars($clinic['logo']) ?>"
+                                                <img src="../uploads/logos/<?= htmlspecialchars($clinic['logo']) ?>"
                                                     alt="Clinic Logo"
                                                     style="width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid #ccc;">
                                             <?php else: ?>
