@@ -520,6 +520,59 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         </table>
       </div>
     </div>
+
+    <!-- Expired Items Table -->
+    <div class="card shadow-sm mt-5">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Expired Items</h4>
+        </div>
+
+        <table id="expiredTable" class="table table-striped table-bordered align-middle" style="width:100%">
+          <thead class="table-dark">
+            <tr>
+              <th>Item</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Unit</th>
+              <th>Expiration</th>
+              <th>Cost</th>
+              <th>Selling</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+            // Fetch expired items
+            $stmt = $pdo->prepare("SELECT i.*, c.category_name 
+                               FROM inventory i 
+                               LEFT JOIN categories c ON i.category_id = c.category_id 
+                               WHERE i.clinic_id = ? AND i.expiration_date < CURDATE()");
+            $stmt->execute([$clinic_id]);
+            $expiredItems = $stmt->fetchAll();
+
+            foreach ($expiredItems as $item): ?>
+              <tr class="table-danger">
+                <td><?= htmlspecialchars($item['item_name']) ?></td>
+                <td><?= htmlspecialchars($item['category_name'] ?? 'Uncategorized') ?></td>
+                <td><?= $item['quantity'] ?></td>
+                <td><?= htmlspecialchars($item['unit']) ?></td>
+                <td><?= $item['expiration_date'] ?></td>
+                <td>₱<?= number_format($item['cost_price'], 2) ?></td>
+                <td>₱<?= number_format($item['selling_price'], 2) ?></td>
+                <td><span class="badge bg-danger">Expired</span></td>
+                <td>
+                  <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
+                    data-bs-target="#editItemModal<?= $item['item_id'] ?>">✏️</button>
+                  <button class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $item['item_id'] ?>)">🗑</button>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <!-- re-stock -->
@@ -844,6 +897,17 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
           loadAdminNotifications(); // Reload count
         }
       }
+    });
+  </script>
+
+  <!-- for the expired table item -->
+  <script>
+    $(document).ready(function () {
+      $('#expiredTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+        pageLength: 10
+      });
     });
   </script>
 </body>

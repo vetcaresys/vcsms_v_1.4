@@ -104,90 +104,83 @@ Thank you for trusting VetCareSys.";
         error_log("Mailer Error: {$mail->ErrorInfo}");
     }
 }
+
 // --- Handle GET status update (Approve/Cancel) ---
-if (isset($_GET['update']) && isset($_GET['status'])) {
+if (isset($_GET['update'], $_GET['status'])) {
     $appointment_id = $_GET['update'];
     $new_status = $_GET['status'];
 
-    // 1. Fetch ALL required appointment details (including date/time and owner_id)
     $stmt = $pdo->prepare("
-        SELECT 
-            owner_id, appointment_date, appointment_start, appointment_end, phone 
+        SELECT owner_id, appointment_date, appointment_start, appointment_end, phone 
         FROM appointments 
         WHERE appointment_id = ? AND clinic_id = ?
     ");
     $stmt->execute([$appointment_id, $clinic_id]);
     $appointment_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Stop execution if appointment is not found
     if (!$appointment_data) {
-        // You might want to redirect or show an error here
         header('Location: some_error_page.php?error=notfound');
         exit;
     }
 
-    // Extract variables from fetched data
     $petowner_id = $appointment_data['owner_id'];
-    $appointment_date = $appointment_data['appointment_date']; // Raw date
-    $appointment_start = $appointment_data['appointment_start']; // Raw start time
-    $appointment_end = $appointment_data['appointment_end']; // Raw end time
-    $phone = $appointment_data['phone']; // Phone number
+    $appointment_date = $appointment_data['appointment_date'];
+    $appointment_start = $appointment_data['appointment_start'];
+    $appointment_end = $appointment_data['appointment_end'];
+    $phone = $appointment_data['phone'];
 
-    // Format the date/time for the notification message
     $formatted_date = date("F j, Y", strtotime($appointment_date));
     $formatted_start = date("g:i A", strtotime($appointment_start));
     $formatted_end = date("g:i A", strtotime($appointment_end));
 
-    // 2. Update the status
     $updateStmt = $pdo->prepare("UPDATE appointments SET status = ? WHERE appointment_id = ? AND clinic_id = ?");
     $updateStmt->execute([$new_status, $appointment_id, $clinic_id]);
 
-    // 3. Send Email (it will fetch its own details for the email body)
     sendAppointmentEmail($pdo, $appointment_id, $clinic_id, $new_status);
 
-    // 4. Insert Notification using the formatted variables
     $notification_message = "Your appointment has been " . htmlspecialchars($new_status) . " for {$formatted_date} from {$formatted_start} to {$formatted_end}.";
-    $notification_subject = ucfirst($new_status) . " Appointment Confirmation"; // Better subject
-    $clean_schedule_date = substr($appointment_date, 0, 10);
+    $notification_subject = ucfirst($new_status) . " Appointment Confirmation";
+
     $notifStmt = $pdo->prepare("
         INSERT INTO notifications 
             (user_id, role, message, subject, schedule_date, sms, number, status, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-
     $notifStmt->execute([
-        $petowner_id, // user_id
-        'pet_owner', // role
-        $notification_message,// message
-        $notification_subject,// subject
-        $clean_schedule_date,// schedule_date (Raw date is better here)
-        '1', // Assuming you want to send an SMS
-        $phone, // number
-        'unread', // status
-        date('Y-m-d H:i:s') // created_at
+        $petowner_id,
+        'pet_owner',
+        $notification_message,
+        $notification_subject,
+        substr($appointment_date, 0, 10),
+        '1',
+        $phone,
+        'unread',
+        date('Y-m-d H:i:s')
     ]);
 
-    // Redirect back to the main page after processing
-    header('Location: ' . $_SERVER['HTTP_REFERER'] ?? 'index.php');
+    header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
     exit;
 }
+
 // --- Handle POST edit from modal ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'])) {
     $appointment_id = $_POST['appointment_id'];
     $appointment_date = $_POST['appointment_date'];
     $appointment_start = $_POST['appointment_start'];
     $appointment_end = $_POST['appointment_end'];
     $doctor_id = $_POST['doctor_id'];
 
-    $stmt = $pdo->prepare("UPDATE appointments 
+    $stmt = $pdo->prepare("
+        UPDATE appointments 
         SET appointment_date = ?, appointment_start = ?, appointment_end = ?, doctor_id = ? 
-        WHERE appointment_id = ? AND clinic_id = ?");
+        WHERE appointment_id = ? AND clinic_id = ?
+    ");
     $stmt->execute([$appointment_date, $appointment_start, $appointment_end, $doctor_id, $appointment_id, $clinic_id]);
 
     sendAppointmentEmail($pdo, $appointment_id, $clinic_id);
 }
 
-// --- Fetch all appointments for display ---
+// --- Fetch all appointments ---
 $stmt = $pdo->prepare("
     SELECT a.*, p.pet_name, p.owner_id, s.service_name, 
            u.name AS owner_name, u.email AS owner_email, u.contact_number AS owner_contact
@@ -206,7 +199,7 @@ $stmt = $pdo->prepare("
         END ASC
 ");
 $stmt->execute([$clinic_id]);
-$appointments = $stmt->fetchAll();
+$appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // --- Staff profile info ---
 $staff_id = $_SESSION['staff_id'];
@@ -217,7 +210,9 @@ $staff = $stmt->fetch(PDO::FETCH_ASSOC);
 $name = htmlspecialchars($staff['name']);
 $profilePic = !empty($staff['profile_picture']) ? $staff['profile_picture'] : 'default.png';
 $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
+
 ?>
+
 
 
 <!DOCTYPE html>
@@ -234,6 +229,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Google Fonts -->
     <link
@@ -409,12 +405,16 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                             <i class="bi bi-pencil-square"></i> Edit
                                         </a> -->
                                         <a href="?update=<?= $appt['appointment_id']; ?>&status=approved"
-                                            class="btn btn-sm btn-success me-1"
-                                            onclick="return confirm('Approve this appointment?')">Approve</a>
+                                            class="btn btn-sm btn-success me-1 action-appointment" data-status="approved"
+                                            data-id="<?= $appt['appointment_id']; ?>">
+                                            Approve
+                                        </a>
                                     <?php elseif ($appt['status'] === 'approved'): ?>
                                         <a href="?update=<?= $appt['appointment_id']; ?>&status=completed"
-                                            class="btn btn-sm btn-primary me-1"
-                                            onclick="return confirm('Mark as completed?')">Complete</a>
+                                            class="btn btn-sm btn-primary me-1 action-appointment" data-status="completed"
+                                            data-id="<?= $appt['appointment_id']; ?>">
+                                            Complete
+                                        </a>
                                     <?php else: ?>
                                         <em class="text-muted">No further actions</em>
                                     <?php endif; ?>
@@ -708,7 +708,8 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 
                     // Fill edit mode
                     $('#edit_appointment_id').val(a.appointment_id);
-                    $('#edit_appointment_date').val(a.appointment_date);
+                    // Format date for <input type="date">
+                    $('#edit_appointment_date').val(a.appointment_date ? a.appointment_date.slice(0, 10) : '');
                     $('#edit_appointment_start').val(a.appointment_start);
                     $('#edit_appointment_end').val(a.appointment_end);
                     $('#edit_doctor_id').val(a.doctor_id || '');
@@ -933,6 +934,46 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             }
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+            $('.action-appointment').click(function (e) {
+                e.preventDefault();
+                const btn = $(this);
+                const status = btn.data('status');
+                const id = btn.data('id');
+
+                Swal.fire({
+                    title: `Are you sure you want to ${status}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, proceed!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to your PHP update URL
+                        window.location.href = `?update=${id}&status=${status}`;
+                    }
+                });
+            });
+
+            // Optional: Show success message if URL has ?success=approved/completed
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            if (success) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: `Appointment ${success} successfully!`,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                // Remove the query string after showing
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+
 </body>
 
 </html>
