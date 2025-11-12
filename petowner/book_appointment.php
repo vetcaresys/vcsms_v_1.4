@@ -83,7 +83,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
             $message,
             $appointment_date
         ]);
+        // Fetch appointment date for notification
+        $appointment_petname_stmt = $pdo->prepare("SELECT pet_name FROM pets WHERE pet_id = ?");
+        $appointment_petname_stmt->execute([$pet_id]);
+        $appointment_petname = $appointment_petname_stmt->fetchColumn();
 
+
+        $message_notif = "New appointment booked by $owner_name for $appointment_petname, on date of $appointment_date.";
         if ($inserted) {
             // 🔔 Create notification for employee/admin
             $notif = $pdo->prepare("
@@ -94,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
             $notif->execute([
                 $user_id,
                 'employee',
-                $message ?: 'New appointment request.',
+                $message_notif ?: 'New appointment request.',
                 'Book Appointment',
                 null,
                 $appointment_date,
