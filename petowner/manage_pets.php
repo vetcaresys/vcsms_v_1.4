@@ -770,6 +770,7 @@ if (!empty($contact)) {
                     return;
                 }
 
+                // Locate the loadAdminNotifications function and replace the following loop:
                 data.forEach(n => {
                     if (n.status === "unread") unreadCount++;
 
@@ -777,11 +778,34 @@ if (!empty($contact)) {
                         <li>
                             <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
                             data-id="${n.notif_id}">
-                                <div>
-                                    <strong>${n.subject}</strong><br>
-                                    <small class="text-muted">${n.message}</small>
+                                <div class="w-100"> 
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="text-secondary fw-semibold" style="font-size: 0.75rem;">
+                                            <i class="bi bi-calendar"></i> ${n.display_date}
+                                        </small>
+                                        <small class="text-muted" style="font-size: 0.7rem;">
+                                            <i class="bi bi-clock"></i> ${n.display_time}
+                                        </small>
+                                    </div>
+
+                                    <span style="
+                                        font-size: 0.85rem; 
+                                        max-width: 100%; 
+                                        display: block; 
+                                        overflow: hidden; 
+                                        text-overflow: ellipsis; 
+                                        white-space: nowrap;
+                                        /* Conditional Style: Use font-weight: bold (700) if unread, normal (400) if read */
+                                        font-weight: ${n.status === "unread" ? '700' : '400'};
+                                    ">
+                                    ${n.status === "unread" ? `<span class="badge bg-danger ms-2">New</span>` : ""}
+
+                                        ${n.subject}
+
+                                    </span>
+                                    
+                                    <small class="text-muted" style="font-size: 0.78rem;">${n.message}</small>
                                 </div>
-                                ${n.status === "unread" ? `<span class="badge bg-danger ms-2">New</span>` : ""}
                             </a>
                         </li>
                         <li><hr class="dropdown-divider my-0"></li>
