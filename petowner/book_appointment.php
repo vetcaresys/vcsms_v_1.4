@@ -145,10 +145,10 @@ $pendingStmt = $pdo->prepare("
     SELECT a.appointment_id, a.status, a.appointment_date, a.appointment_start, a.appointment_end,
            p.pet_name, c.clinic_name, s.service_name
     FROM appointments a
-    JOIN pets p ON a.pet_id = p.pet_id
-    JOIN clinics c ON a.clinic_id = c.clinic_id
-    JOIN clinic_services s ON a.service_id = s.service_id
-    WHERE p.owner_id = ? AND a.status = 'pending'
+    LEFT JOIN pets p ON a.pet_id = p.pet_id
+    LEFT JOIN clinics c ON a.clinic_id = c.clinic_id
+    LEFT JOIN clinic_services s ON a.service_id = s.service_id
+    WHERE a.owner_id = ? AND a.status = 'pending'
     ORDER BY a.appointment_date DESC
 ");
 $pendingStmt->execute([$user_id]);
@@ -159,10 +159,10 @@ $approvedStmt = $pdo->prepare("
     SELECT a.appointment_id, a.status, a.appointment_date, a.appointment_start, a.appointment_end,
            p.pet_name, c.clinic_name, s.service_name
     FROM appointments a
-    JOIN pets p ON a.pet_id = p.pet_id
-    JOIN clinics c ON a.clinic_id = c.clinic_id
-    JOIN clinic_services s ON a.service_id = s.service_id
-    WHERE p.owner_id = ? AND a.status = 'approved'
+    LEFT JOIN pets p ON a.pet_id = p.pet_id
+    LEFT JOIN clinics c ON a.clinic_id = c.clinic_id
+    LEFT JOIN clinic_services s ON a.service_id = s.service_id
+    WHERE a.owner_id = ? AND a.status = 'approved'
     ORDER BY a.appointment_date DESC
 ");
 $approvedStmt->execute([$user_id]);
