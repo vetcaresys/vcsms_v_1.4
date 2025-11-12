@@ -6,6 +6,9 @@ $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';
 
+// Set the default timezone to Manila (Asia/Manila)
+date_default_timezone_set('Asia/Manila');
+
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
