@@ -46,16 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
             exit;
         }
 
-        // 🔎 Check if a pending/approved appointment already exists (same date & service)
+        // 🔎 Check if a pending/approved appointment already exists (same date, service, and pet)
         $check = $pdo->prepare("
             SELECT * FROM appointments 
-            WHERE owner_id = ? 
-              AND clinic_id = ? 
-              AND appointment_date = ? 
-              AND service_id = ? 
-              AND status IN ('pending', 'approved')
-        ");
-        $check->execute([$user_id, $clinic_id, $appointment_date, $service_id]);
+                WHERE owner_id = ? 
+                AND clinic_id = ? 
+                AND appointment_date = ? 
+                AND service_id = ? 
+                AND pet_id = ? 
+                AND status IN ('pending', 'approved')
+            ");
+        $check->execute([$user_id, $clinic_id, $appointment_date, $service_id, $pet_id]);
 
         if ($check->rowCount() > 0) {
             $_SESSION['booking_msg'] = 'error';
@@ -194,20 +195,20 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
 
 <body class="bg-light">
 
-<?php if (isset($_SESSION['booking_msg'])): ?>
-<script>
-    Swal.fire({
-        icon: '<?= $_SESSION['booking_msg'] === "success" ? "success" : "error" ?>',
-        title: '<?= $_SESSION['booking_msg'] === "success" ? "Appointment booked!" : "Booking failed." ?>',
-        text: '<?= $_SESSION['booking_msg'] === "success" 
-            ? "Please wait for approval." 
-            : ($_SESSION['booking_error_text'] ?? "Please try again later.") ?>'
+    <?php if (isset($_SESSION['booking_msg'])): ?>
+        <script>
+            Swal.fire({
+                icon: '<?= $_SESSION['booking_msg'] === "success" ? "success" : "error" ?>',
+                title: '<?= $_SESSION['booking_msg'] === "success" ? "Appointment booked!" : "Booking failed." ?>',
+                text: '<?= $_SESSION['booking_msg'] === "success"
+                    ? "Please wait for approval."
+                    : ($_SESSION['booking_error_text'] ?? "Please try again later.") ?>'
             });
-</script>
-<?php 
-unset($_SESSION['booking_msg']); 
-unset($_SESSION['booking_error_text']);
-endif; ?>
+        </script>
+        <?php
+        unset($_SESSION['booking_msg']);
+        unset($_SESSION['booking_error_text']);
+    endif; ?>
 
 
 
@@ -874,39 +875,39 @@ endif; ?>
         });
     </script>
     <script>
-         document.addEventListener("DOMContentLoaded", function() {
-        loadAdminNotifications();
-        
-        // Load when bell icon is clicked
-        document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
-        
-        // 💡 NEW: Listener for Mark All button
-        document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
-    });
+        document.addEventListener("DOMContentLoaded", function () {
+            loadAdminNotifications();
 
-    function loadAdminNotifications() {
-        fetch(`../petowner_fetch_notifications.php?user_id=` + `<?=($user_id) ?>`)
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById("notif_list");
-                const count = document.getElementById("notif_count");
-                const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
-                
-                list.innerHTML = "";
-                let unreadCount = 0;
+            // Load when bell icon is clicked
+            document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
 
-                if (!data || data.length === 0) {
-                    list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
-                    count.textContent = "";
-                    markAllBtn.disabled = true; // Disable button if no notifs
-                    return;
-                }
+            // 💡 NEW: Listener for Mark All button
+            document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
+        });
 
-                // Locate the loadAdminNotifications function and replace the following loop:
-                data.forEach(n => {
-                    if (n.status === "unread") unreadCount++;
+        function loadAdminNotifications() {
+            fetch(`../petowner_fetch_notifications.php?user_id=` + `<?= ($user_id) ?>`)
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById("notif_list");
+                    const count = document.getElementById("notif_count");
+                    const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
 
-                    list.innerHTML += `
+                    list.innerHTML = "";
+                    let unreadCount = 0;
+
+                    if (!data || data.length === 0) {
+                        list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
+                        count.textContent = "";
+                        markAllBtn.disabled = true; // Disable button if no notifs
+                        return;
+                    }
+
+                    // Locate the loadAdminNotifications function and replace the following loop:
+                    data.forEach(n => {
+                        if (n.status === "unread") unreadCount++;
+
+                        list.innerHTML += `
                         <li>
                             <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
                             data-id="${n.notif_id}">
@@ -942,60 +943,60 @@ endif; ?>
                         </li>
                         <li><hr class="dropdown-divider my-0"></li>
                     `;
-                });
-
-                count.textContent = unreadCount > 0 ? unreadCount : "";
-                markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
-            });
-    }
-
-    // 💡 NEW: Function to mark all notifications as read
-    function markAllAsRead() {
-        Swal.fire({
-            title: 'Mark all as read?',
-            text: "All current unread notifications will be marked as read.",
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, Mark All'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Fetch the new PHP endpoint to update the database
-                fetch(`../petowner_mark_all_as_read.php?user_id=` + `<?=($user_id) ?>`, { method: 'POST' })
-                    .then(response => {
-                        if (response.ok) {
-                            Swal.fire('Success!', 'All notifications marked as read.', 'success');
-                            // Reload the notifications immediately after success
-                            loadAdminNotifications(); 
-                        } else {
-                            Swal.fire('Error!', 'Could not mark all as read.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        Swal.fire('Error!', 'Network or server issue.', 'error');
                     });
+
+                    count.textContent = unreadCount > 0 ? unreadCount : "";
+                    markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
+                });
+        }
+
+        // 💡 NEW: Function to mark all notifications as read
+        function markAllAsRead() {
+            Swal.fire({
+                title: 'Mark all as read?',
+                text: "All current unread notifications will be marked as read.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Mark All'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Fetch the new PHP endpoint to update the database
+                    fetch(`../petowner_mark_all_as_read.php?user_id=` + `<?= ($user_id) ?>`, { method: 'POST' })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire('Success!', 'All notifications marked as read.', 'success');
+                                // Reload the notifications immediately after success
+                                loadAdminNotifications();
+                            } else {
+                                Swal.fire('Error!', 'Could not mark all as read.', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                            Swal.fire('Error!', 'Network or server issue.', 'error');
+                        });
+                }
+            });
+        }
+
+        // Mark as read when opening a notification (Your original function, updated for clarity)
+        document.addEventListener("click", function (e) {
+            if (e.target.closest(".notif-item")) {
+                const notifItem = e.target.closest(".notif-item");
+                const id = notifItem.dataset.id;
+
+                // Only send the request if it's currently marked as unread
+                if (notifItem.classList.contains('bg-light')) {
+                    fetch(`../mark_as_read.php?id=${id}`);
+                    // Simple visual update after click
+                    notifItem.classList.remove('bg-light');
+                    notifItem.querySelector('.badge')?.remove();
+                    loadAdminNotifications(); // Reload count
+                }
             }
         });
-    }
-
-    // Mark as read when opening a notification (Your original function, updated for clarity)
-    document.addEventListener("click", function(e) {
-        if (e.target.closest(".notif-item")) {
-            const notifItem = e.target.closest(".notif-item");
-            const id = notifItem.dataset.id;
-            
-            // Only send the request if it's currently marked as unread
-            if (notifItem.classList.contains('bg-light')) {
-                fetch(`../mark_as_read.php?id=${id}`);
-                // Simple visual update after click
-                notifItem.classList.remove('bg-light');
-                notifItem.querySelector('.badge')?.remove();
-                loadAdminNotifications(); // Reload count
-            }
-        }
-    });
     </script>
 </body>
 
