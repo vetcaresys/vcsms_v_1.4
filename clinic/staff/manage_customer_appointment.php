@@ -137,14 +137,14 @@ if (isset($_GET['update']) && isset($_GET['status'])) {
     $formatted_date = date("F j, Y", strtotime($appointment_date));
     $formatted_start = date("g:i A", strtotime($appointment_start));
     $formatted_end = date("g:i A", strtotime($appointment_end));
-    
+
     // 2. Update the status
     $updateStmt = $pdo->prepare("UPDATE appointments SET status = ? WHERE appointment_id = ? AND clinic_id = ?");
     $updateStmt->execute([$new_status, $appointment_id, $clinic_id]);
 
     // 3. Send Email (it will fetch its own details for the email body)
     sendAppointmentEmail($pdo, $appointment_id, $clinic_id, $new_status);
-    
+
     // 4. Insert Notification using the formatted variables
     $notification_message = "Your appointment has been " . htmlspecialchars($new_status) . " for {$formatted_date} from {$formatted_start} to {$formatted_end}.";
     $notification_subject = ucfirst($new_status) . " Appointment Confirmation"; // Better subject
@@ -196,7 +196,14 @@ $stmt = $pdo->prepare("
     JOIN clinic_services s ON a.service_id = s.service_id
     JOIN users u ON p.owner_id = u.user_id
     WHERE a.clinic_id = ?
-    ORDER BY a.appointment_date DESC
+    ORDER BY 
+        CASE a.status
+            WHEN 'pending' THEN 1
+            WHEN 'approved' THEN 2
+            WHEN 'completed' THEN 3
+            WHEN 'cancelled' THEN 4
+            ELSE 5
+        END ASC
 ");
 $stmt->execute([$clinic_id]);
 $appointments = $stmt->fetchAll();
@@ -276,16 +283,19 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                             </span>
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end p-2"
-                            style="width: 320px; max-height: 400px;" id="notif_list_container">
-                            
+                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 320px; max-height: 400px;"
+                            id="notif_list_container">
+
                             <li class="d-flex justify-content-between align-items-center mb-2 px-2">
                                 <h6 class="mb-0">Notifications</h6>
-                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;" disabled>
+                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none"
+                                    style="font-size: 0.8rem;" disabled>
                                     Mark all as read
                                 </button>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
 
                             <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
                                 <li class="text-center text-muted">Loading...</li>
@@ -545,7 +555,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             </div>
         </div>
     </div>
-    
+
     <!-- 👁️ View & Edit Appointment Modal -->
     <div class="modal fade" id="viewAppointmentModal" tabindex="-1" aria-labelledby="viewAppointmentModalLabel"
         aria-hidden="true">
@@ -789,7 +799,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             $('#appointmentsTable').DataTable({
                 "pageLength": 10,
                 "lengthMenu": [5, 10, 25, 50, 100],
-                "order": [[3, "desc"]], // Sort by appointment date by default
+                "order": [], // ❌ remove auto-sorting
                 "language": {
                     "search": "Search appointments:",
                     "lengthMenu": "Show _MENU_ entries per page",
@@ -801,39 +811,39 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         });
     </script>
     <script>
-         document.addEventListener("DOMContentLoaded", function() {
-        loadAdminNotifications();
-        
-        // Load when bell icon is clicked
-        document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
-        
-        // 💡 NEW: Listener for Mark All button
-        document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
-    });
+        document.addEventListener("DOMContentLoaded", function () {
+            loadAdminNotifications();
 
-    function loadAdminNotifications() {
-        fetch("../../emp_fetch_notifications.php")
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById("notif_list");
-                const count = document.getElementById("notif_count");
-                const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
-                
-                list.innerHTML = "";
-                let unreadCount = 0;
+            // Load when bell icon is clicked
+            document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
 
-                if (!data || data.length === 0) {
-                    list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
-                    count.textContent = "";
-                    markAllBtn.disabled = true; // Disable button if no notifs
-                    return;
-                }
+            // 💡 NEW: Listener for Mark All button
+            document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
+        });
 
-                // Locate the loadAdminNotifications function and replace the following loop:
-                data.forEach(n => {
-                    if (n.status === "unread") unreadCount++;
+        function loadAdminNotifications() {
+            fetch("../../emp_fetch_notifications.php")
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById("notif_list");
+                    const count = document.getElementById("notif_count");
+                    const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
 
-                    list.innerHTML += `
+                    list.innerHTML = "";
+                    let unreadCount = 0;
+
+                    if (!data || data.length === 0) {
+                        list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
+                        count.textContent = "";
+                        markAllBtn.disabled = true; // Disable button if no notifs
+                        return;
+                    }
+
+                    // Locate the loadAdminNotifications function and replace the following loop:
+                    data.forEach(n => {
+                        if (n.status === "unread") unreadCount++;
+
+                        list.innerHTML += `
                         <li>
                             <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
                             data-id="${n.notif_id}">
@@ -869,59 +879,59 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                         </li>
                         <li><hr class="dropdown-divider my-0"></li>
                     `;
-                });
-                count.textContent = unreadCount > 0 ? unreadCount : "";
-                markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
-            });
-    }
-
-    // 💡 NEW: Function to mark all notifications as read
-    function markAllAsRead() {
-        Swal.fire({
-            title: 'Mark all as read?',
-            text: "All current unread notifications will be marked as read.",
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, Mark All'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Fetch the new PHP endpoint to update the database
-                fetch("../../emp_mark_all_as_read.php", { method: 'POST' })
-                    .then(response => {
-                        if (response.ok) {
-                            Swal.fire('Success!', 'All notifications marked as read.', 'success');
-                            // Reload the notifications immediately after success
-                            loadAdminNotifications(); 
-                        } else {
-                            Swal.fire('Error!', 'Could not mark all as read.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        Swal.fire('Error!', 'Network or server issue.', 'error');
                     });
+                    count.textContent = unreadCount > 0 ? unreadCount : "";
+                    markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
+                });
+        }
+
+        // 💡 NEW: Function to mark all notifications as read
+        function markAllAsRead() {
+            Swal.fire({
+                title: 'Mark all as read?',
+                text: "All current unread notifications will be marked as read.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Mark All'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Fetch the new PHP endpoint to update the database
+                    fetch("../../emp_mark_all_as_read.php", { method: 'POST' })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire('Success!', 'All notifications marked as read.', 'success');
+                                // Reload the notifications immediately after success
+                                loadAdminNotifications();
+                            } else {
+                                Swal.fire('Error!', 'Could not mark all as read.', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                            Swal.fire('Error!', 'Network or server issue.', 'error');
+                        });
+                }
+            });
+        }
+
+        // Mark as read when opening a notification (Your original function, updated for clarity)
+        document.addEventListener("click", function (e) {
+            if (e.target.closest(".notif-item")) {
+                const notifItem = e.target.closest(".notif-item");
+                const id = notifItem.dataset.id;
+
+                // Only send the request if it's currently marked as unread
+                if (notifItem.classList.contains('bg-light')) {
+                    fetch(`../../mark_as_read.php?id=${id}`);
+                    // Simple visual update after click
+                    notifItem.classList.remove('bg-light');
+                    notifItem.querySelector('.badge')?.remove();
+                    loadAdminNotifications(); // Reload count
+                }
             }
         });
-    }
-
-    // Mark as read when opening a notification (Your original function, updated for clarity)
-    document.addEventListener("click", function(e) {
-        if (e.target.closest(".notif-item")) {
-            const notifItem = e.target.closest(".notif-item");
-            const id = notifItem.dataset.id;
-            
-            // Only send the request if it's currently marked as unread
-            if (notifItem.classList.contains('bg-light')) {
-                fetch(`../../mark_as_read.php?id=${id}`);
-                // Simple visual update after click
-                notifItem.classList.remove('bg-light');
-                notifItem.querySelector('.badge')?.remove();
-                loadAdminNotifications(); // Reload count
-            }
-        }
-    });
     </script>
 </body>
 
