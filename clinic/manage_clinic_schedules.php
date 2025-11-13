@@ -91,6 +91,7 @@ ORDER BY FIELD(day_of_week, 'Monday','Tuesday','Wednesday','Thursday','Friday','
     <meta charset="UTF-8">
     <title>Manage Clinic Schedules - VetCareSys</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/jpg" href="../assets/img/favicon-removebg-preview.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

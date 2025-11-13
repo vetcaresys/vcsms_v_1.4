@@ -72,6 +72,7 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <title>Register Pet Owner - VetCareSys</title>
+    <link rel="icon" type="image/jpg" href="../../assets/img/favicon-removebg-preview.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -279,9 +280,6 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
         <?php unset($_SESSION['message']); ?>
     <?php endif; ?>
 
-
-
-
     <!-- 🌟 Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container-fluid">
@@ -465,8 +463,6 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
     </div>
-
-
 
     <!-- Register Pet Owner Modal -->
     <div class="modal fade" id="registerOwnerModal" tabindex="-1" aria-hidden="true">

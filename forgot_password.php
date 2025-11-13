@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Forgot Password - VetCareSys</title>
+  <link rel="icon" type="image/jpg" href="assets/img/favicon-removebg-preview.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
@@ -15,26 +17,30 @@
       align-items: center;
       color: #333;
     }
+
     .forgot-card {
       background: #fff;
       padding: 30px;
       border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
       max-width: 450px;
       width: 100%;
     }
+
     .btn-custom {
       background-color: #636868;
       color: white;
       border-radius: 10px;
       transition: 0.3s;
     }
+
     .btn-custom:hover {
       background-color: #898b8c;
       color: black;
     }
   </style>
 </head>
+
 <body>
 
   <div class="forgot-card">
@@ -59,4 +65,5 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

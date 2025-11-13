@@ -44,6 +44,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 <head>
   <meta charset="UTF-8">
   <title>Inventory Management - VetCareSys</title>
+  <link rel="icon" type="image/jpg" href="../../assets/img/favicon-removebg-preview.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet">

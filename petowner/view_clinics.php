@@ -17,6 +17,7 @@ $clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <title>View Clinics on Map</title>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/jpg" href="../assets/img/favicon-removebg-preview.png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>

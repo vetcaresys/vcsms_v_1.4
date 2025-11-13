@@ -20,6 +20,7 @@ $clinic_id = $_SESSION['clinic_id'];
 <head>
   <meta charset="UTF-8">
   <title>Appointment Calendar</title>
+  <link rel="icon" type="image/jpg" href="../../assets/img/favicon-removebg-preview.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
