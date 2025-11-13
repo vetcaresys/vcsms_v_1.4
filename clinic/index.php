@@ -62,6 +62,7 @@ if ($clinic_id) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,6 +77,7 @@ if ($clinic_id) {
         rel="stylesheet">
     <link rel="stylesheet" href="assets/index.css">
 </head>
+
 <body>
 
     <?php if (isset($_SESSION['success'])): ?>
@@ -177,28 +179,32 @@ if ($clinic_id) {
     <!-- Profile Modal -->
     <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+            <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Profile Information</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body text-center">
 
-                    <!-- Profile Picture -->
-                    <?php
-                    $profilePic = !empty($user['profile_picture'])
-                        ? "../uploads/profiles/" . htmlspecialchars($user['profile_picture'])
-                        : "../uploads/profiles/default.png";
-                    ?>
-                    <img src="<?= $profilePic ?>" alt="Profile" width="120" height="120" class="rounded-circle mb-3">
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <?php
+                        $profilePic = !empty($user['profile_picture'])
+                            ? "../uploads/profiles/" . htmlspecialchars($user['profile_picture'])
+                            : "../assets/default-profile.png"; // fallback kung walay pic
+                        ?>
+                        <img src="<?= $profilePic ?>" alt="Profile Picture"
+                            class="rounded-circle border border-3 border-primary mb-3" width="150" height="150"
+                            style="object-fit: cover;">
+                        <h5 class="fw-bold text-primary mb-0"><?= htmlspecialchars($user['name']) ?></h5>
+                        <small class="text-muted">Clinic Staff</small>
+                    </div>
 
-                    <h6 class="mb-3">User Information</h6>
-
+                    <!-- Formal Info Table -->
                     <div class="table-responsive">
                         <table class="table table-bordered align-middle">
                             <tbody>
                                 <tr>
-                                    <th style="width: 30%">Name</th>
+                                    <th style="width: 30%">Full Name</th>
                                     <td><?= htmlspecialchars($user['name']) ?></td>
                                 </tr>
                                 <tr>
@@ -206,21 +212,23 @@ if ($clinic_id) {
                                     <td><?= htmlspecialchars($user['email']) ?></td>
                                 </tr>
                                 <tr>
-                                    <th>Contact</th>
-                                    <td><?= htmlspecialchars($user['contact_number'] ?? '—') ?></td>
+                                    <th>Contact Number</th>
+                                    <td><?= htmlspecialchars($user['contact_number'] ?? 'Not provided') ?></td>
                                 </tr>
                                 <tr>
                                     <th>Address</th>
-                                    <td><?= htmlspecialchars($user['address'] ?? '—') ?></td>
+                                    <td><?= htmlspecialchars($user['address'] ?? 'Not provided') ?></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <button class="btn btn-sm btn-outline-primary mt-2" data-bs-target="#editUserModal"
-                        data-bs-toggle="modal" data-bs-dismiss="modal">
-                        <i class="bi bi-pencil-square"></i> Edit User Info
-                    </button>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-primary px-4" data-bs-target="#editUserModal"
+                            data-bs-toggle="modal" data-bs-dismiss="modal">
+                            <i class="bi bi-pencil-square me-1"></i> Edit Profile
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -240,18 +248,83 @@ if ($clinic_id) {
                                 value="<?= htmlspecialchars($user['name']) ?>" required></div>
                         <div class="mb-3"><label>Email</label><input type="email" name="email" class="form-control"
                                 value="<?= htmlspecialchars($user['email']) ?>" required></div>
-                        <div class="mb-3"><label>Contact Number</label><input type="text" name="contact_number"
-                                class="form-control" value="<?= htmlspecialchars($user['contact_number']) ?>"></div>
+                        <div class="mb-3">
+                            <label>Contact Number</label>
+                            <input type="text" name="contact_number" class="form-control"
+                                value="<?= htmlspecialchars($user['contact_number']) ?>" maxlength="11"
+                                pattern="^0\d{10}$" title="Enter a valid 11-digit number (e.g. 09123456789)" oninput="
+                                // remove any non-digit characters
+                                this.value = this.value.replace(/[^0-9]/g, '');
+                                // limit to 11 digits only
+                                if (this.value.length > 11) this.value = this.value.slice(0, 11);" required>
+                            <div class="form-text text-muted">Format: 09XXXXXXXXX (11 digits only)</div>
+                        </div>
                         <div class="mb-3"><label>Address</label><input type="text" name="address" class="form-control"
                                 value="<?= htmlspecialchars($user['address']) ?>"></div>
                         <div class="mb-3"><label>Profile Picture</label><input type="file" name="profile_picture"
                                 class="form-control"></div>
+
+                        <h6 class="text-primary">Change Password (optional)</h6>
+                        <!-- Current Password -->
+                        <div class="mb-3 position-relative">
+                            <label>Current Password</label>
+                            <div class="input-group">
+                                <input type="password" name="current_password" class="form-control" id="currentPassword"
+                                    placeholder="Enter current password">
+                                <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                    data-target="currentPassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <small class="text-muted">Type your current password to confirm changes.</small>
+                                    <a href="../forgot_password.php" class="small">Forgot password?</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- New Password -->
+                        <div class="mb-3 position-relative">
+                            <label>New Password</label>
+                            <div class="input-group">
+                                <input type="password" name="new_password" class="form-control" id="newPassword"
+                                    minlength="6" placeholder="Enter new password">
+                                <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                    data-target="newPassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm New Password -->
+                        <div class="mb-3 position-relative">
+                            <label>Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" name="confirm_password" class="form-control" id="confirmPassword"
+                                    minlength="6" placeholder="Re-enter new password">
+                                <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                    data-target="confirmPassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer"><button type="submit" class="btn btn-primary">Save Changes</button></div>
                 </form>
             </div>
         </div>
     </div>
+
+    <?php if (!empty($_SESSION['update_msg'])): ?>
+        <script>
+            Swal.fire({
+                icon: <?= (stripos($_SESSION['update_msg'], '❌') !== false || stripos($_SESSION['update_msg'], '⚠️') !== false) ? "'error'" : "'success'" ?>,
+                title: 'Profile Update',
+                text: <?= json_encode($_SESSION['update_msg']) ?>,
+                confirmButtonColor: '#3085d6'
+            });
+        </script>
+        <?php unset($_SESSION['update_msg']); endif; ?>
 
     <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -298,5 +371,24 @@ if ($clinic_id) {
         });
     </script>
 
+    <!-- for the show password -->
+    <script>
+        document.querySelectorAll('.toggle-pass').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = btn.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('bi-eye', 'bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('bi-eye-slash', 'bi-eye');
+                }
+            });
+        });
+    </script>
 </body>
+
 </html>

@@ -27,15 +27,12 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div id="navbarContent" class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a href="login.php" class="btn btn-outline-light me-2">Login</a>
-          </li>
-          <li class="nav-item">
-            <a href="register.php" class="btn btn-light">Register</a>
-          </li>
-        </ul>
+      <!-- Collapsible Content -->
+      <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
+        <div class="d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0">
+          <a href="login.php" class="btn btn-outline-light">Login</a>
+          <a href="register.php" class="btn btn-light">Register</a>
+        </div>
       </div>
     </div>
   </nav>
