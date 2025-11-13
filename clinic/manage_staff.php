@@ -158,201 +158,7 @@ $staffMembers = $staffList->fetchAll(PDO::FETCH_ASSOC);
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
-
-    <style>
-        /* 🌟 Global Styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fb;
-            color: #2e2e2e;
-            line-height: 1.6;
-        }
-
-        /* 🧭 Navbar */
-        .navbar {
-            background: linear-gradient(90deg, #0d6efd, #007bff);
-            font-family: 'Poppins', sans-serif;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.25rem;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-brand img {
-            width: 38px;
-            height: 38px;
-            object-fit: cover;
-            border-radius: 50%;
-            background: #fff;
-            padding: 3px;
-            margin-right: 10px;
-            transition: transform 0.2s ease;
-        }
-
-        .navbar-brand img:hover {
-            transform: scale(1.08);
-        }
-
-        /* Links */
-        .nav-link {
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: #ffc107 !important;
-        }
-
-        /* 🧾 Summary Cards */
-        .summary-card {
-            border: none;
-            border-radius: 12px;
-            background: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .summary-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .summary-card h5 {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        .summary-card h2 {
-            font-weight: 700;
-            font-size: 2rem;
-        }
-
-        /* 💼 Tables */
-        .table {
-            border-radius: 10px;
-            overflow: hidden;
-            font-size: 0.95rem;
-        }
-
-        .table thead {
-            background-color: #0d6efd;
-            color: white;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f2f7ff;
-        }
-
-        /* 🪄 Buttons */
-        .btn {
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        /* 🧩 Modals */
-        .modal-content {
-            border-radius: 15px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-header {
-            border-radius: 15px 15px 0 0;
-            background: linear-gradient(90deg, #0d6efd, #007bff);
-            color: white;
-        }
-
-        .modal-title {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        /* 🧍 Form */
-        .form-label {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        /* ⚡ Sweet alert pop */
-        .swal2-popup {
-            font-family: 'Inter', sans-serif !important;
-            border-radius: 15px !important;
-        }
-
-        /* 🌈 Badges */
-        .badge {
-            font-size: 0.85rem;
-            padding: 6px 10px;
-            border-radius: 8px;
-        }
-
-        /* 🐾 Page Titles */
-        h4.text-primary {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            color: #0d6efd !important;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* 📦 Footer vibe */
-        .container-footer {
-            text-align: center;
-            margin-top: 50px;
-            font-size: 0.9rem;
-            color: #777;
-        }
-
-        /* 🧭 Datatables */
-        div.dataTables_wrapper .dataTables_filter input {
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
-        div.dataTables_wrapper .dataTables_length select {
-            border-radius: 6px;
-        }
-
-        /* 🧁 Animations */
-        .card,
-        .modal-content {
-            transition: all 0.25s ease-in-out;
-        }
-
-
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-3px);
-        }
-    </style>
+    <link rel="stylesheet" href="assets/manage_staff.css">
 </head>
 
 <body class="bg-light d-flex flex-column min-vh-100">
@@ -453,10 +259,6 @@ $staffMembers = $staffList->fetchAll(PDO::FETCH_ASSOC);
                                                 <img src="../uploads/profiles/<?= !empty($staff['profile_picture']) ? htmlspecialchars($staff['profile_picture']) : 'default.png' ?>"
                                                     alt="Profile" width="32" height="32" class="rounded-circle me-2"
                                                     style="object-fit: cover;">
-
-                                                <!-- Staff Name -->
-                                                <!-- <td class="fw-semibold text-dark px-4"> -->
-                                                <!-- <i class="bi bi-person-circle me-2 text-primary fs-5"></i> -->
                                                 <?php echo htmlspecialchars($staff['name']); ?>
                                             </td>
 
@@ -703,11 +505,15 @@ $staffMembers = $staffList->fetchAll(PDO::FETCH_ASSOC);
 
                             <!-- Password -->
                             <div class="mb-3">
-                                <label>New Password (leave blank to keep current)</label>
-                                <input type="password" name="password" class="form-control"
-                                    placeholder="Enter new password (optional)" minlength="6" maxlength="20"
-                                    pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,20}$"
-                                    title="Password must be 6-20 characters, include letters & numbers">
+                                <label class="form-label">Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="password" id="editStaffPassword"
+                                        placeholder="Enter new password (leave blank to keep current)" minlength="8"
+                                        pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
+                                        title="Must be at least 8 characters, include uppercase, lowercase, number, and special character.">
+                                    <button type="button" class="btn btn-outline-secondary" id="toggleEditStaffPassword">
+                                        Show</button>
+                                </div>
                             </div>
                         </div>
 
@@ -763,9 +569,14 @@ $staffMembers = $staffList->fetchAll(PDO::FETCH_ASSOC);
 
                             <div class="col-md-6">
                                 <label class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control"
-                                    placeholder="At least 6 chars, letters & numbers" minlength="6"
-                                    pattern="^(?=.*[A-Za-z])(?=.*\d).+$" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="password" id="addStaffPassword"
+                                        placeholder="Enter password" required minlength="8"
+                                        pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
+                                        title="Must be at least 8 characters, include uppercase, lowercase, number, and special character.">
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        id="toggleAddStaffPassword">Show</button>
+                                </div>
                             </div>
 
                             <div class="col-md-6">
@@ -855,6 +666,22 @@ $staffMembers = $staffList->fetchAll(PDO::FETCH_ASSOC);
                     document.getElementById('logoutForm').submit();
                 }
             });
+        });
+    </script>
+
+    <script>
+        document.getElementById('toggleAddStaffPassword').addEventListener('click', function () {
+            const pwField = document.getElementById('addStaffPassword');
+            const isHidden = pwField.type === 'password';
+            pwField.type = isHidden ? 'text' : 'password';
+            this.textContent = isHidden ? 'Hide' : 'Show';
+        });
+
+        document.getElementById('toggleEditStaffPassword').addEventListener('click', function () {
+            const pwField = document.getElementById('editStaffPassword');
+            const isHidden = pwField.type === 'password';
+            pwField.type = isHidden ? 'text' : 'password';
+            this.textContent = isHidden ? 'Hide' : 'Show';
         });
     </script>
 </body>

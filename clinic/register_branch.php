@@ -412,11 +412,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="email" name="email" class="form-control" required placeholder="ex. branch@email.com">
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 position-relative">
                 <label class="form-label">Branch Password</label>
-                <input type="password" name="password" class="form-control" required minlength="8"
-                    placeholder="At least 8 chars: Aresfast@123" pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
-                    title="Password must be at least 8 characters, include uppercase, lowercase, number, and special character.">
+                <div class="input-group">
+                    <input type="password" name="password" id="branchPassword" class="form-control" required
+                        minlength="8" placeholder="At least 8 chars: Aresfast@123"
+                        pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
+                        title="Password must be at least 8 characters, include uppercase, lowercase, number, and special character.">
+                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                        Show
+                    </button>
+                </div>
             </div>
 
             <hr>
@@ -504,6 +510,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
     </div>
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordField = document.getElementById('branchPassword');
+            const isPassword = passwordField.type === 'password';
+            passwordField.type = isPassword ? 'text' : 'password';
+            this.textContent = isPassword ? 'Hide' : 'Show';
+        });
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

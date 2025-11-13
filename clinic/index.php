@@ -60,10 +60,8 @@ if ($clinic_id) {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,201 +74,8 @@ if ($clinic_id) {
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
-
-    <style>
-        /* 🌟 Global Styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fb;
-            color: #2e2e2e;
-            line-height: 1.6;
-        }
-
-        /* 🧭 Navbar */
-        .navbar {
-            background: linear-gradient(90deg, #0d6efd, #007bff);
-            font-family: 'Poppins', sans-serif;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.25rem;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-brand img {
-            width: 38px;
-            height: 38px;
-            object-fit: cover;
-            border-radius: 50%;
-            background: #fff;
-            padding: 3px;
-            margin-right: 10px;
-            transition: transform 0.2s ease;
-        }
-
-        .navbar-brand img:hover {
-            transform: scale(1.08);
-        }
-
-        /* Links */
-        .nav-link {
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: #ffc107 !important;
-        }
-
-        /* 🧾 Summary Cards */
-        .summary-card {
-            border: none;
-            border-radius: 12px;
-            background: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .summary-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .summary-card h5 {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        .summary-card h2 {
-            font-weight: 700;
-            font-size: 2rem;
-        }
-
-        /* 💼 Tables */
-        .table {
-            border-radius: 10px;
-            overflow: hidden;
-            font-size: 0.95rem;
-        }
-
-        .table thead {
-            background-color: #0d6efd;
-            color: white;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f2f7ff;
-        }
-
-        /* 🪄 Buttons */
-        .btn {
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        /* 🧩 Modals */
-        .modal-content {
-            border-radius: 15px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-header {
-            border-radius: 15px 15px 0 0;
-            background: linear-gradient(90deg, #0d6efd, #007bff);
-            color: white;
-        }
-
-        .modal-title {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        /* 🧍 Form */
-        .form-label {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        /* ⚡ Sweet alert pop */
-        .swal2-popup {
-            font-family: 'Inter', sans-serif !important;
-            border-radius: 15px !important;
-        }
-
-        /* 🌈 Badges */
-        .badge {
-            font-size: 0.85rem;
-            padding: 6px 10px;
-            border-radius: 8px;
-        }
-
-        /* 🐾 Page Titles */
-        h4.text-primary {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            color: #0d6efd !important;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* 📦 Footer vibe */
-        .container-footer {
-            text-align: center;
-            margin-top: 50px;
-            font-size: 0.9rem;
-            color: #777;
-        }
-
-        /* 🧭 Datatables */
-        div.dataTables_wrapper .dataTables_filter input {
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
-        div.dataTables_wrapper .dataTables_length select {
-            border-radius: 6px;
-        }
-
-        /* 🧁 Animations */
-        .card,
-        .modal-content {
-            transition: all 0.25s ease-in-out;
-        }
-
-        #profileModal table th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            color: #333;
-        }
-
-        #profileModal table td {
-            color: #555;
-        }
-    </style>
+    <link rel="stylesheet" href="assets/index.css">
 </head>
-
 <body>
 
     <?php if (isset($_SESSION['success'])): ?>
@@ -287,7 +92,6 @@ if ($clinic_id) {
         </script>
         <?php unset($_SESSION['success']);
     endif; ?>
-
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
@@ -332,7 +136,7 @@ if ($clinic_id) {
         </div>
     </nav>
 
-    <!-- 📊 Main Content -->
+    <!-- Main Content -->
     <div class="container py-5">
         <h2 class="mb-4 text-primary"><i class="bi bi-speedometer2"></i> Dashboard</h2>
 
@@ -388,7 +192,6 @@ if ($clinic_id) {
                     ?>
                     <img src="<?= $profilePic ?>" alt="Profile" width="120" height="120" class="rounded-circle mb-3">
 
-
                     <h6 class="mb-3">User Information</h6>
 
                     <div class="table-responsive">
@@ -423,7 +226,6 @@ if ($clinic_id) {
         </div>
     </div>
 
-
     <!-- Edit User Modal -->
     <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -450,7 +252,6 @@ if ($clinic_id) {
             </div>
         </div>
     </div>
-
 
     <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -498,5 +299,4 @@ if ($clinic_id) {
     </script>
 
 </body>
-
 </html>
