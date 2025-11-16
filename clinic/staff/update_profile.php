@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // ✅ Update database
+    // ✅ Update basic info (with or without picture)
     if ($profile_picture) {
         $stmt = $pdo->prepare("
             UPDATE staff 
@@ -70,10 +70,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$name, $email, $contact_number, $staff_id]);
     }
 
+    // 🔑 Optional: Change Password
+    $current = trim($_POST['current_password'] ?? '');
+    $new = trim($_POST['new_password'] ?? '');
+    $confirm = trim($_POST['confirm_password'] ?? '');
+
+    if (!empty($current) || !empty($new) || !empty($confirm)) {
+        // Fetch existing hashed password
+        $stmt = $pdo->prepare("SELECT password FROM staff WHERE staff_id = ?");
+        $stmt->execute([$staff_id]);
+        $existingHash = $stmt->fetchColumn();
+
+        if (!$existingHash || !password_verify($current, $existingHash)) {
+            $_SESSION['msg'] = "❌ Incorrect current password.";
+            header("Location: index.php?profile_updated=0");
+            exit;
+        }
+
+        if ($new !== $confirm) {
+            $_SESSION['msg'] = "❌ New passwords do not match.";
+            header("Location: index.php?profile_updated=0");
+            exit;
+        }
+
+        if (strlen($new) < 6) {
+            $_SESSION['msg'] = "❌ Password must be at least 6 characters long.";
+            header("Location: index.php?profile_updated=0");
+            exit;
+        }
+
+        // Hash and update password
+        $hashed = password_hash($new, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("UPDATE staff SET password = ? WHERE staff_id = ?");
+        $stmt->execute([$hashed, $staff_id]);
+    }
+
     // 🔄 Update session for live navbar refresh
     $_SESSION['name'] = $name;
 
     // 🎉 Redirect back to dashboard with success flag
+    $_SESSION['msg'] = "Profile updated successfully.";
     header("Location: index.php?profile_updated=1");
     exit;
 }

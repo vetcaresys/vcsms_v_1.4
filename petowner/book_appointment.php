@@ -542,61 +542,133 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
             <div class="modal-content">
 
+                <!-- View Profile Section -->
                 <div id="viewProfile">
-                    <div class="modal-header">
+                    <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">My Profile</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
+
                     <div class="modal-body text-center">
-                        <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile" class="rounded-circle mb-3"
-                            width="100">
-                        <h4><?= htmlspecialchars($user['name']) ?></h4>
-                        <p><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></p>
-                        <p><strong>Contact:</strong> <?= htmlspecialchars($contact) ?></p>
-                        <p><strong>Address:</strong> <?= htmlspecialchars($user['address'] ?? 'N/A') ?></p>
+                        <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile Picture"
+                            class="rounded-circle shadow-sm mb-3" width="110" height="110"
+                            style="object-fit: cover; border: 3px solid #0d6efd;">
+                        <h4 class="fw-bold mb-3"><?= htmlspecialchars($user['name']) ?></h4>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped align-middle">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 35%;">Email</th>
+                                        <td><?= htmlspecialchars($user['email']) ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Contact</th>
+                                        <td><?= htmlspecialchars($contact) ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Address</th>
+                                        <td><?= htmlspecialchars($user['address'] ?? 'N/A') ?></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
                     <div class="modal-footer">
-                        <button class="btn btn-primary" onclick="toggleEdit(true)">Edit Profile</button>
+                        <button class="btn btn-primary" onclick="toggleEdit(true)">
+                            <i class="bi bi-pencil-square"></i> Edit Profile
+                        </button>
                     </div>
                 </div>
 
+                <!-- Edit Profile Section -->
                 <div id="editProfile" style="display:none;">
                     <form action="update_profile.php" method="POST" enctype="multipart/form-data">
-                        <div class="modal-header">
+                        <div class="modal-header bg-success text-white">
                             <h5 class="modal-title">Edit Profile</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
+
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label">Full Name</label>
                                 <input type="text" name="name" class="form-control"
                                     value="<?= htmlspecialchars($user['name']) ?>" required>
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label">Email</label>
                                 <input type="email" name="email" class="form-control"
                                     value="<?= htmlspecialchars($user['email']) ?>" required>
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label">Contact Number</label>
                                 <input type="text" name="contact_number" class="form-control"
                                     value="<?= htmlspecialchars($user['contact_number']) ?>" inputmode="numeric"
-                                    maxlength="11" pattern="^09\d{9}$" placeholder="e.g., 09123456789" required
-                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                    maxlength="11" pattern="^09\d{9}$" placeholder="e.g., 09123456789"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
                                 <div class="invalid-feedback">
                                     Contact must be 11 digits and start with 09.
                                 </div>
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label">Address</label>
                                 <textarea name="address"
                                     class="form-control"><?= htmlspecialchars($user['address']) ?></textarea>
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label">Profile Picture</label>
                                 <input type="file" name="profile_picture" class="form-control">
                             </div>
+
+                            <!-- 🔵 CHANGE PASSWORD SECTION -->
+                            <hr>
+                            <h6 class="text-primary">Change Password (optional)</h6>
+
+                            <!-- Current Password -->
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">Current Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="current_password" id="currentPassword"
+                                        class="form-control" placeholder="Enter current password">
+                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                        data-target="currentPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- New Password -->
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">New Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="new_password" id="newPassword" class="form-control"
+                                        minlength="6" placeholder="Enter new password">
+                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                        data-target="newPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">Confirm New Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="confirm_password" id="confirmPassword"
+                                        class="form-control" minlength="6" placeholder="Re-enter new password">
+                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                        data-target="confirmPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Cancel</button>
                             <button type="submit" class="btn btn-success">Save Changes</button>
@@ -1003,6 +1075,25 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
                     loadAdminNotifications(); // Reload count
                 }
             }
+        });
+    </script>
+
+    <!-- for the show password -->
+    <script>
+        document.querySelectorAll('.toggle-pass').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = btn.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('bi-eye', 'bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('bi-eye-slash', 'bi-eye');
+                }
+            });
         });
     </script>
 </body>

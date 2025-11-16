@@ -104,6 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 
+    <link rel="stylesheet" href="css/index.css">
+
     <style>
         #calendar {
             max-width: 100%;
@@ -117,134 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 
     <style>
-        /* 🌟 Global Reset */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fb;
-            color: #2e2e2e;
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
 
-        /* 🧭 Navbar */
-        .navbar {
-            background: linear-gradient(90deg, #0d6efd, #007bff);
-            font-family: 'Poppins', sans-serif;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.25rem;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-brand img {
-            width: 38px;
-            height: 38px;
-            object-fit: cover;
-            border-radius: 50%;
-            background: #fff;
-            padding: 3px;
-            margin-right: 10px;
-            transition: transform 0.2s ease;
-        }
-
-        .navbar-brand img:hover {
-            transform: scale(1.08);
-        }
-
-        .nav-link {
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: #ffc107 !important;
-        }
-
-        /* 🧾 Cards */
-        .card {
-            border: none;
-            border-radius: 12px;
-            background: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-title {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            color: #0d6efd;
-        }
-
-        /* 🧍 Modal */
-        .modal-content {
-            border-radius: 15px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-header {
-            border-radius: 15px 15px 0 0;
-            background: linear-gradient(90deg, #0d6efd, #007bff);
-            color: white;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        /* ⚡ SweetAlert */
-        .swal2-popup {
-            font-family: 'Inter', sans-serif !important;
-            border-radius: 15px !important;
-        }
-
-        /* 🧠 Responsive Footer */
-        footer {
-            background-color: #212529;
-            color: #fff;
-            text-align: center;
-            padding: 15px 0;
-            font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
-            margin-top: auto;
-        }
-
-        /* ✨ Dashboard Stats Grid */
-        #dashboardStats .card {
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        #dashboardStats .card h5 {
-            color: #495057;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        #dashboardStats .display-6 {
-            font-weight: 700;
-        }
     </style>
 </head>
 
@@ -472,6 +347,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="mb-3">
                                 <label class="form-label">Profile Picture</label>
                                 <input type="file" name="profile_picture" class="form-control">
+                            </div>
+
+                            <!-- 🔵 CHANGE PASSWORD SECTION -->
+                            <hr>
+                            <h6 class="text-primary">Change Password (optional)</h6>
+
+                            <!-- Current Password -->
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">Current Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="current_password" id="currentPassword"
+                                        class="form-control" placeholder="Enter current password">
+                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                        data-target="currentPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- New Password -->
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">New Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="new_password" id="newPassword" class="form-control"
+                                        minlength="6" placeholder="Enter new password">
+                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                        data-target="newPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">Confirm New Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="confirm_password" id="confirmPassword"
+                                        class="form-control" minlength="6" placeholder="Re-enter new password">
+                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                        data-target="confirmPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -800,6 +718,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
     </script>
+
+    <!-- for the show password -->
+    <script>
+        document.querySelectorAll('.toggle-pass').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = btn.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('bi-eye', 'bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('bi-eye-slash', 'bi-eye');
+                }
+            });
+        });
+    </script>
+
 </body>
 
 </html>

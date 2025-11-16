@@ -49,14 +49,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
   <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- Google Fonts -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
-    rel="stylesheet">
-
-  <!-- Google Fonts -->
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
     rel="stylesheet">
@@ -280,61 +273,132 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
     <!-- Profile Modal -->
     <div class="modal fade" id="profileModal" tabindex="-1">
       <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow">
 
-          <!-- View Profile -->
+          <!-- VIEW PROFILE -->
           <div id="viewProfile">
-            <div class="modal-header">
+            <div class="modal-header bg-primary text-white">
               <h5 class="modal-title">My Profile</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body text-center">
-              <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile" class="rounded-circle mb-3" width="100">
-              <h4><?= $name ?></h4>
-              <p><strong>Email:</strong> <?= htmlspecialchars($staff['email']) ?></p>
-              <p><strong>Contact:</strong> <?= htmlspecialchars($staff['contact_number']) ?></p>
-              <p><strong>Role:</strong> <?= htmlspecialchars($staff['role']) ?></p>
+              <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile Picture"
+                class="rounded-circle border border-3 border-primary mb-3" width="130" height="130"
+                style="object-fit: cover;">
+              <h4 class="fw-bold text-primary mb-3"><?= htmlspecialchars($staff['name']) ?></h4>
+
+              <!-- 🧾 Info Table -->
+              <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                  <tbody>
+                    <tr>
+                      <th style="width:30%">Full Name</th>
+                      <td><?= htmlspecialchars($staff['name']) ?></td>
+                    </tr>
+                    <tr>
+                      <th>Email</th>
+                      <td><?= htmlspecialchars($staff['email']) ?></td>
+                    </tr>
+                    <tr>
+                      <th>Contact Number</th>
+                      <td><?= htmlspecialchars($staff['contact_number'] ?? 'Not provided') ?></td>
+                    </tr>
+                    <tr>
+                      <th>Role</th>
+                      <td><?= htmlspecialchars($staff['role']) ?></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
+
             <div class="modal-footer">
-              <button class="btn btn-primary" onclick="toggleEdit(true)">Edit Profile</button>
+              <button class="btn btn-outline-primary" onclick="toggleEdit(true)">
+                <i class="bi bi-pencil-square me-1"></i> Edit Profile
+              </button>
             </div>
           </div>
 
-          <!-- Edit Profile -->
+          <!-- EDIT PROFILE -->
           <div id="editProfile" style="display:none;">
             <form action="update_profile.php" method="POST" enctype="multipart/form-data">
-              <div class="modal-header">
+              <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">Edit Profile</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
               </div>
+
               <div class="modal-body">
                 <div class="mb-3">
                   <label class="form-label">Full Name</label>
                   <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($staff['name']) ?>"
                     required>
                 </div>
+
                 <div class="mb-3">
                   <label class="form-label">Email</label>
                   <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($staff['email']) ?>"
                     required>
                 </div>
+
                 <div class="mb-3">
                   <label class="form-label">Contact Number</label>
                   <input type="text" name="contact_number" class="form-control"
                     value="<?= htmlspecialchars($staff['contact_number']) ?>">
                 </div>
+
                 <div class="mb-3">
                   <label class="form-label">Profile Picture</label>
                   <input type="file" name="profile_picture" class="form-control">
                 </div>
+
+                <hr>
+                <h6 class="text-primary">Change Password (optional)</h6>
+
+                <!-- Current Password -->
+                <div class="mb-3 position-relative">
+                  <label class="form-label">Current Password</label>
+                  <div class="input-group">
+                    <input type="password" name="current_password" id="currentPassword" class="form-control"
+                      placeholder="Enter current password">
+                    <button class="btn btn-outline-secondary toggle-pass" type="button" data-target="currentPassword">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- New Password -->
+                <div class="mb-3 position-relative">
+                  <label class="form-label">New Password</label>
+                  <div class="input-group">
+                    <input type="password" name="new_password" id="newPassword" class="form-control" minlength="6"
+                      placeholder="Enter new password">
+                    <button class="btn btn-outline-secondary toggle-pass" type="button" data-target="newPassword">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-3 position-relative">
+                  <label class="form-label">Confirm New Password</label>
+                  <div class="input-group">
+                    <input type="password" name="confirm_password" id="confirmPassword" class="form-control"
+                      minlength="6" placeholder="Re-enter new password">
+                    <button class="btn btn-outline-secondary toggle-pass" type="button" data-target="confirmPassword">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+
               </div>
+
               <div class="modal-footer">
-                <!-- <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Cancel</button> -->
+                <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Cancel</button>
                 <button type="submit" class="btn btn-success">Save Changes</button>
               </div>
             </form>
           </div>
-
         </div>
       </div>
     </div>
@@ -908,6 +972,25 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         dom: 'Bfrtip',
         buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
         pageLength: 10
+      });
+    });
+  </script>
+
+  <!-- for the show password -->
+  <script>
+    document.querySelectorAll('.toggle-pass').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        const icon = btn.querySelector('i');
+
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+          input.type = 'password';
+          icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
       });
     });
   </script>

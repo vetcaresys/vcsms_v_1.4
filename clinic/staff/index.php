@@ -80,205 +80,7 @@ $inquiries = $stmt->fetchColumn();
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
     rel="stylesheet">
-  <style>
-    /* 🌟 Global Styles */
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8f9fb;
-      color: #2e2e2e;
-      line-height: 1.6;
-    }
-
-    /* 🧭 Navbar */
-    .navbar {
-      background: linear-gradient(90deg, #0d6efd, #007bff);
-      font-family: 'Poppins', sans-serif;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar-brand {
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-    }
-
-    .navbar-brand img {
-      width: 38px;
-      height: 38px;
-      object-fit: cover;
-      border-radius: 50%;
-      background: #fff;
-      padding: 3px;
-      margin-right: 10px;
-      transition: transform 0.2s ease;
-    }
-
-    .navbar-brand img:hover {
-      transform: scale(1.08);
-    }
-
-    /* Links */
-    .nav-link {
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    .nav-link:hover {
-      color: #ffc107 !important;
-    }
-
-    /* 🧾 Summary Cards */
-    .summary-card {
-      border: none;
-      border-radius: 12px;
-      background: #fff;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .summary-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .summary-card h5 {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-    }
-
-    .summary-card h2 {
-      font-weight: 700;
-      font-size: 2rem;
-    }
-
-    /* 💼 Tables */
-    .table {
-      border-radius: 10px;
-      overflow: hidden;
-      font-size: 0.95rem;
-    }
-
-    .table thead {
-      background-color: #0d6efd;
-      color: white;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-    }
-
-    .table tbody tr:hover {
-      background-color: #f2f7ff;
-    }
-
-    /* 🪄 Buttons */
-    .btn {
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-
-    .btn:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    /* 🧩 Modals */
-    .modal-content {
-      border-radius: 15px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .modal-header {
-      border-radius: 15px 15px 0 0;
-      background: linear-gradient(90deg, #0d6efd, #007bff);
-      color: white;
-    }
-
-    .modal-title {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-    }
-
-    /* 🧍 Form */
-    .form-label {
-      font-weight: 600;
-      color: #333;
-    }
-
-    .form-control {
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-
-    /* ⚡ Sweet alert pop */
-    .swal2-popup {
-      font-family: 'Inter', sans-serif !important;
-      border-radius: 15px !important;
-    }
-
-    /* 🌈 Badges */
-    .badge {
-      font-size: 0.85rem;
-      padding: 6px 10px;
-      border-radius: 8px;
-    }
-
-    /* 🐾 Page Titles */
-    h4.text-primary {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      color: #0d6efd !important;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    /* 📦 Footer vibe */
-    .container-footer {
-      text-align: center;
-      margin-top: 50px;
-      font-size: 0.9rem;
-      color: #777;
-    }
-
-    /* 🔍 Align Search label and input properly */
-    .dataTables_wrapper .dataTables_filter {
-      display: flex;
-      justify-content: flex-end;
-      /* keep it aligned right like default */
-      align-items: center;
-      margin-bottom: 12px !important;
-      gap: 8px;
-    }
-
-    .dataTables_wrapper .dataTables_filter label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      /* space between “Search:” and input */
-      margin-bottom: 0;
-      /* remove awkward spacing */
-    }
-
-    .dataTables_wrapper .dataTables_filter input {
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      padding: 6px 10px;
-      outline: none;
-      transition: all 0.2s ease;
-      height: 36px;
-    }
-
-    .dataTables_wrapper .dataTables_filter input:focus {
-      border-color: #0d6efd;
-      box-shadow: 0 0 4px rgba(13, 110, 253, 0.3);
-    }
-  </style>
+  <link rel="stylesheet" href="includes/css/index.css">
 </head>
 
 <body class="bg-light">
@@ -310,35 +112,38 @@ $inquiries = $stmt->fetchColumn();
           <li class="nav-item">
             <a href="manage_inventory.php" class="nav-link text-white">Inventory</a>
           </li>
-          
+
         </ul>
         <ul class="navbar-nav mb-2 mb-lg-0">
-                    <li class="nav-item dropdown me-3">
-                        <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown">
-                            <i class="bi bi-bell-fill" style="font-size: 1.35rem;"></i>
-                            <span id="notif_count"
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                style="font-size: 0.65rem; padding: 3px 6px;">
-                            </span>
-                        </a>
+          <li class="nav-item dropdown me-3">
+            <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown">
+              <i class="bi bi-bell-fill" style="font-size: 1.35rem;"></i>
+              <span id="notif_count"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                style="font-size: 0.65rem; padding: 3px 6px;">
+              </span>
+            </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end p-2"
-                            style="width: 320px; max-height: 400px;" id="notif_list_container">
-                            
-                            <li class="d-flex justify-content-between align-items-center mb-2 px-2">
-                                <h6 class="mb-0">Notifications</h6>
-                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;" disabled>
-                                    Mark all as read
-                                </button>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
+            <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 320px; max-height: 400px;"
+              id="notif_list_container">
 
-                            <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
-                                <li class="text-center text-muted">Loading...</li>
-                            </div>
-                        </ul>
-                    </li>
-                </ul>
+              <li class="d-flex justify-content-between align-items-center mb-2 px-2">
+                <h6 class="mb-0">Notifications</h6>
+                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none"
+                  style="font-size: 0.8rem;" disabled>
+                  Mark all as read
+                </button>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+
+              <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
+                <li class="text-center text-muted">Loading...</li>
+              </div>
+            </ul>
+          </li>
+        </ul>
         <!-- Profile Dropdown -->
         <div class="dropdown">
           <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
@@ -527,74 +332,141 @@ $inquiries = $stmt->fetchColumn();
         </div>
       </div>
     </div>
-
   </div>
-
-
-
-
 
   <!-- Profile Modal -->
   <div class="modal fade" id="profileModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-      <div class="modal-content">
+      <div class="modal-content border-0 shadow">
 
-        <!-- View Profile -->
+        <!-- VIEW PROFILE -->
         <div id="viewProfile">
-          <div class="modal-header">
+          <div class="modal-header bg-primary text-white">
             <h5 class="modal-title">My Profile</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
+
           <div class="modal-body text-center">
-            <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile" class="rounded-circle mb-3" width="100">
-            <h4><?= $name ?></h4>
-            <p><strong>Email:</strong> <?= htmlspecialchars($staff['email']) ?></p>
-            <p><strong>Contact:</strong> <?= htmlspecialchars($staff['contact_number']) ?></p>
-            <p><strong>Role:</strong> <?= htmlspecialchars($staff['role']) ?></p>
+            <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile Picture"
+              class="rounded-circle border border-3 border-primary mb-3" width="130" height="130"
+              style="object-fit: cover;">
+            <h4 class="fw-bold text-primary mb-3"><?= htmlspecialchars($staff['name']) ?></h4>
+
+            <!-- 🧾 Info Table -->
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle">
+                <tbody>
+                  <tr>
+                    <th style="width:30%">Full Name</th>
+                    <td><?= htmlspecialchars($staff['name']) ?></td>
+                  </tr>
+                  <tr>
+                    <th>Email</th>
+                    <td><?= htmlspecialchars($staff['email']) ?></td>
+                  </tr>
+                  <tr>
+                    <th>Contact Number</th>
+                    <td><?= htmlspecialchars($staff['contact_number'] ?? 'Not provided') ?></td>
+                  </tr>
+                  <tr>
+                    <th>Role</th>
+                    <td><?= htmlspecialchars($staff['role']) ?></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
+
           <div class="modal-footer">
-            <button class="btn btn-primary" onclick="toggleEdit(true)">Edit Profile</button>
+            <button class="btn btn-outline-primary" onclick="toggleEdit(true)">
+              <i class="bi bi-pencil-square me-1"></i> Edit Profile
+            </button>
           </div>
         </div>
 
-        <!-- Edit Profile -->
+        <!-- EDIT PROFILE -->
         <div id="editProfile" style="display:none;">
           <form action="update_profile.php" method="POST" enctype="multipart/form-data">
-            <div class="modal-header">
+            <div class="modal-header bg-primary text-white">
               <h5 class="modal-title">Edit Profile</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+
             <div class="modal-body">
               <div class="mb-3">
                 <label class="form-label">Full Name</label>
                 <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($staff['name']) ?>"
                   required>
               </div>
+
               <div class="mb-3">
                 <label class="form-label">Email</label>
                 <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($staff['email']) ?>"
                   required>
               </div>
+
               <div class="mb-3">
                 <label class="form-label">Contact Number</label>
                 <input type="text" name="contact_number" class="form-control"
                   value="<?= htmlspecialchars($staff['contact_number']) ?>">
               </div>
+
               <div class="mb-3">
                 <label class="form-label">Profile Picture</label>
                 <input type="file" name="profile_picture" class="form-control">
               </div>
+
+              <hr>
+              <h6 class="text-primary">Change Password (optional)</h6>
+
+              <!-- Current Password -->
+              <div class="mb-3 position-relative">
+                <label class="form-label">Current Password</label>
+                <div class="input-group">
+                  <input type="password" name="current_password" id="currentPassword" class="form-control"
+                    placeholder="Enter current password">
+                  <button class="btn btn-outline-secondary toggle-pass" type="button" data-target="currentPassword">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- New Password -->
+              <div class="mb-3 position-relative">
+                <label class="form-label">New Password</label>
+                <div class="input-group">
+                  <input type="password" name="new_password" id="newPassword" class="form-control" minlength="6"
+                    placeholder="Enter new password">
+                  <button class="btn btn-outline-secondary toggle-pass" type="button" data-target="newPassword">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="mb-3 position-relative">
+                <label class="form-label">Confirm New Password</label>
+                <div class="input-group">
+                  <input type="password" name="confirm_password" id="confirmPassword" class="form-control" minlength="6"
+                    placeholder="Re-enter new password">
+                  <button class="btn btn-outline-secondary toggle-pass" type="button" data-target="confirmPassword">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+
             </div>
+
             <div class="modal-footer">
-              <!-- <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Cancel</button> -->
+              <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Cancel</button>
               <button type="submit" class="btn btn-success">Save Changes</button>
             </div>
           </form>
         </div>
-
       </div>
     </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- jQuery + DataTables JS -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -754,39 +626,39 @@ $inquiries = $stmt->fetchColumn();
     });
   </script>
   <script>
-         document.addEventListener("DOMContentLoaded", function() {
-        loadAdminNotifications();
-        
-        // Load when bell icon is clicked
-        document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
-        
-        // 💡 NEW: Listener for Mark All button
-        document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
+    document.addEventListener("DOMContentLoaded", function () {
+      loadAdminNotifications();
+
+      // Load when bell icon is clicked
+      document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
+
+      // 💡 NEW: Listener for Mark All button
+      document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
     });
 
     function loadAdminNotifications() {
-        fetch("../../emp_fetch_notifications.php")
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById("notif_list");
-                const count = document.getElementById("notif_count");
-                const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
-                
-                list.innerHTML = "";
-                let unreadCount = 0;
+      fetch("../../emp_fetch_notifications.php")
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById("notif_list");
+          const count = document.getElementById("notif_count");
+          const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
 
-                if (!data || data.length === 0) {
-                    list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
-                    count.textContent = "";
-                    markAllBtn.disabled = true; // Disable button if no notifs
-                    return;
-                }
+          list.innerHTML = "";
+          let unreadCount = 0;
 
-                // Locate the loadAdminNotifications function and replace the following loop:
-                data.forEach(n => {
-                    if (n.status === "unread") unreadCount++;
+          if (!data || data.length === 0) {
+            list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
+            count.textContent = "";
+            markAllBtn.disabled = true; // Disable button if no notifs
+            return;
+          }
 
-                    list.innerHTML += `
+          // Locate the loadAdminNotifications function and replace the following loop:
+          data.forEach(n => {
+            if (n.status === "unread") unreadCount++;
+
+            list.innerHTML += `
                         <li>
                             <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
                             data-id="${n.notif_id}">
@@ -822,60 +694,79 @@ $inquiries = $stmt->fetchColumn();
                         </li>
                         <li><hr class="dropdown-divider my-0"></li>
                     `;
-                });
-                count.textContent = unreadCount > 0 ? unreadCount : "";
-                markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
-            });
+          });
+          count.textContent = unreadCount > 0 ? unreadCount : "";
+          markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
+        });
     }
 
     // 💡 NEW: Function to mark all notifications as read
     function markAllAsRead() {
-        Swal.fire({
-            title: 'Mark all as read?',
-            text: "All current unread notifications will be marked as read.",
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, Mark All'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Fetch the new PHP endpoint to update the database
-                fetch("../../emp_mark_all_as_read.php", { method: 'POST' })
-                    .then(response => {
-                        if (response.ok) {
-                            Swal.fire('Success!', 'All notifications marked as read.', 'success');
-                            // Reload the notifications immediately after success
-                            loadAdminNotifications(); 
-                        } else {
-                            Swal.fire('Error!', 'Could not mark all as read.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        Swal.fire('Error!', 'Network or server issue.', 'error');
-                    });
-            }
-        });
+      Swal.fire({
+        title: 'Mark all as read?',
+        text: "All current unread notifications will be marked as read.",
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Mark All'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Fetch the new PHP endpoint to update the database
+          fetch("../../emp_mark_all_as_read.php", { method: 'POST' })
+            .then(response => {
+              if (response.ok) {
+                Swal.fire('Success!', 'All notifications marked as read.', 'success');
+                // Reload the notifications immediately after success
+                loadAdminNotifications();
+              } else {
+                Swal.fire('Error!', 'Could not mark all as read.', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Fetch error:', error);
+              Swal.fire('Error!', 'Network or server issue.', 'error');
+            });
+        }
+      });
     }
 
     // Mark as read when opening a notification (Your original function, updated for clarity)
-    document.addEventListener("click", function(e) {
-        if (e.target.closest(".notif-item")) {
-            const notifItem = e.target.closest(".notif-item");
-            const id = notifItem.dataset.id;
-            
-            // Only send the request if it's currently marked as unread
-            if (notifItem.classList.contains('bg-light')) {
-                fetch(`../../mark_as_read.php?id=${id}`);
-                // Simple visual update after click
-                notifItem.classList.remove('bg-light');
-                notifItem.querySelector('.badge')?.remove();
-                loadAdminNotifications(); // Reload count
-            }
+    document.addEventListener("click", function (e) {
+      if (e.target.closest(".notif-item")) {
+        const notifItem = e.target.closest(".notif-item");
+        const id = notifItem.dataset.id;
+
+        // Only send the request if it's currently marked as unread
+        if (notifItem.classList.contains('bg-light')) {
+          fetch(`../../mark_as_read.php?id=${id}`);
+          // Simple visual update after click
+          notifItem.classList.remove('bg-light');
+          notifItem.querySelector('.badge')?.remove();
+          loadAdminNotifications(); // Reload count
         }
+      }
     });
-    </script>
+  </script>
+
+  <!-- for the show password -->
+  <script>
+    document.querySelectorAll('.toggle-pass').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        const icon = btn.querySelector('i');
+
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+          input.type = 'password';
+          icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>

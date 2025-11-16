@@ -10,14 +10,23 @@ if (!isset($_SESSION['staff_id']) || $_SESSION['role'] !== 'doctor') {
 $doctor_id = $_SESSION['staff_id'];
 $clinic_id = $_SESSION['clinic_id'];
 
-$clinicStmt = $pdo->prepare("SELECT clinic_name FROM clinics WHERE clinic_id = ?");
+/* --------------------------------------
+   FETCH CLINIC (FULL DATA INCLUDING LOGO)
+---------------------------------------- */
+$clinicStmt = $pdo->prepare("
+    SELECT clinic_name, address, contact_info, logo 
+    FROM clinics 
+    WHERE clinic_id = ?
+");
 $clinicStmt->execute([$clinic_id]);
 $clinic = $clinicStmt->fetch(PDO::FETCH_ASSOC);
 
-// Store in session so pwede gamiton anywhere
+// Store name in session
 $_SESSION['clinic_name'] = $clinic['clinic_name'] ?? 'N/A';
 
-// Get doctor info
+/* --------------------------------------
+   FETCH DOCTOR MAIN STAFF INFO
+---------------------------------------- */
 $stmt = $pdo->prepare("SELECT * FROM staff WHERE staff_id = ?");
 $stmt->execute([$doctor_id]);
 $doctor = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -26,16 +35,21 @@ $name = htmlspecialchars($doctor['name']);
 $profilePic = !empty($doctor['profile_picture']) ? $doctor['profile_picture'] : 'default.png';
 $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 
-// Fetch clinic info
-$stmt = $pdo->prepare("SELECT clinic_name, address, contact_info, logo FROM clinics WHERE clinic_id = ?");
-$stmt->execute([$clinic_id]);
-$clinic = $stmt->fetch(PDO::FETCH_ASSOC);
+/* --------------------------------------
+   FETCH DOCTOR ADDITIONAL DETAILS
+---------------------------------------- */
+$docInfoStmt = $pdo->prepare("SELECT * FROM doctors WHERE staff_id = ?");
+$docInfoStmt->execute([$doctor_id]);
+$doctorInfo = $docInfoStmt->fetch(PDO::FETCH_ASSOC);
 
-// Fetch doctor’s visitation schedule
+/* --------------------------------------
+   FETCH DOCTOR VISITATION SCHEDULE
+---------------------------------------- */
 $visits = $pdo->prepare("SELECT * FROM doctor_visits WHERE doctor_id = ? AND clinic_id = ?");
 $visits->execute([$doctor_id, $clinic_id]);
 $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -82,16 +96,20 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
                             </span>
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end p-2"
-                            style="width: 320px; max-height: 400px;" id="notif_list_container">
-                            
+                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 320px; max-height: 400px;"
+
+                            id="notif_list_container">
+
                             <li class="d-flex justify-content-between align-items-center mb-2 px-2">
                                 <h6 class="mb-0">Notifications</h6>
-                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;" disabled>
+                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none"
+                                    style="font-size: 0.8rem;" disabled>
                                     Mark all as read
                                 </button>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
 
                             <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
                                 <li class="text-center text-muted">Loading...</li>
@@ -129,7 +147,9 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
         <h2 class="fw-bold">Clinic Information</h2>
         <div class="card shadow-sm mb-4">
             <div class="card-body d-flex align-items-center">
-                <img src="../../uploads/logos/<?= htmlspecialchars($clinic['logo']) ?>" width="80" class="me-3 rounded">
+            <img src="../../<?= htmlspecialchars($clinic['logo']) ?>?t=<?= time() ?>" 
+     width="80" class="me-3 rounded">
+
                 <div>
                     <h4><?= htmlspecialchars($clinic['clinic_name']) ?></h4>
                     <p class="mb-1"><strong>Address:</strong> <?= htmlspecialchars($clinic['address']) ?></p>
@@ -233,6 +253,7 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle text-start">
                                 <tbody>
+                                    <!-- Staff Info -->
                                     <tr>
                                         <th width="35%">Email</th>
                                         <td><?= htmlspecialchars($doctor['email']) ?></td>
@@ -248,6 +269,24 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
                                     <tr>
                                         <th>Clinic</th>
                                         <td><?= htmlspecialchars($_SESSION['clinic_name'] ?? 'N/A') ?></td>
+                                    </tr>
+
+                                    <!-- Doctor Info -->
+                                    <tr>
+                                        <th>Specialization</th>
+                                        <td><?= htmlspecialchars($doctorInfo['specialization'] ?? 'N/A') ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Education</th>
+                                        <td><?= htmlspecialchars($doctorInfo['education'] ?? 'N/A') ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Years of Experience</th>
+                                        <td><?= htmlspecialchars($doctorInfo['experience'] ?? 'N/A') ?></td>
+                                    </tr>
+                                    <tr>
+                                        <th>License Number</th>
+                                        <td><?= htmlspecialchars($doctorInfo['license_no'] ?? 'N/A') ?></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -301,6 +340,76 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
                                 <label class="form-label">Profile Picture</label>
                                 <input type="file" name="profile_picture" class="form-control">
                             </div>
+
+                            <hr>
+                            <h6 class="fw-bold mt-3">Doctor Details</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Specialization</label>
+                                <input type="text" name="specialization" class="form-control"
+                                    value="<?= htmlspecialchars($doctorInfo['specialization'] ?? '') ?>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Educational Background</label>
+                                <input type="text" name="education" class="form-control"
+                                    value="<?= htmlspecialchars($doctorInfo['education'] ?? '') ?>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Years of Experience</label>
+                                <input type="text" name="experience" class="form-control"
+                                    value="<?= htmlspecialchars($doctorInfo['experience'] ?? '') ?>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">License Number</label>
+                                <input type="text" name="license_no" class="form-control"
+                                    value="<?= htmlspecialchars($doctorInfo['license_no'] ?? '') ?>">
+                            </div>
+
+                            <hr>
+                            <h6 class="text-primary">Change Password (optional)</h6>
+
+                            <!-- Current Password -->
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">Current Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="current_password" id="currentPassword"
+                                        class="form-control" placeholder="Enter current password">
+                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                        data-target="currentPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- New Password -->
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">New Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="new_password" id="newPassword" class="form-control"
+                                        minlength="6" placeholder="Enter new password">
+                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                        data-target="newPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="mb-3 position-relative">
+                                <label class="form-label">Confirm New Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="confirm_password" id="confirmPassword"
+                                        class="form-control" minlength="6" placeholder="Re-enter new password">
+                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
+                                        data-target="confirmPassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="modal-footer d-flex">
                             <button type="button" class="btn btn-success" onclick="submitProfileForm()">
@@ -312,6 +421,7 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </form>
                 </div>
+
             </div>
         </div>
     </div>
@@ -327,7 +437,7 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
         }
     </script>
 
-<script>
+    <script>
         document.getElementById('logoutBtn').addEventListener('click', function (e) {
             e.preventDefault(); // Prevent form from submitting instantly
 
@@ -378,10 +488,10 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
                     }
 
                     // Locate the loadAdminNotifications function and replace the following loop:
-                data.forEach(n => {
-                    if (n.status === "unread") unreadCount++;
+                    data.forEach(n => {
+                        if (n.status === "unread") unreadCount++;
 
-                    list.innerHTML += `
+                        list.innerHTML += `
                         <li>
                             <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
                             data-id="${n.notif_id}">
@@ -417,7 +527,7 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
                         </li>
                         <li><hr class="dropdown-divider my-0"></li>
                     `;
-                });
+                    });
 
                     count.textContent = unreadCount > 0 ? unreadCount : "";
                     markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
@@ -470,6 +580,25 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
                     loadAdminNotifications(); // Reload count
                 }
             }
+        });
+    </script>
+
+    <!-- for the show password -->
+    <script>
+        document.querySelectorAll('.toggle-pass').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = btn.querySelector('i');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('bi-eye', 'bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('bi-eye-slash', 'bi-eye');
+                }
+            });
         });
     </script>
 </body>
