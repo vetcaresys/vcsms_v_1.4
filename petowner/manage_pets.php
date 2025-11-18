@@ -133,7 +133,7 @@ $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'default.png';
+$profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'profile_default.jpg';
 $profilePicPath = "../uploads/profiles/" . $profilePic . "?t=" . time();
 $name = htmlspecialchars($user['name']);
 

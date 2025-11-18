@@ -173,7 +173,7 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
                             <hr class="dropdown-divider">
                         </li>
                         <li>
-                            <form method="POST" action="logout.php" id="logoutForm" class="m-0">
+                            <form method="POST" action="../logout.php" id="logoutForm" class="m-0">
                                 <button class="dropdown-item text-danger" type="submit" id="logoutBtn">
                                     <i class="bi bi-box-arrow-right"></i> Logout
                                 </button>
@@ -301,35 +301,49 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php endif; ?>
 
                     <form id="registerOwnerForm" method="POST" novalidate>
+
                         <div class="mb-3">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <label class="form-label">Full Name
+                                <span class="text-danger error-msg"></span>
+                            </label>
+                            <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Email Address</label>
-                            <input type="email" name="email" class="form-control" required>
+                            <label class="form-label">Email Address
+                                <span class="text-danger error-msg"></span>
+                            </label>
+                            <input type="email" name="email" class="form-control" placeholder="Enter email" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" name="password" class="form-control" required>
+                            <label class="form-label">Password
+                                <span class="text-danger error-msg"></span>
+                            </label>
+                            <input type="password" name="password" class="form-control" placeholder="Enter password"
+                                required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Contact Number</label>
-                            <input type="text" name="contact" class="form-control" maxlength="11" pattern="\d{11}"
-                                title="Contact number must be 11 digits (e.g., 09xxxxxxxxx)" required
+                            <label class="form-label">Contact Number
+                                <span class="text-danger error-msg"></span>
+                            </label>
+                            <input type="text" name="contact" class="form-control" maxlength="11"
+                                placeholder="09xxxxxxxxx" required
                                 oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            <textarea name="address" class="form-control" rows="3" required></textarea>
+                            <label class="form-label">Address
+                                <span class="text-danger error-msg"></span>
+                            </label>
+                            <textarea name="address" class="form-control" rows="3" placeholder="Enter complete address"
+                                required></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-success w-100">Register</button>
                     </form>
+
                 </div>
             </div>
         </div>
@@ -739,6 +753,70 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
                     input.type = 'password';
                     icon.classList.replace('bi-eye-slash', 'bi-eye');
                 }
+            });
+        });
+    </script>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
+            e.preventDefault(); // Prevent form from submitting instantly
+
+            Swal.fire({
+                title: 'Are you sure you want to logout?',
+                text: "You’ll be logged out of your current session.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'No, stay here'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the form only if confirmed
+                    document.getElementById('logoutForm').submit();
+                }
+            });
+        });
+    </script>
+
+    <!-- validation for the "register pet owner" -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("registerOwnerForm");
+
+            const validators = {
+                name: value => value.length >= 3 || "Full name must be at least 3 characters.",
+                email: value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || "Enter a valid email.",
+                password: value => value.length >= 6 || "Password must be at least 6 characters.",
+                contact: value => /^\d{11}$/.test(value) || "Contact must be exactly 11 digits.",
+                address: value => value.length >= 5 || "Please enter a valid address."
+            };
+
+            Object.keys(validators).forEach(field => {
+                const input = form[field];
+                const errorSpan = input.previousElementSibling.querySelector(".error-msg");
+
+                input.addEventListener("input", () => {
+                    const result = validators[field](input.value.trim());
+                    errorSpan.textContent = result === true ? "" : result;
+                });
+            });
+
+            form.addEventListener("submit", e => {
+                let valid = true;
+
+                Object.keys(validators).forEach(field => {
+                    const input = form[field];
+                    const errorSpan = input.previousElementSibling.querySelector(".error-msg");
+                    const result = validators[field](input.value.trim());
+
+                    if (result !== true) {
+                        errorSpan.textContent = result;
+                        valid = false;
+                    }
+                });
+
+                if (!valid) e.preventDefault();
             });
         });
     </script>

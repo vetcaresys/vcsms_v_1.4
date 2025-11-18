@@ -160,7 +160,7 @@ function getLogoPath($logo)
         <h6 class='fw-bold mb-1'>${c.clinic_name}</h6>
         <p class='text-muted small mb-1'>${c.address}</p>
         <button class='btn btn-sm btn-primary me-1' onclick='showClinicDetails(${c.clinic_id})'>View</button>
-        <button class='btn btn-sm btn-outline-dark' onclick='window.location.href="login.php"'>Login</button>
+        <button class='btn btn-sm btn-outline-dark' onclick='window.location.href="login.php"'>Book</button>
         <button class='btn btn-sm btn-success' onclick='getDirections(${c.latitude}, ${c.longitude})'>
                                     Get Directions
                                 </button>

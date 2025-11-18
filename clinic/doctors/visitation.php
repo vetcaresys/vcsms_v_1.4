@@ -70,6 +70,18 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
 
 <body class="bg-light">
 
+    <?php if (isset($_SESSION['success'])): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Successful',
+                text: 'Welcome back!',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        </script>
+        <?php unset($_SESSION['success']); endif; ?>
+
     <!-- 🌟 Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container-fluid">
@@ -97,7 +109,6 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
                         </a>
 
                         <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 320px; max-height: 400px;"
-
                             id="notif_list_container">
 
                             <li class="d-flex justify-content-between align-items-center mb-2 px-2">
@@ -133,9 +144,8 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
                         </li>
                         <li>
                             <form method="POST" action="../logout.php" id="logoutForm" class="m-0">
-                                <button class="dropdown-item text-danger" type="submit" id="logoutBtn">
-                                    <i class="bi bi-box-arrow-right"></i> Logout
-                                </button>
+                                <button class="dropdown-item text-danger" type="submit" class="btn btn-light btn-sm"
+                                    id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button>
                             </form>
                         </li>
                     </ul>
@@ -147,8 +157,8 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
         <h2 class="fw-bold">Clinic Information</h2>
         <div class="card shadow-sm mb-4">
             <div class="card-body d-flex align-items-center">
-            <img src="../../<?= htmlspecialchars($clinic['logo']) ?>?t=<?= time() ?>" 
-     width="80" class="me-3 rounded">
+                <img src="../../<?= htmlspecialchars($clinic['logo']) ?>?t=<?= time() ?>" width="80"
+                    class="me-3 rounded">
 
                 <div>
                     <h4><?= htmlspecialchars($clinic['clinic_name']) ?></h4>
@@ -427,6 +437,26 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- for the logout session -->
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure you want to logout?',
+                text: "You’ll be logged out of your current session.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'No, stay here'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logoutForm').submit();
+                }
+            });
+        });
+    </script>
     <script>
         function toggleEdit(editMode) {
             if (!editMode) {

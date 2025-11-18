@@ -131,9 +131,10 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
               <hr class="dropdown-divider">
             </li>
             <li>
-              <form method="POST" action="../logout.php" class="m-0">
-                <button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right"></i>
-                  Logout</button>
+              <form method="POST" action="../logout.php" id="logoutForm" class="m-0">
+                <button class="dropdown-item text-danger" type="submit" id="logoutBtn">
+                  <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
               </form>
             </li>
           </ul>
@@ -754,7 +755,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
           </div>
 
           <div class="modal-footer">
-            <button type="submit" name="add_item" class="btn btn-success">💾 Save Item</button>
+            <button type="submit" name="add_item" class="btn btn-success">Save Item</button>
           </div>
         </form>
       </div>
@@ -990,6 +991,28 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         } else {
           input.type = 'password';
           icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+      });
+    });
+  </script>
+
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', function (e) {
+      e.preventDefault(); // Prevent form from submitting instantly
+
+      Swal.fire({
+        title: 'Are you sure you want to logout?',
+        text: "You’ll be logged out of your current session.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, logout',
+        cancelButtonText: 'No, stay here'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Submit the form only if confirmed
+          document.getElementById('logoutForm').submit();
         }
       });
     });

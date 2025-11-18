@@ -95,6 +95,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['name'] = $staff['name'];
         $_SESSION['role'] = $staff['role'];
 
+        // ✅ Add this success message
+        $_SESSION['success'] = "Login successful! Welcome, " . $staff['name'] . ".";
+
         if ($staff['role'] === 'doctor') {
           header('Location: clinic/doctors/index.php');
           exit;
@@ -156,7 +159,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </script>
     <?php unset($_SESSION['error']);
   endif; ?>
-
 
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container">

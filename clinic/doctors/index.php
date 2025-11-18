@@ -128,8 +128,8 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                             <hr class="dropdown-divider">
                         </li>
                         <li>
-                            <form method="POST" action="../logout.php" class="m-0">
-                                <button class="dropdown-item text-danger" type="submit"><i
+                            <form method="POST" action="../logout.php" id="logoutForm" class="m-0">
+                                <button class="dropdown-item text-danger" type="submit" class="btn btn-light btn-sm" id="logoutBtn"><i
                                         class="bi bi-box-arrow-right"></i> Logout</button>
                             </form>
                         </li>
@@ -138,6 +138,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             </div>
         </div>
     </nav>
+
     <div class="container py-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold text-dark">Doctor Dashboard</h2>
@@ -366,6 +367,26 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- for the logout session -->
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure you want to logout?',
+                text: "You’ll be logged out of your current session.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'No, stay here'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logoutForm').submit();
+                }
+            });
+        });
+    </script>
     <script>
         async function loadDashboard() {
             let res = await fetch("doctor_dashboard.php");

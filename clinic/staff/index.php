@@ -85,6 +85,18 @@ $inquiries = $stmt->fetchColumn();
 
 <body class="bg-light">
 
+<?php if (isset($_SESSION['success'])): ?>
+<script>
+Swal.fire({
+    icon: 'success',
+    title: 'Login Successful',
+    text: 'Welcome back!',
+    timer: 1500,
+    showConfirmButton: false
+});
+</script>
+<?php unset($_SESSION['success']); endif; ?>
+
   <!-- 🌟 Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container-fluid">

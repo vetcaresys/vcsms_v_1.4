@@ -121,16 +121,19 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                             </span>
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end p-2"
-                            style="width: 320px; max-height: 400px;" id="notif_list_container">
-                            
+                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 320px; max-height: 400px;"
+                            id="notif_list_container">
+
                             <li class="d-flex justify-content-between align-items-center mb-2 px-2">
                                 <h6 class="mb-0">Notifications</h6>
-                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none" style="font-size: 0.8rem;" disabled>
+                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none"
+                                    style="font-size: 0.8rem;" disabled>
                                     Mark all as read
                                 </button>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
 
                             <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
                                 <li class="text-center text-muted">Loading...</li>
@@ -153,9 +156,10 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                             <hr class="dropdown-divider">
                         </li>
                         <li>
-                            <form method="POST" action="../logout.php" class="m-0">
-                                <button class="dropdown-item text-danger" type="submit"><i
-                                        class="bi bi-box-arrow-right"></i> Logout</button>
+                            <form method="POST" action="../logout.php" id="logoutForm" class="m-0">
+                                <button class="dropdown-item text-danger" type="submit" id="logoutBtn">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
                             </form>
                         </li>
                     </ul>
@@ -233,7 +237,7 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                         <div class="mb-3">
                             <label class="form-label">Select Pet</label>
                             <select name="pet_id" class="form-select" required>
-                                <option value="">-- Select Pet --</option>
+                                <option value="">Select Pet</option>
                                 <?php foreach ($pets as $p): ?>
                                     <option value="<?= $p['pet_id'] ?>"><?= htmlspecialchars($p['pet_name']) ?></option>
                                 <?php endforeach; ?>
@@ -243,7 +247,7 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                         <div class="mb-3">
                             <label class="form-label">Record Template</label>
                             <select name="template_id" id="templateSelect" class="form-select" required>
-                                <option value="">-- Choose Record Type --</option>
+                                <option value="">Choose Record Type</option>
                                 <?php foreach ($templates as $t): ?>
                                     <option value="<?= $t['template_id'] ?>">
                                         <?= htmlspecialchars($t['template_name']) ?>
@@ -255,7 +259,7 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                         <div id="dynamicFields"></div>
 
                         <hr>
-                        <h5 class="mt-4">🧴 Medicines / Supplies Used</h5>
+                        <h5 class="mt-4">Medicines / Supplies Used</h5>
                         <p class="text-muted">Select items used during this treatment and quantity.</p>
 
                         <div id="medicineContainer">
@@ -263,7 +267,7 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                                 <div class="col-md-6">
                                     <label class="form-label">Item</label>
                                     <select name="item_id[]" class="form-select">
-                                        <option value="">-- Select Item --</option>
+                                        <option value="">Select Item</option>
                                         <?php
                                         $items = $pdo->prepare("SELECT item_id, item_name, quantity FROM inventory WHERE clinic_id = ?");
                                         $items->execute([$clinic_id]);
@@ -660,40 +664,40 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
             }
         });
     </script>
-   <script>
-         document.addEventListener("DOMContentLoaded", function() {
-        loadAdminNotifications();
-        
-        // Load when bell icon is clicked
-        document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
-        
-        // 💡 NEW: Listener for Mark All button
-        document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
-    });
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            loadAdminNotifications();
 
-    function loadAdminNotifications() {
-        fetch("../../emp_fetch_notifications.php")
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById("notif_list");
-                const count = document.getElementById("notif_count");
-                const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
-                
-                list.innerHTML = "";
-                let unreadCount = 0;
+            // Load when bell icon is clicked
+            document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
 
-                if (!data || data.length === 0) {
-                    list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
-                    count.textContent = "";
-                    markAllBtn.disabled = true; // Disable button if no notifs
-                    return;
-                }
+            // 💡 NEW: Listener for Mark All button
+            document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
+        });
 
-                // Locate the loadAdminNotifications function and replace the following loop:
-                data.forEach(n => {
-                    if (n.status === "unread") unreadCount++;
+        function loadAdminNotifications() {
+            fetch("../../emp_fetch_notifications.php")
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById("notif_list");
+                    const count = document.getElementById("notif_count");
+                    const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
 
-                    list.innerHTML += `
+                    list.innerHTML = "";
+                    let unreadCount = 0;
+
+                    if (!data || data.length === 0) {
+                        list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
+                        count.textContent = "";
+                        markAllBtn.disabled = true; // Disable button if no notifs
+                        return;
+                    }
+
+                    // Locate the loadAdminNotifications function and replace the following loop:
+                    data.forEach(n => {
+                        if (n.status === "unread") unreadCount++;
+
+                        list.innerHTML += `
                         <li>
                             <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
                             data-id="${n.notif_id}">
@@ -729,59 +733,59 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                         </li>
                         <li><hr class="dropdown-divider my-0"></li>
                     `;
-                });
-                count.textContent = unreadCount > 0 ? unreadCount : "";
-                markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
-            });
-    }
-
-    // 💡 NEW: Function to mark all notifications as read
-    function markAllAsRead() {
-        Swal.fire({
-            title: 'Mark all as read?',
-            text: "All current unread notifications will be marked as read.",
-            icon: 'info',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, Mark All'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Fetch the new PHP endpoint to update the database
-                fetch("../../emp_mark_all_as_read.php", { method: 'POST' })
-                    .then(response => {
-                        if (response.ok) {
-                            Swal.fire('Success!', 'All notifications marked as read.', 'success');
-                            // Reload the notifications immediately after success
-                            loadAdminNotifications(); 
-                        } else {
-                            Swal.fire('Error!', 'Could not mark all as read.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        Swal.fire('Error!', 'Network or server issue.', 'error');
                     });
+                    count.textContent = unreadCount > 0 ? unreadCount : "";
+                    markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
+                });
+        }
+
+        // 💡 NEW: Function to mark all notifications as read
+        function markAllAsRead() {
+            Swal.fire({
+                title: 'Mark all as read?',
+                text: "All current unread notifications will be marked as read.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Mark All'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Fetch the new PHP endpoint to update the database
+                    fetch("../../emp_mark_all_as_read.php", { method: 'POST' })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire('Success!', 'All notifications marked as read.', 'success');
+                                // Reload the notifications immediately after success
+                                loadAdminNotifications();
+                            } else {
+                                Swal.fire('Error!', 'Could not mark all as read.', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Fetch error:', error);
+                            Swal.fire('Error!', 'Network or server issue.', 'error');
+                        });
+                }
+            });
+        }
+
+        // Mark as read when opening a notification (Your original function, updated for clarity)
+        document.addEventListener("click", function (e) {
+            if (e.target.closest(".notif-item")) {
+                const notifItem = e.target.closest(".notif-item");
+                const id = notifItem.dataset.id;
+
+                // Only send the request if it's currently marked as unread
+                if (notifItem.classList.contains('bg-light')) {
+                    fetch(`../../mark_as_read.php?id=${id}`);
+                    // Simple visual update after click
+                    notifItem.classList.remove('bg-light');
+                    notifItem.querySelector('.badge')?.remove();
+                    loadAdminNotifications(); // Reload count
+                }
             }
         });
-    }
-
-    // Mark as read when opening a notification (Your original function, updated for clarity)
-    document.addEventListener("click", function(e) {
-        if (e.target.closest(".notif-item")) {
-            const notifItem = e.target.closest(".notif-item");
-            const id = notifItem.dataset.id;
-            
-            // Only send the request if it's currently marked as unread
-            if (notifItem.classList.contains('bg-light')) {
-                fetch(`../../mark_as_read.php?id=${id}`);
-                // Simple visual update after click
-                notifItem.classList.remove('bg-light');
-                notifItem.querySelector('.badge')?.remove();
-                loadAdminNotifications(); // Reload count
-            }
-        }
-    });
     </script>
     <!-- for the show password -->
     <script>
@@ -801,5 +805,28 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
             });
         });
     </script>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
+            e.preventDefault(); // Prevent form from submitting instantly
+
+            Swal.fire({
+                title: 'Are you sure you want to logout?',
+                text: "You’ll be logged out of your current session.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'No, stay here'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the form only if confirmed
+                    document.getElementById('logoutForm').submit();
+                }
+            });
+        });
+    </script>
 </body>
+
 </html>

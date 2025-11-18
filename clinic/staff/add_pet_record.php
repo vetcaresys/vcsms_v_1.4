@@ -35,7 +35,7 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
         <div class="mb-3">
           <label class="form-label">Select Pet</label>
           <select name="pet_id" class="form-select" required>
-            <option value="">-- Select Pet --</option>
+            <option value="">Select Pet</option>
             <?php foreach ($pets as $p): ?>
               <option value="<?= $p['pet_id'] ?>"><?= htmlspecialchars($p['pet_name']) ?></option>
             <?php endforeach; ?>
@@ -45,7 +45,7 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
         <div class="mb-3">
           <label class="form-label">Form Type</label>
           <select id="templateSelect" name="template_id" class="form-select" required>
-            <option value="">-- Select Record Type --</option>
+            <option value="">Select Record Type</option>
             <?php foreach ($templates as $t): ?>
               <option value="<?= $t['template_id'] ?>"><?= htmlspecialchars($t['template_name']) ?></option>
             <?php endforeach; ?>

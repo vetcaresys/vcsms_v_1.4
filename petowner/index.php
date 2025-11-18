@@ -15,7 +15,7 @@ $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Profile picture path
-$profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'default.png';
+$profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'profile_default.jpg';
 $profilePicPath = "../uploads/profiles/" . $profilePic . "?t=" . time();
 $name = htmlspecialchars($user['name']);
 
@@ -139,21 +139,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </script>
         <?php unset($_SESSION['success']);
     endif; ?>
-
-    <?php if (isset($_SESSION['success'])): ?>
-        <script>
-            Swal.fire({
-                title: 'Success!',
-                text: '<?= addslashes($_SESSION['success']) ?>',
-                icon: 'success',
-                confirmButtonColor: '#3085d6',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        </script>
-        <?php unset($_SESSION['success']);
-    endif; ?>
-
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
@@ -308,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <!-- Edit Profile Section -->
                 <div id="editProfile" style="display:none;">
-                    <form action="update_profile.php" method="POST" enctype="multipart/form-data">
+                    <form id="editProfileForm" action="update_profile.php" method="POST" enctype="multipart/form-data">
                         <div class="modal-header bg-success text-white">
                             <h5 class="modal-title">Edit Profile</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>

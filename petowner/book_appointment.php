@@ -130,7 +130,7 @@ $user_stmt->execute([$user_id]);
 $user = $user_stmt->fetch(PDO::FETCH_ASSOC);
 
 // Profile picture
-$profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'default.png';
+$profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'profile_default.jpg';
 $profilePicPath = "../uploads/profiles/" . $profilePic . "?t=" . time();
 $name = htmlspecialchars($user['name'] ?? '');
 
@@ -216,9 +216,6 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
         unset($_SESSION['booking_msg']);
         unset($_SESSION['booking_error_text']);
     endif; ?>
-
-
-
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">

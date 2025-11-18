@@ -17,7 +17,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 $picPath = "../uploads/profiles/" . $user['profile_picture'];
 $profilePic = (!empty($user['profile_picture']) && file_exists($picPath))
     ? $picPath
-    : "../uploads/profiles/default.png";
+    : "profile_default.jpg";
 
 
 $name = htmlspecialchars($_SESSION['name']);

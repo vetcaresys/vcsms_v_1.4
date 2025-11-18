@@ -16,9 +16,7 @@ $name = htmlspecialchars($_SESSION['name']);
 
 // ✅ One consistent definition for profile picture
 $picPath = "../uploads/profiles/" . $user['profile_picture'];
-$profilePic = (!empty($user['profile_picture']) && file_exists($picPath))
-    ? $picPath
-    : "../uploads/profiles/default.png";
+$profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'default.png';
 
 // Get clinic
 $stmt = $pdo->prepare("SELECT * FROM clinics WHERE user_id = ?");

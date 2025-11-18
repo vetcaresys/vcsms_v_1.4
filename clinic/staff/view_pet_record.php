@@ -50,11 +50,23 @@ if (!$record) {
 }
 
 $data = json_decode($record['data'], true);
+
+// 🧪 Fetch items used in this record (correct table)
+$stmtItems = $pdo->prepare("
+    SELECT 
+        iu.quantity_used,
+        i.item_name
+    FROM record_inventory_usage iu
+    JOIN inventory i ON iu.item_id = i.item_id
+    WHERE iu.record_id = ?
+");
+$stmtItems->execute([$record_id]);
+$usedItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <div id="printSection">
   <div class="text-center mb-3">
-  <img src="<?= $clinic_logo ?>" alt="Clinic Logo" width="80" height="80" style="object-fit:contain;">
     <h4 class='text-primary fw-bold mt-2 mb-0'>VetCareSys Veterinary Clinic</h4>
     <small class='text-muted'>Official Pet Medical Record</small>
   </div>
@@ -89,6 +101,32 @@ $data = json_decode($record['data'], true);
       <?php endif; ?>
     </tbody>
   </table>
+
+  <!-- 🧴 Medicines / Supplies Used -->
+<h6 class="fw-bold mt-4 text-info">Medicines / Supplies Used</h6>
+<table class="table table-bordered table-striped table-sm">
+    <thead class="table-light">
+        <tr>
+            <th>Item Name</th>
+            <th>Quantity Used</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (!empty($usedItems)): ?>
+            <?php foreach ($usedItems as $item): ?>
+                <tr>
+                    <td><?= htmlspecialchars($item['item_name']) ?></td>
+                    <td><?= htmlspecialchars($item['quantity_used']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="2" class="text-center text-muted">No items used for this record.</td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>
+
 
   <!-- Signature -->
   <div class="text-end mt-4">
