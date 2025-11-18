@@ -175,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <p>Welcome to <b>VetCareSys</b> — your partner in smart veterinary management.</p>
       <p>Please confirm your email address to activate your account:</p>
       <p style='text-align:center;'>
-        <a href='http://vetcaresys-001-site1.ntempurl.com/verify.php?email=$email&token=$verification_token' class='button'>Verify Email</a>
+        <a href='https://vetcaresys-001-site1.ntempurl.com/verify.php?email=$email&token=$verification_token' class='button'>Verify Email</a>
       </p>
       <p>If you didn’t register for VetCareSys, please disregard this email.</p>
       <p>Kind regards,<br><b>VetCareSys Team</b></p>
