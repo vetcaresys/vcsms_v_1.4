@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'config.php';
+$clinic_id = $_SESSION['clinic_id'];
 
 /* Only allow admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
@@ -22,13 +23,14 @@ try {
             DATE_FORMAT(created_at, '%h:%i %p') AS display_time
         FROM notifications
 
-        WHERE role = 'employee' OR role = 'staff'  -- MODIFIED WHERE CLAUSE
+        WHERE (role = 'employee' OR role = 'staff')
+        AND clinic_id=?   -- MODIFIED WHERE CLAUSE
         ORDER BY 
             CASE WHEN status = 'unread' THEN 0 ELSE 1 END,
             created_at DESC
         LIMIT 20
     ");
-    $stmt->execute();
+    $stmt->execute([$clinic_id]);
     $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode($notifications);

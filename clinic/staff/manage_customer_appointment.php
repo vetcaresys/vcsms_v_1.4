@@ -143,12 +143,13 @@ if (isset($_GET['update'], $_GET['status'])) {
 
     $notifStmt = $pdo->prepare("
         INSERT INTO notifications 
-            (user_id, role, message, subject, schedule_date, sms, number, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (user_id, role,clinic_id, message, subject, schedule_date, sms, number, status, created_at)
+        VALUES (?, ?, ?,?, ?, ?, ?, ?, ?, ?)
     ");
     $notifStmt->execute([
         $petowner_id,
         'pet_owner',
+        $clinic_id ,
         $notification_message,
         $notification_subject,
         substr($appointment_date, 0, 10),

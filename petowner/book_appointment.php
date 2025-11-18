@@ -94,12 +94,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
             // 🔔 Create notification for employee/admin
             $notif = $pdo->prepare("
                 INSERT INTO notifications 
-                (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (user_id, role,clinic_id, message, subject, link, schedule_date, sms, number, status, created_at)
+                VALUES (?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?)
             ");
             $notif->execute([
                 $user_id,
                 'employee',
+                $clinic_id,
                 $message_notif ?: 'New appointment request.',
                 'Book Appointment',
                 null,

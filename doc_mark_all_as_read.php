@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'config.php'; // Assuming config.php is one level above
+$clinic_id = $_SESSION['clinic_id'];
 
 /* Check if admin is logged in and the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
@@ -17,10 +18,11 @@ try {
         SET status = 'read'
         WHERE status = 'unread'
         AND (role = 'employee' OR role = 'doctor')
+        AND clinic_id=?
     ";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+    $stmt->execute([$clinic_id]);
 
     // Success response
     http_response_code(200);

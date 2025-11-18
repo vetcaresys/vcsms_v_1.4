@@ -38,9 +38,9 @@ function generate_reminders($pdo) {
 
             $sql_insert = "
                 INSERT INTO `notifications` 
-                (`user_id`, `role`, `message`, `subject`, `link`, `status`,`schedule_date`, `sms`, `number`, `created_at`) 
+                (`user_id`, `role`,`clinic_id`, `message`, `subject`, `link`, `status`,`schedule_date`, `sms`, `number`, `created_at`) 
                 VALUES 
-                (?, ?, ?, ?, ?, 'unread',?, '2',?, ?)
+                (?, ?, ?,?, ?, ?, 'unread',?, '2',?, ?)
             ";
             $stmt_insert = $pdo->prepare($sql_insert);
             
@@ -65,7 +65,7 @@ function generate_reminders($pdo) {
 
                 // Insert the NEW Reminder Notification (sms=2)
                 $stmt_insert->execute([
-                    $row['user_id'], $row['role'], $reminder_message, $reminder_subject, $row['link'], 
+                    $row['user_id'], $row['role'],$row['clinic_id'], $reminder_message, $reminder_subject, $row['link'], 
                     $row['schedule_date'], $row['number'], $current_datetime
                 ]);
 
