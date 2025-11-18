@@ -46,7 +46,7 @@ foreach ($rows as $row) {
     $grouped[$key][] = $row['day_of_week'];
 }
 
-// 📅 Build readable grouped schedule (12-hour format)
+// 📅 Build formatted grouped schedule (12-hour format)
 $schedules = [];
 foreach ($grouped as $time => $days) {
     [$open, $close] = explode('-', $time);
@@ -65,11 +65,49 @@ foreach ($grouped as $time => $days) {
 }
 
 // 🧩 Fetch services
-$stmt = $pdo->prepare("SELECT service_name, duration, price FROM clinic_services WHERE clinic_id = ?");
+$stmt = $pdo->prepare("
+    SELECT service_name, duration, price 
+    FROM clinic_services 
+    WHERE clinic_id = ?
+");
 $stmt->execute([$id]);
 $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// ✅ Combine all data
+// 🧑‍⚕️ Fetch Doctors (staff role = doctor)
+$stmt = $pdo->prepare("
+    SELECT s.staff_id, s.name, s.contact_number,
+           d.specialization, d.education, d.experience, d.license_no
+    FROM staff s
+    LEFT JOIN doctors d ON s.staff_id = d.staff_id
+    WHERE s.clinic_id = ? AND s.role = 'doctor'
+");
+$stmt->execute([$id]);
+$doctors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// 🗓 Doctor Visit Schedules
+$stmt = $pdo->prepare("
+    SELECT v.doctor_id, s.name AS doctor_name, 
+           v.day_of_week, v.start_time, v.end_time
+    FROM doctor_visits v
+    JOIN staff s ON s.staff_id = v.doctor_id
+    WHERE v.clinic_id = ?
+    ORDER BY FIELD(v.day_of_week, 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')
+");
+$stmt->execute([$id]);
+$doctorVisits = [];
+
+$visitRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+foreach ($visitRows as $row) {
+    $doctorVisits[] = [
+        'doctor_id' => $row['doctor_id'],
+        'doctor_name' => $row['doctor_name'],
+        'day_of_week' => $row['day_of_week'],
+        'start_time' => date("g:i A", strtotime($row['start_time'])),
+        'end_time' => date("g:i A", strtotime($row['end_time']))
+    ];
+}
+
+// 📌 Return full JSON response
 echo json_encode([
     'clinic_id' => $clinic['clinic_id'],
     'clinic_name' => $clinic['clinic_name'],
@@ -79,6 +117,9 @@ echo json_encode([
     'longitude' => $clinic['longitude'],
     'logo' => $clinic['logo'],
     'schedules' => $schedules,
-    'services' => $services
+    'services' => $services,
+    'doctors' => $doctors,
+    'doctor_visits' => $doctorVisits
 ]);
+
 ?>
