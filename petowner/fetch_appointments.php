@@ -37,20 +37,23 @@ $stmt->execute([$owner_id]);
 $appointments = [];
 
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    // Format time and date for display/JS consumption
+    $appointmentDate = date('Y-m-d', strtotime($row['appointment_date']));
     $startTime = $row['appointment_start'] ? date('h:i A', strtotime($row['appointment_start'])) : '';
     $endTime = $row['appointment_end'] ? date('h:i A', strtotime($row['appointment_end'])) : '';
+    $timeDisplay = trim($startTime . ($endTime ? ' - ' . $endTime : ''));
 
     $appointments[] = [
         'id' => $row['appointment_id'],
         'title' => $row['pet_name'] . ' - ' . $row['service_name'],
-        'start' => date('Y-m-d\TH:i:s', strtotime($row['appointment_date'])),
+        'dateKey' => $appointmentDate, // New key for easy JS grouping
         'extendedProps' => [
             'clinic' => $row['clinic_name'],
             'service' => $row['service_name'],
             'pet' => $row['pet_name'],
             'doctor' => $row['doctor_name'] ?? 'Not assigned',
             'specialization' => $row['specialization'] ?? 'N/A',
-            'time' => trim($startTime . ($endTime ? ' - ' . $endTime : '')),
+            'time' => $timeDisplay,
             'status' => ucfirst($row['status'])
         ],
         'color' => match (strtolower($row['status'])) {
