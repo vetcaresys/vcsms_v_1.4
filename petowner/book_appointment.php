@@ -413,8 +413,6 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
 
     </script>
 
-
-
     <!-- Booking Modal -->
     <div class="modal fade" id="bookingModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -515,6 +513,11 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
                             style="display:none; font-size: 0.9rem;">
                             <!-- Specialization will show here -->
                         </div>
+
+                        <div id="doctorScheduleDisplay" class="border rounded p-3 bg-light text-muted mt-2">
+                            Select a doctor to view schedule.
+                        </div>
+
                     </div>
 
                     <!-- Message -->
@@ -676,6 +679,27 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById("doctorSelect").addEventListener("change", function () {
+            const doctorId = this.value;
+            const clinicId = document.getElementById("clinicSelect").value;
+
+            if (!doctorId || !clinicId) {
+                document.getElementById("doctorScheduleDisplay").innerHTML =
+                    "Please select a doctor.";
+                return;
+            }
+
+            // Fetch schedule using AJAX
+            fetch("fetch_doctor_schedule.php?doctor_id=" + doctorId + "&clinic_id=" + clinicId)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("doctorScheduleDisplay").innerHTML = data;
+                });
+        });
+    </script>
+
 
     <script>
         function toggleEdit(isEdit) {
