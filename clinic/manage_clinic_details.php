@@ -11,12 +11,13 @@ $user_id = $_SESSION['user_id'];
 $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
-$profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'default.png';
 $name = htmlspecialchars($_SESSION['name']);
 
 // ✅ One consistent definition for profile picture
 $picPath = "../uploads/profiles/" . $user['profile_picture'];
-$profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'default.png';
+$profilePic = (!empty($user['profile_picture']) && file_exists($picPath))
+    ? $picPath
+    : "profile_default.jpg";
 
 // Get clinic
 $stmt = $pdo->prepare("SELECT * FROM clinics WHERE user_id = ?");
