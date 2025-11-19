@@ -68,8 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
         // ✅ Insert appointment
         $insert = $pdo->prepare("
             INSERT INTO appointments 
-            (clinic_id, pet_id, owner_id, service_id, doctor_id, residence, phone, message, updated_by, appointment_date, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, 'pending')
+            (clinic_id, pet_id, owner_id, service_id, doctor_id, residence, phone, message, updated_by, appointment_date,appointment_start,appointment_end, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, '8:00:00' , '17:00:00' , 'pending')
         ");
 
         $inserted = $insert->execute([
