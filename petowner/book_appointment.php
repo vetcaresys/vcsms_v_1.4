@@ -65,12 +65,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
             exit;
         }
 
-        // ✅ Insert appointment
+        // Get selected start time
+        $start_time = $_POST['appointment_start']; // ex: "09:00"
+
+        // Auto compute 1-hour end time
+        $end_time = date("H:i", strtotime($start_time . " +1 hour"));
+
+        // Insert appointment with start and end time
         $insert = $pdo->prepare("
-            INSERT INTO appointments 
-            (clinic_id, pet_id, owner_id, service_id, doctor_id, residence, phone, message, updated_by, appointment_date,appointment_start,appointment_end, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, '8:00:00' , '17:00:00' , 'pending')
-        ");
+    INSERT INTO appointments 
+    (clinic_id, pet_id, owner_id, service_id, doctor_id, residence, phone, message, updated_by,
+     appointment_date, appointment_start, appointment_end, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, 'pending')
+");
 
         $inserted = $insert->execute([
             $clinic_id,
@@ -81,7 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_booking'])) {
             $residence,
             $phone,
             $message,
-            $appointment_date
+            $appointment_date,
+            $start_time,
+            $end_time
         ]);
         // Fetch appointment date for notification
         $appointment_petname_stmt = $pdo->prepare("SELECT pet_name FROM pets WHERE pet_id = ?");
@@ -517,7 +526,22 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
                         <div id="doctorScheduleDisplay" class="border rounded p-3 bg-light text-muted mt-2">
                             Select a doctor to view schedule.
                         </div>
+                    </div>
 
+                    <!-- Appointment Time Slot -->
+                    <div class="col-md-6 mt-3">
+                        <label class="form-label">Select Time *</label>
+                        <select name="appointment_start" id="timeSlot" class="form-select" required>
+                            <option value="">Select Time</option>
+                            <option value="08:00">08:00 AM - 09:00 AM</option>
+                            <option value="09:00">09:00 AM - 10:00 AM</option>
+                            <option value="10:00">10:00 AM - 11:00 AM</option>
+                            <option value="11:00">11:00 AM - 12:00 PM</option>
+                            <option value="13:00">01:00 PM - 02:00 PM</option>
+                            <option value="14:00">02:00 PM - 03:00 PM</option>
+                            <option value="15:00">03:00 PM - 04:00 PM</option>
+                            <option value="16:00">04:00 PM - 05:00 PM</option>
+                        </select>
                     </div>
 
                     <!-- Message -->
