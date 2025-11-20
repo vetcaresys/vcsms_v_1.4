@@ -1,4 +1,6 @@
 <?php
+session_start(); // ← Required
+
 require 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -8,14 +10,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $message = trim($_POST['message']);
 
     $stmt = $pdo->prepare("INSERT INTO inquiries (name, email, subject, message) VALUES (?, ?, ?, ?)");
+    
     if ($stmt->execute([$name, $email, $subject, $message])) {
-        // Optional: send an email to admin here
-        $_SESSION['success'] = "Your inquiry has been submitted successfully!";
-        header("Location: index.php#contact");
+        header("Location: index.php?sent=1"); // ← SweetAlert trigger
         exit;
     } else {
-        $_SESSION['error'] = "Failed to submit inquiry. Please try again.";
-        header("Location: index.php#contact");
+        header("Location: index.php?sent=0"); // ← Optional error
         exit;
     }
 }

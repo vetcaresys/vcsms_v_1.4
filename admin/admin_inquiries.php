@@ -178,10 +178,10 @@ $inquiries = $pdo->query("SELECT * FROM inquiries ORDER BY created_at DESC")->fe
                     </ul>
                 </li>
 
-                <!-- LOGOUT -->
+                <!-- Logout -->
                 <li class="nav-item">
                     <form method="POST" action="logout.php" id="logoutForm" class="d-inline">
-                        <button type="submit" class="btn btn-light btn-sm">
+                        <button type="submit" class="btn btn-light btn-sm" id="logoutBtn">
                             <i class="bi bi-box-arrow-right"></i> Logout
                         </button>
                     </form>
@@ -282,6 +282,26 @@ $inquiries = $pdo->query("SELECT * FROM inquiries ORDER BY created_at DESC")->fe
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure you want to logout?',
+                text: "You’ll be logged out of your current session.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'No, stay here'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logoutForm').submit();
+                }
+            });
+        });
+    </script>
 
     <script>
         $(document).ready(() => {
