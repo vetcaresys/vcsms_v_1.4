@@ -58,9 +58,20 @@ function generate_reminders($pdo) {
                 $stmt_user->bindParam(':user_id', $row['user_id'], PDO::PARAM_INT);
                 $stmt_user->execute();
                 $user = $stmt_user->fetch();
+
+                $sql = "
+                SELECT `clinic_name` FROM `clinics` 
+                WHERE clinic_id = ?
+                ";
+                $stmt_select = $pdo->prepare($sql);
+                $stmt_select->execute([$row['clinic_id']]);
+                $result = $stmt_select->fetch(PDO::FETCH_ASSOC);
+                $clinic_name = $result['clinic_name'] ?? null;
+
+
                 
                 $user_name = isset($user['name']) ? $user['name'] : 'User';
-                $reminder_message = "REMINDER: Hi '{$user_name}' ,Your scheduled notification about '{$row['subject']}' is tomorrow.";
+                $reminder_message = "REMINDER: Hi '{$user_name}' ,Your approved appointment at '{$clinic_name}' is tomorrow.";
                 $reminder_subject = "Reminder: " . $row['subject'];
 
                 // Insert the NEW Reminder Notification (sms=2)
@@ -118,6 +129,8 @@ function send_sms_reminders($pdo) {
             $notif_id = $notification['notif_id'];
             $recipient_number = $notification['number'];
             $sms_message = $notification['message'];
+
+            
 
             // Strict check for valid PH mobile number format (09xxxxxxxxx or 639xxxxxxxxx)
             // If the number format is invalid, mark it as done (sms=0) to stop perpetual retries.
