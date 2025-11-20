@@ -112,7 +112,8 @@ $staffs = $pdo->query("
             <ul class="navbar-nav ms-auto align-items-center">
 
                 <li class="nav-item">
-                    <a href="admin_inquiries.php" class="nav-link text-white"><i class="bi bi-chat-left-text-fill"></i></a>
+                    <a href="admin_inquiries.php" class="nav-link text-white"><i
+                            class="bi bi-chat-left-text-fill"></i></a>
                 </li>
 
                 <!-- 🔔 Notification Bell -->
@@ -185,8 +186,7 @@ $staffs = $pdo->query("
                                     <tr>
                                         <td>
                                             <?php if (!empty($clinic['logo'])): ?>
-                                                <img src="../uploads/logos/<?= htmlspecialchars($clinic['logo']) ?>"
-                                                    alt="Clinic Logo"
+                                                <img src="../<?= htmlspecialchars($clinic['logo']) ?>" alt="Clinic Logo"
                                                     style="width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid #ccc;">
                                             <?php else: ?>
                                                 <span class="text-muted">No Logo</span>

@@ -60,12 +60,12 @@ function sendAppointmentEmail($pdo, $appointment_id, $clinic_id, $status = null)
         $mail->isSMTP();
         $mail->Host = "smtp.gmail.com";
         $mail->SMTPAuth = true;
-        $mail->Username = "loelynates@gmail.com";   // Gmail
-        $mail->Password = "vuhk kttg xcrc hxwt";    // App Password
+        $mail->Username = "vetcaresys@gmail.com";   // Gmail
+        $mail->Password = "ddghlcrdfyroulbj";    // App Password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
-        $mail->setFrom('loelynates@gmail.com', 'VetCareSys');
+        $mail->setFrom('vetcaresys@gmail.com', 'VetCareSys');
         $mail->addAddress($ownerEmail, $ownerName);
 
         $mail->isHTML(true);

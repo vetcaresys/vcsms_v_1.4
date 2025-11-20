@@ -3,7 +3,7 @@ session_start();
 require 'config.php'; // This file provides the $pdo object
 
 // --- Configuration ---
-$apiKey = '836eff6e31b18cbd39e1e33c3b24c29f'; // **CRITICAL: Replace with your actual Semaphore API KEY**
+$apiKey = ''; // **CRITICAL: Replace with your actual Semaphore API KEY**
 $senderName = 'VetCareSys'; // Your preferred sender name.
 
 // --- 1. Reminder Generation Function (Creates the SMS records) ---
