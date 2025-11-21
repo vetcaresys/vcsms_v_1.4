@@ -107,9 +107,13 @@ $staffs = $pdo->query("
     <!-- ✅ Updated Navbar with Notification Bell -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">VetCareSys Admin</a>
+            <a class="navbar-brand fw-bold" href="index.php">VetCareSys Admin</a>
 
             <ul class="navbar-nav ms-auto align-items-center">
+
+                <li class="nav-item">
+                    <a href="admin_inquiries.php" class="nav-link text-white"><i class="bi bi-chat-left-text-fill"></i></a>
+                </li>
 
                 <!-- 🔔 Notification Bell -->
                 <li class="nav-item dropdown me-3">
