@@ -3,7 +3,7 @@ session_start();
 require 'config.php'; // This file provides the $pdo object
 
 // --- Configuration ---
-$apiKey = ''; // **CRITICAL: Replace with your actual Semaphore API KEY**
+$apiKey = '836eff6e31b18cbd39e1e33c3b24c29f'; // **CRITICAL: Replace with your actual Semaphore API KEY**
 $senderName = 'VetCareSys'; // Your preferred sender name.
 
 // --- 1. Reminder Generation Function (Creates the SMS records) ---
@@ -58,9 +58,14 @@ function generate_reminders($pdo) {
                 $stmt_user->bindParam(':user_id', $row['user_id'], PDO::PARAM_INT);
                 $stmt_user->execute();
                 $user = $stmt_user->fetch();
+
+                $sql = "SELECT clinic_name FROM clinics WHERE clinic_id= ?";
+                $stmt_user = $pdo->prepare($sql);
+                $stmt_user->execute();
+                $clinic_name = $stmt_user->fetch();
                 
                 $user_name = isset($user['name']) ? $user['name'] : 'User';
-                $reminder_message = "REMINDER: Hi '{$user_name}' ,Your scheduled notification about '{$row['subject']}' is tomorrow.";
+                $reminder_message = "REMINDER: Hi '{$user_name}' , your approved appointment at  '{[$clinic_name]}' is scheduled for tomorrow.";
                 $reminder_subject = "Reminder: " . $row['subject'];
 
                 // Insert the NEW Reminder Notification (sms=2)
