@@ -67,11 +67,9 @@ function generate_reminders($pdo) {
                 $clinic_name = $clinic['clinic_name'] ;
                 
                 $user_name = isset($user['name']) ? $user['name'] : 'User';
-<<<<<<< HEAD
+
                 $reminder_message = "REMINDER: Hi '{$user_name}' , your approved appointment at  '{$clinic_name}' is scheduled for tomorrow.";
-=======
-                $reminder_message = "REMINDER: Hi '{$user_name}' ,Your scheduled notification about '{$row['subject']}' is tomorrow.";
->>>>>>> 8902907cb7a637293a78bfc7ca9b2c6e945246bd
+
                 $reminder_subject = "Reminder: " . $row['subject'];
 
                 // Insert the NEW Reminder Notification (sms=2)
