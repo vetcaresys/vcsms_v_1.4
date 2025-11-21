@@ -19,7 +19,7 @@ function generate_reminders($pdo) {
 
     $sql_select = "
         SELECT 
-            notif_id, user_id, role, message, subject, link, schedule_date, number 
+            notif_id, user_id, clinic_id, role, message, subject, link, schedule_date, number 
         FROM 
             `notifications` 
         WHERE 
@@ -59,13 +59,15 @@ function generate_reminders($pdo) {
                 $stmt_user->execute();
                 $user = $stmt_user->fetch();
 
-                $sql = "SELECT clinic_name FROM clinics WHERE clinic_id= ?";
-                $stmt_user = $pdo->prepare($sql);
-                $stmt_user->execute();
-                $clinic_name = $stmt_user->fetch();
+                $sql = "SELECT clinic_name FROM clinics WHERE clinic_id = ?";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$row['clinic_id']]);
+                $clinic = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                $clinic_name = $clinic['clinic_name'] ;
                 
                 $user_name = isset($user['name']) ? $user['name'] : 'User';
-                $reminder_message = "REMINDER: Hi '{$user_name}' , your approved appointment at  '{[$clinic_name]}' is scheduled for tomorrow.";
+                $reminder_message = "REMINDER: Hi '{$user_name}' , your approved appointment at  '{$clinic_name}' is scheduled for tomorrow.";
                 $reminder_subject = "Reminder: " . $row['subject'];
 
                 // Insert the NEW Reminder Notification (sms=2)

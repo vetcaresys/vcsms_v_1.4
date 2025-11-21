@@ -15,10 +15,10 @@ unset($_SESSION['resend_email']); // para dili magsige resend
  * 🔹 Helper function: Build one email template for all accounts
  */
 function buildVerificationEmail($name, $email, $token, $extraParams = '') {
-    $verifyUrl = "https://mysql1001.site4now.net/verify.php?email=" . urlencode($email) . "&token=$token" . $extraParams;
+    $verifyUrl = "https://localhost/vcsms_v_1.4/verify.php?email=" . urlencode($email) . "&token=$token" . $extraParams;
 
     // Change to your actual hosted logo path
-    $clinicLogo = "https://mysql1001.site4now.net/assets/img/VetCareSystemLogo.png"; 
+    $clinicLogo = "https://localhost/vcsms_v_1.4/assets/img/VetCareSystemLogo.png"; 
 
     return "
     <div style='font-family: Arial, sans-serif; padding:20px; background:#f4f6f9;'>
@@ -76,7 +76,7 @@ if ($user) {
     $stmt->execute([$token, $email]);
 
     $body = buildVerificationEmail($user['name'], $email, $token);
-    $text = "Copy this link to verify: https://mysql1001.site4now.net/verify.php?email=" . urlencode($email) . "&token=$token";
+    $text = "Copy this link to verify: https://localhost/vcsms_v_1.4/verify.php?email=" . urlencode($email) . "&token=$token";
 
     sendVerificationMail($email, $user['name'], "Verify Your VetCareSys Account", $body, $text);
 
@@ -102,7 +102,7 @@ if ($staff) {
     $stmt->execute([$token, $email]);
 
     $body = buildVerificationEmail($staff['name'], $email, $token, "&staff=1");
-    $text = "Copy this link to verify: https://mysql1001.site4now.net/verify.php?email=" . urlencode($email) . "&token=$token&staff=1";
+    $text = "Copy this link to verify: https://localhost/vcsms_v_1.4/verify.php?email=" . urlencode($email) . "&token=$token&staff=1";
 
     sendVerificationMail($email, $staff['name'], "Verify Your VetCareSys Staff Account", $body, $text);
 
