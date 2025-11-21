@@ -24,7 +24,8 @@ $stmt = $pdo->prepare("SELECT i.*, c.category_name
 $stmt->execute([$clinic_id]);
 $inventory = $stmt->fetchAll();
 
-$stmt = $pdo->query("SELECT * FROM categories");
+$stmt = $pdo->prepare("SELECT * FROM categories WHERE clinic_id = ?");
+$stmt->execute([$clinic_id]);
 $categories = $stmt->fetchAll();
 
 // Profile data
