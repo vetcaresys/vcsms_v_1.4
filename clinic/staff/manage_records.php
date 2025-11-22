@@ -13,6 +13,50 @@ $clinic_id = $_SESSION['clinic_id'];
 $role = $_SESSION['role'];
 $name = htmlspecialchars($_SESSION['name']);
 
+// if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_consumable_usage'])) {
+//     $item_id = $_POST['consumable_item_id'];
+//     $use_volume = (float) $_POST['use_volume'];
+//     $notes = trim($_POST['notes']);
+//     $staff_id = $_SESSION['staff_id'];
+
+//     // Fetch consumable
+//     $stmt = $pdo->prepare("SELECT remaining_volume_ml, total_volume_ml, reorder_level FROM inventory WHERE item_id = ?");
+//     $stmt->execute([$item_id]);
+//     $item = $stmt->fetch();
+
+//     if ($item) {
+//         $remaining = $item['remaining_volume_ml'];
+//         $new_remaining = max(0, $remaining - $use_volume);
+
+//         if ($new_remaining <= 0) {
+//             $status = "out_of_stock";
+//         } elseif ($new_remaining <= $item['reorder_level']) {
+//             $status = "low_stock";
+//         } else {
+//             $status = "available";
+//         }
+
+//         // Update inventory
+//         $update = $pdo->prepare("
+//             UPDATE inventory SET remaining_volume_ml=?, status=?, last_updated=NOW() WHERE item_id=?
+//         ");
+//         $update->execute([$new_remaining, $status, $item_id]);
+
+//         // Insert consumable usage into inventory_usage
+//         $log = $pdo->prepare("
+// INSERT INTO inventory_usage (inventory_id, used_ml, staff_id)
+// VALUES (?, ?, ?)
+// ");
+//         $log->execute([$item_id, $use_volume, $staff_id]);
+
+
+//         $_SESSION['flash'] = ['type' => 'success', 'message' => 'Consumable usage saved!'];
+//     }
+
+//     header("Location: manage_records.php");
+//     exit;
+// }
+
 // 🖼️ Profile info
 $stmt = $pdo->prepare("SELECT * FROM staff WHERE staff_id = ?");
 $stmt->execute([$staff_id]);
@@ -232,8 +276,10 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                         <h5 class="modal-title">Add New Pet Record</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
+
                     <div class="modal-body">
 
+                        <!-- PET -->
                         <div class="mb-3">
                             <label class="form-label">Select Pet</label>
                             <select name="pet_id" class="form-select" required>
@@ -244,6 +290,7 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                             </select>
                         </div>
 
+                        <!-- TEMPLATE -->
                         <div class="mb-3">
                             <label class="form-label">Record Template</label>
                             <select name="template_id" id="templateSelect" class="form-select" required>
@@ -260,32 +307,56 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
 
                         <hr>
                         <h5 class="mt-4">Medicines / Supplies Used</h5>
-                        <p class="text-muted">Select items used during this treatment and quantity.</p>
+                        <p class="text-muted">Select items used during this treatment.</p>
 
+                        <!-- MEDICINES -->
                         <div id="medicineContainer">
                             <div class="row mb-2 medicine-row">
                                 <div class="col-md-6">
                                     <label class="form-label">Item</label>
-                                    <select name="item_id[]" class="form-select">
+
+                                    <!-- UPDATED DROPDOWN -->
+                                    <select name="item_id[]" class="form-select" onchange="checkConsumable(this)">
                                         <option value="">Select Item</option>
+
                                         <?php
-                                        $items = $pdo->prepare("SELECT item_id, item_name, quantity FROM inventory WHERE clinic_id = ?");
+                                        $items = $pdo->prepare("
+                                        SELECT item_id, item_name, quantity, is_consumable, 
+                                               remaining_volume_ml, volume_per_bottle_ml
+                                        FROM inventory
+                                        WHERE clinic_id = ?
+                                    ");
                                         $items->execute([$clinic_id]);
-                                        foreach ($items as $i) {
-                                            echo '<option value="' . $i['item_id'] . '">' .
-                                                htmlspecialchars($i['item_name']) . ' (Available: ' . $i['quantity'] . ')' .
-                                                '</option>';
-                                        }
-                                        ?>
+
+                                        foreach ($items as $i):
+
+                                            $label = $i['is_consumable']
+                                                ? htmlspecialchars($i['item_name']) . " (Remaining: {$i['remaining_volume_ml']} ml)"
+                                                : htmlspecialchars($i['item_name']) . " (Remaining: {$i['quantity']} pcs)";
+                                            ?>
+
+                                            <option value="<?= $i['item_id'] ?>"
+                                                data-consumable="<?= $i['is_consumable'] ?>"
+                                                data-remaining="<?= $i['remaining_volume_ml'] ?>"
+                                                data-perbottle="<?= $i['volume_per_bottle_ml'] ?>">
+                                                <?= $label ?>
+                                            </option>
+
+                                        <?php endforeach; ?>
                                     </select>
+
                                 </div>
+
                                 <div class="col-md-4">
                                     <label class="form-label">Quantity Used</label>
-                                    <input type="number" name="quantity_used[]" class="form-control" min="1" value="1">
+                                    <input type="number" name="quantity_used[]" class="form-control qty-input" min="1"
+                                        value="1">
                                 </div>
+
                                 <div class="col-md-2 d-flex align-items-end">
-                                    <button type="button" class="btn btn-danger removeRow w-100"><i
-                                            class="bi bi-trash"></i></button>
+                                    <button type="button" class="btn btn-danger removeRow w-100">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -295,13 +366,16 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                         </button>
 
                     </div>
+
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-success">Save Record</button>
                     </div>
+
                 </form>
             </div>
         </div>
     </div>
+
 
     <!-- Profile Modal -->
     <div class="modal fade" id="profileModal" tabindex="-1">
@@ -477,6 +551,99 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
             </div>
         </div>
     </div>
+
+    <!-- Modal: Use Consumable -->
+    <div class="modal fade" id="useConsumableModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form method="POST">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="consumableName">Use Consumable</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="consumable_item_id" id="consumable_item_id">
+
+                        <div class="mb-3">
+                            <label>Remaining Volume (ml)</label>
+                            <input type="text" class="form-control" id="consumableRemaining" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Volume to Use (ml)</label>
+                            <input type="number" name="use_volume" class="form-control" required min="1">
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Notes (optional)</label>
+                            <textarea name="notes" class="form-control"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" onclick="applyConsumableUsage()" class="btn btn-success">
+                            Save Usage
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function applyConsumableUsage() {
+            const item_id = document.getElementById("consumable_item_id").value;
+            const used_ml = document.querySelector("input[name='use_volume']").value;
+
+            // find the correct medicine-row
+            const rows = document.querySelectorAll('.medicine-row');
+            rows.forEach(row => {
+                if (row.querySelector("select").value == item_id) {
+                    let hidden = row.querySelector("input[name='consumable_used_ml[]']");
+                    if (!hidden) {
+                        hidden = document.createElement("input");
+                        hidden.type = "hidden";
+                        hidden.name = "consumable_used_ml[]";
+                        row.appendChild(hidden);
+                    }
+                    hidden.value = used_ml;
+                }
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById("useConsumableModal")).hide();
+        }
+    </script>
+
+    <script>
+        function checkConsumable(selectElement) {
+
+            const option = selectElement.selectedOptions[0];
+            const isConsumable = option.dataset.consumable;
+
+            if (isConsumable == "1") {
+
+                // Show ml modal
+                document.getElementById("consumable_item_id").value = option.value;
+                document.getElementById("consumableRemaining").value = option.dataset.remaining;
+                document.getElementById("consumableName").innerText = option.text;
+
+                new bootstrap.Modal(document.getElementById("useConsumableModal")).show();
+
+                // Disable normal quantity field
+                selectElement.closest(".medicine-row")
+                    .querySelector("input[name='quantity_used[]']")
+                    .disabled = true;
+
+            } else {
+
+                // Non consumable → allow quantity input
+                selectElement.closest(".medicine-row")
+                    .querySelector("input[name='quantity_used[]']")
+                    .disabled = false;
+            }
+        }
+    </script>
 
 
     <script>

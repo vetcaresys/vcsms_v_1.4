@@ -219,9 +219,11 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                 <td><?= htmlspecialchars($category['category_name']) ?></td>
                 <td>
                   <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
-                    data-bs-target="#editCategoryModal<?= $category['category_id'] ?>">✏️</button>
+                    data-bs-target="#editCategoryModal<?= $category['category_id'] ?>"><i class="bi bi-pencil-square"></i>
+                  </button>
                   <button class="btn btn-sm btn-danger"
-                    onclick="confirmDeleteCategory(<?= $category['category_id'] ?>)">🗑</button>
+                    onclick="confirmDeleteCategory(<?= $category['category_id'] ?>)"><i class="bi bi-trash"></i>
+                  </button>
                 </td>
               </tr>
 
@@ -457,7 +459,8 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             <tr>
               <th>Item</th>
               <th>Category</th>
-              <th>Quantity</th>
+              <th>Quantity (pcs)</th>
+              <th>Total Volume (ml)</th>
               <th>Unit</th>
               <th>Expiration</th>
               <th>Cost</th>
@@ -471,9 +474,54 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
               <tr class="<?= (strtotime($item['expiration_date']) - time() < 2592000) ? 'table-warning' : '' ?>">
                 <td><?= htmlspecialchars($item['item_name']) ?></td>
                 <td><?= htmlspecialchars($item['category_name'] ?? 'Uncategorized') ?></td>
-                <td><?= $item['quantity'] ?></td>
+                <!-- Quantity (pcs) column -->
+                <td>
+                  <?php if ($item['is_consumable']): ?>
+                    <?php
+                    // compute remaining bottles based on ml
+                    if ($item['volume_per_bottle_ml'] > 0) {
+                      $remaining_bottles = $item['remaining_volume_ml'] / $item['volume_per_bottle_ml'];
+                    } else {
+                      $remaining_bottles = 0;
+                    }
+                    ?>
+
+                    <?= $item['quantity'] ?> bottles
+                    (<?= number_format($remaining_bottles, 2) ?> left)
+
+                  <?php else: ?>
+                    <?= $item['quantity'] ?>
+                  <?php endif; ?>
+                </td>
+
+                <!-- Total Volume (ml) column -->
+                <td>
+                  <?php if ($item['is_consumable']): ?>
+                    <?= number_format($item['remaining_volume_ml'], 2) ?> ml /
+                    <?= number_format($item['total_volume_ml'], 2) ?> ml
+
+                    <?php
+                    $percent = 0;
+                    if ($item['total_volume_ml'] > 0) {
+                      $percent = ($item['remaining_volume_ml'] / $item['total_volume_ml']) * 100;
+                    }
+                    ?>
+
+                    <div class="progress mt-1" style="height: 6px;">
+                      <div class="progress-bar 
+                <?= $percent <= 10 ? 'bg-danger' : ($percent <= 30 ? 'bg-warning' : 'bg-success') ?>"
+                        style="width: <?= $percent ?>%">
+                      </div>
+                    </div>
+                  <?php else: ?>
+                    —
+                  <?php endif; ?>
+                </td>
+
                 <td><?= htmlspecialchars($item['unit']) ?></td>
+
                 <td><?= $item['expiration_date'] ?></td>
+
                 <td>₱<?= number_format($item['cost_price'], 2) ?></td>
                 <td>₱<?= number_format($item['selling_price'], 2) ?></td>
                 <td>
@@ -488,81 +536,130 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                 </td>
                 <td>
                   <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
-                    data-bs-target="#editItemModal<?= $item['item_id'] ?>">✏️</button>
+                    data-bs-target="#editItemModal<?= $item['item_id'] ?>"><i class="bi bi-pencil-square"></i>
+                  </button>
 
                   <button class="btn btn-sm btn-success" data-bs-toggle="modal"
-                    data-bs-target="#restockModal<?= $item['item_id'] ?>">Restock</button>
+                    data-bs-target="#restockModal<?= $item['item_id'] ?>"><i class="bi bi-box-arrow-down"></i>
+                  </button>
 
-                  <button class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $item['item_id'] ?>)">🗑</button>
+                  <!-- <button class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $item['item_id'] ?>)">🗑</button> -->
                 </td>
               </tr>
 
-              <!-- Edit Modal -->
+              <!-- ============================
+     EDIT ITEM MODAL (UPDATED)
+=============================== -->
               <div class="modal fade" id="editItemModal<?= $item['item_id'] ?>" tabindex="-1">
                 <div class="modal-dialog modal-lg">
                   <div class="modal-content">
+
                     <form method="POST" action="update_item.php">
                       <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title">Edit Item - <?= htmlspecialchars($item['item_name']) ?></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
+
                       <div class="modal-body row g-3">
                         <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
 
+                        <!-- Item name -->
                         <div class="col-md-6">
                           <label class="form-label">Item Name</label>
                           <input type="text" name="item_name" class="form-control"
                             value="<?= htmlspecialchars($item['item_name']) ?>" required>
                         </div>
 
+                        <!-- Category -->
                         <div class="col-md-6">
                           <label class="form-label">Category</label>
                           <select name="category_id" class="form-select" required>
                             <?php foreach ($categories as $cat): ?>
-                              <option value="<?= $cat['category_id'] ?>" <?= ($cat['category_id'] == $item['category_id']) ? 'selected' : '' ?>>
+                              <option value="<?= $cat['category_id'] ?>" <?= $cat['category_id'] == $item['category_id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($cat['category_name']) ?>
                               </option>
                             <?php endforeach; ?>
                           </select>
                         </div>
 
+                        <!-- Stock quantity -->
                         <div class="col-md-4">
                           <label class="form-label">Quantity</label>
-                          <input type="number" name="quantity" class="form-control" value="<?= $item['quantity'] ?>"
-                            readonly>
+                          <input type="number" name="quantity" id="qty_edit_<?= $item['item_id'] ?>" class="form-control"
+                            value="<?= $item['quantity'] ?>" min="0" required>
                         </div>
 
-
+                        <!-- Unit -->
                         <div class="col-md-4">
                           <label class="form-label">Unit</label>
                           <input type="text" name="unit" class="form-control"
-                            value="<?= htmlspecialchars($item['unit']) ?>">
+                            value="<?= htmlspecialchars($item['unit']) ?>" required>
                         </div>
 
+                        <!-- Reorder level -->
                         <div class="col-md-4">
                           <label class="form-label">Reorder Level</label>
                           <input type="number" name="reorder_level" class="form-control"
                             value="<?= $item['reorder_level'] ?>">
                         </div>
 
+                        <!-- ============================
+               CONSUMABLE CHECKBOX
+          =============================== -->
+                        <div class="col-md-12">
+                          <div class="form-check mt-3">
+                            <input class="form-check-input isConsumableEdit" type="checkbox"
+                              id="is_consumable_edit_<?= $item['item_id'] ?>" name="is_consumable" value="1"
+                              <?= $item['is_consumable'] ? 'checked' : '' ?>>
+                            <label class="form-check-label fw-bold" for="is_consumable_edit_<?= $item['item_id'] ?>">
+                              Is Consumable (mL-based)
+                            </label>
+                          </div>
+                        </div>
+
+                        <!-- ============================
+                CONSUMABLE FIELDS
+          =============================== -->
+                        <div class="col-md-4 consumableFieldsEdit consumable_<?= $item['item_id'] ?>"
+                          style="display: <?= $item['is_consumable'] ? 'block' : 'none' ?>;">
+                          <label class="form-label">Volume per bottle (ml)</label>
+                          <input type="number" class="form-control" id="vol_bottle_edit_<?= $item['item_id'] ?>"
+                            name="volume_per_bottle_ml" value="<?= $item['volume_per_bottle_ml'] ?>" min="1">
+                        </div>
+
+                        <div class="col-md-4 consumableFieldsEdit consumable_<?= $item['item_id'] ?>"
+                          style="display: <?= $item['is_consumable'] ? 'block' : 'none' ?>;">
+                          <label class="form-label">Total Volume (auto)</label>
+                          <input type="number" class="form-control" id="total_vol_edit_<?= $item['item_id'] ?>"
+                            name="total_volume_ml" value="<?= $item['total_volume_ml'] ?>" readonly>
+                        </div>
+
+                        <div class="col-md-4 consumableFieldsEdit consumable_<?= $item['item_id'] ?>"
+                          style="display: <?= $item['is_consumable'] ? 'block' : 'none' ?>;">
+                          <label class="form-label">Remaining Volume (auto)</label>
+                          <input type="number" class="form-control" id="remain_vol_edit_<?= $item['item_id'] ?>"
+                            name="remaining_volume_ml" value="<?= $item['remaining_volume_ml'] ?>" readonly>
+                        </div>
+
+                        <!-- Cost + Selling -->
                         <div class="col-md-6">
                           <label class="form-label">Cost Price</label>
                           <input type="number" step="0.01" name="cost_price" class="form-control"
-                            value="<?= $item['cost_price'] ?>">
+                            value="<?= $item['cost_price'] ?>" required>
                         </div>
 
                         <div class="col-md-6">
                           <label class="form-label">Selling Price</label>
                           <input type="number" step="0.01" name="selling_price" class="form-control"
-                            value="<?= $item['selling_price'] ?>">
+                            value="<?= $item['selling_price'] ?>" required>
                         </div>
 
+                        <!-- Expiration -->
                         <div class="col-md-6">
                           <label class="form-label">Expiration Date</label>
                           <input type="date" name="expiration_date" class="form-control"
-                            value="<?= $item['expiration_date'] ?>" min="<?= date('Y-m-d') ?>" required>
+                            value="<?= $item['expiration_date'] ?>" required>
                         </div>
-
 
                         <div class="col-md-6">
                           <label class="form-label">Location</label>
@@ -574,14 +671,55 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                           <label class="form-label">Notes</label>
                           <textarea name="notes" class="form-control"><?= htmlspecialchars($item['notes']) ?></textarea>
                         </div>
+
                       </div>
+
                       <div class="modal-footer">
-                        <button type="submit" name="update_item" class="btn btn-success">💾 Save Changes</button>
+                        <button type="submit" name="update_item" class="btn btn-success">Save Changes</button>
                       </div>
+
                     </form>
                   </div>
                 </div>
               </div>
+
+              <!-- AUTO-CALC FOR THIS SPECIFIC MODAL -->
+              <script>
+                document.addEventListener("DOMContentLoaded", function () {
+
+                  let id = <?= $item['item_id'] ?>;
+
+                  const qty = document.getElementById("qty_edit_" + id);
+                  const perBottle = document.getElementById("vol_bottle_edit_" + id);
+                  const total = document.getElementById("total_vol_edit_" + id);
+                  const remain = document.getElementById("remain_vol_edit_" + id);
+                  const consumableCheckbox = document.getElementById("is_consumable_edit_" + id);
+
+                  // Toggle visibility
+                  consumableCheckbox.addEventListener("change", function () {
+                    document.querySelectorAll(".consumable_" + id).forEach(el => {
+                      el.style.display = this.checked ? 'block' : 'none';
+                    });
+                  });
+
+                  // Auto calculate
+                  function recalc() {
+                    let q = parseFloat(qty.value) || 0;
+                    let vb = parseFloat(perBottle.value) || 0;
+
+                    if (q > 0 && vb > 0) {
+                      let totalCalc = q * vb;
+                      total.value = totalCalc;
+                      remain.value = totalCalc;
+                    }
+                  }
+
+                  qty.addEventListener("input", recalc);
+                  perBottle.addEventListener("input", recalc);
+                });
+              </script>
+
+
             <?php endforeach; ?>
           </tbody>
         </table>
@@ -722,6 +860,21 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
               <input type="text" name="unit" class="form-control" placeholder="e.g. pcs, bottle" required>
             </div>
 
+            <div class="col-md-4 consumable-fields" style="display:none;">
+              <label class="form-label">Volume per bottle (ml)</label>
+              <input type="number" name="volume_per_bottle_ml" id="volume_per_bottle_ml" class="form-control" min="1">
+            </div>
+
+            <div class="col-md-4 consumable-fields" style="display:none;">
+              <label class="form-label">Total Volume (auto)</label>
+              <input type="number" name="total_volume_ml" id="total_volume_ml" class="form-control" readonly>
+            </div>
+
+            <div class="col-md-4 consumable-fields" style="display:none;">
+              <label class="form-label">Remaining Volume (auto)</label>
+              <input type="number" name="remaining_volume_ml" id="remaining_volume_ml" class="form-control" readonly>
+            </div>
+
             <div class="col-md-4">
               <label class="form-label">Reorder Level</label>
               <input type="number" name="reorder_level" class="form-control" min="0">
@@ -749,6 +902,15 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             </div>
 
             <div class="col-md-12">
+              <div class="form-check mt-3">
+                <input class="form-check-input" type="checkbox" id="is_consumable" name="is_consumable" value="1">
+                <label class="form-check-label fw-bold" for="is_consumable">
+                  Is Consumable (mL-based)
+                </label>
+              </div>
+            </div>
+
+            <div class="col-md-12">
               <label class="form-label">Notes</label>
               <textarea name="notes" class="form-control" rows="2"></textarea>
             </div>
@@ -766,6 +928,28 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
   <div class="container-footer">
     &copy; <?= date('Y') ?> VetCareSys — Empowering Veterinary Clinics.
   </div>
+
+  <!-- di ni hilabtan -->
+  <script>
+    document.getElementById('is_consumable').addEventListener('change', function () {
+      const show = this.checked;
+      document.querySelectorAll('.consumable-fields').forEach(el => {
+        el.style.display = show ? 'block' : 'none';
+      });
+    });
+
+    // Auto calculate total & remaining volume
+    document.addEventListener("input", function () {
+      let qty = document.querySelector("[name='quantity']").value;
+      let perBottle = document.querySelector("#volume_per_bottle_ml").value;
+
+      if (qty > 0 && perBottle > 0) {
+        let total = qty * perBottle;
+        document.getElementById("total_volume_ml").value = total;
+        document.getElementById("remaining_volume_ml").value = total;
+      }
+    });
+  </script>
 
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

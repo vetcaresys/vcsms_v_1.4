@@ -6,23 +6,33 @@ include '../../config.php';
 $record_id = $_GET['id'] ?? null;
 if (!$record_id) die('Invalid record ID');
 
-// ✅ Get clinic info using session clinic_id
+// ----------------------------------------------------------------------------------------
+// 🔐 SESSION CLINIC
+// ----------------------------------------------------------------------------------------
 $clinic_id = $_SESSION['clinic_id'] ?? null;
 if (!$clinic_id) die('No clinic session found.');
 
-// Fetch clinic info
 $stmtClinic = $pdo->prepare("SELECT clinic_name, logo FROM clinics WHERE clinic_id = ?");
 $stmtClinic->execute([$clinic_id]);
 $clinic = $stmtClinic->fetch(PDO::FETCH_ASSOC);
 
 $clinic_name = $clinic['clinic_name'] ?? 'VetCareSys Veterinary Clinic';
-$clinic_logo = !empty($clinic['logo']) 
-    ? "../../uploads/logos/" . htmlspecialchars($clinic['logo']) 
+
+$clinic_logo = !empty($clinic['logo'])
+    ? "../../uploads/logos/" . htmlspecialchars($clinic['logo'])
     : "../../assets/logo.png";
 
-// Fetch pet record data
+// ----------------------------------------------------------------------------------------
+// 🔍 FETCH RECORD
+// ----------------------------------------------------------------------------------------
 $stmt = $pdo->prepare("
-    SELECT pr.*, p.pet_name, p.breed, p.birth_date, u.name AS owner_name, rt.template_name
+    SELECT 
+        pr.*, 
+        p.pet_name, 
+        p.breed, 
+        p.birth_date, 
+        u.name AS owner_name, 
+        rt.template_name
     FROM pet_records pr
     JOIN pets p ON pr.pet_id = p.pet_id
     JOIN users u ON p.owner_id = u.user_id
@@ -31,34 +41,47 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$record_id]);
 $record = $stmt->fetch(PDO::FETCH_ASSOC);
+
 if (!$record) die('Record not found');
 
 $data = json_decode($record['data'], true);
 
-// ✅ Fetch items used in this record
+// ----------------------------------------------------------------------------------------
+// 🧴 FETCH USED ITEMS with consumable detection
+// ----------------------------------------------------------------------------------------
 $stmtItems = $pdo->prepare("
-    SELECT iu.quantity_used, i.item_name
-    FROM record_inventory_usage iu
-    JOIN inventory i ON iu.item_id = i.item_id
-    WHERE iu.record_id = ?
+    SELECT 
+        riu.quantity_used,
+        i.item_name,
+        i.is_consumable,
+        i.volume_per_bottle_ml
+    FROM record_inventory_usage riu
+    JOIN inventory i ON riu.item_id = i.item_id
+    WHERE riu.record_id = ?
 ");
 $stmtItems->execute([$record_id]);
 $usedItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
-// ✅ Create PDF
+// ----------------------------------------------------------------------------------------
+// 📝 PDF
+// ----------------------------------------------------------------------------------------
 $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
 $pdf->SetTitle('Pet Record - ' . $record['pet_name']);
 $pdf->AddPage();
 $pdf->SetFont('helvetica', '', 11);
 
-// ✅ Clinic Header
+// ----------------------------------------------------------------------------------------
+// 📌 HEADER
+// ----------------------------------------------------------------------------------------
 $html = '
 <div style="text-align:center;">
     <img src="' . $clinic_logo . '" width="80" height="80" style="object-fit:contain;"><br>
     <h2 style="color:#007bff;">' . htmlspecialchars($clinic_name) . '</h2>
     <p style="color:gray;">Official Pet Medical Record</p>
 </div>
+
 <hr>
+
 <h4>Pet Information</h4>
 <table border="1" cellpadding="6">
 <tr><td><b>Pet Name:</b></td><td>' . htmlspecialchars($record['pet_name']) . '</td></tr>
@@ -68,13 +91,20 @@ $html = '
 <tr><td><b>Record Type:</b></td><td>' . htmlspecialchars($record['template_name']) . '</td></tr>
 <tr><td><b>Date Recorded:</b></td><td>' . date("M d, Y h:i A", strtotime($record['date_recorded'])) . '</td></tr>
 </table>
+
 <br><h4>Consultation / Medical Details</h4>
 <table border="1" cellpadding="6">
 ';
 
+// ----------------------------------------------------------------------------------------
+// 📋 CONSULTATION FIELDS
+// ----------------------------------------------------------------------------------------
 if (!empty($data)) {
     foreach ($data as $label => $value) {
-        $html .= '<tr><td><b>' . ucwords(str_replace('_', ' ', $label)) . ':</b></td><td>' . nl2br(htmlspecialchars($value)) . '</td></tr>';
+        $html .= '<tr>
+                    <td><b>' . ucwords(str_replace('_', ' ', $label)) . ':</b></td>
+                    <td>' . nl2br(htmlspecialchars($value)) . '</td>
+                  </tr>';
     }
 } else {
     $html .= '<tr><td colspan="2">No consultation data available.</td></tr>';
@@ -82,32 +112,66 @@ if (!empty($data)) {
 
 $html .= '</table>';
 
-// ✅ Include Medicines / Supplies Used
+// ----------------------------------------------------------------------------------------
+// 💉 MEDICINES / SUPPLIES USED (with ml + Bottle Equiv)
+// ----------------------------------------------------------------------------------------
 $html .= '<br><h4>Medicines / Supplies Used</h4>
 <table border="1" cellpadding="6">
 <tr><th>Item Name</th><th>Quantity Used</th></tr>';
 
 if (!empty($usedItems)) {
+
     foreach ($usedItems as $item) {
-        $html .= '<tr>
+
+        $displayQty = "";
+
+        if ($item['is_consumable']) {
+
+            $used_ml = floatval($item['quantity_used']);
+            $bSize = floatval($item['volume_per_bottle_ml']);
+            $bottle_equiv = $bSize > 0 ? round($used_ml / $bSize, 2) : null;
+
+            $displayQty .= $used_ml . " ml";
+
+            if ($bottle_equiv !== null) {
+                $displayQty .= "<br><small>(≈ $bottle_equiv bottle(s))</small>";
+            }
+
+        } else {
+
+            $displayQty = intval($item['quantity_used']) . " pcs";
+        }
+
+        $html .= '
+        <tr>
             <td>' . htmlspecialchars($item['item_name']) . '</td>
-            <td>' . htmlspecialchars($item['quantity_used']) . '</td>
+            <td>' . $displayQty . '</td>
         </tr>';
     }
+
 } else {
     $html .= '<tr><td colspan="2" style="text-align:center;">No items used for this record.</td></tr>';
 }
 
-$html .= '</table>
+$html .= '</table>';
+
+
+// ----------------------------------------------------------------------------------------
+// ✍ SIGNATURE
+// ----------------------------------------------------------------------------------------
+$html .= '
 <br><br>
 <p><b>Attending Veterinarian:</b> ____________________________</p>
 <p><b>Date:</b> ____________________________</p>
 <hr>
-<p style="text-align:center;font-size:10px;color:gray;">Generated by VetCareSys © ' . date('Y') . ' | For Veterinary Use Only</p>
+
+<p style="text-align:center;font-size:10px;color:gray;">
+Generated by VetCareSys © ' . date('Y') . ' | For Veterinary Use Only
+</p>
 ';
 
-// ✅ Write HTML to PDF
+// ----------------------------------------------------------------------------------------
+// PRINT
+// ----------------------------------------------------------------------------------------
 $pdf->writeHTML($html, true, false, true, false, '');
-
-// ✅ Output PDF
 $pdf->Output('Pet_Record_' . preg_replace('/[^A-Za-z0-9_\-]/', '_', $record['pet_name']) . '.pdf', 'I');

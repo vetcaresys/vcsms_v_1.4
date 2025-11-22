@@ -308,59 +308,141 @@ Swal.fire({
 
       <div class="card-body">
         <div class="table-responsive">
-          <table id="inventoryLogTable" class="table table-striped table-bordered align-middle text-center">
-            <thead class="table-dark text-uppercase">
-              <tr>
-                <th>Date</th>
-                <th>Item</th>
-                <th>Action</th>
-                <th>Qty Added</th>
-                <th>Previous Qty</th>
-                <th>New Qty</th>
-                <th>Performed By</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php
-              $logs = $pdo->query("
-            SELECT l.*, i.item_name, s.name AS staff_name 
+        <table id="inventoryLogTable" class="table table-striped table-bordered align-middle text-center">
+    <thead class="table-dark text-uppercase">
+        <tr>
+            <th>Date</th>
+            <th>Item</th>
+            <th>Action</th>
+
+            <!-- Normal Item Fields -->
+            <th>Qty Added</th>
+            <th>Previous Qty</th>
+            <th>New Qty</th>
+
+            <!-- Consumable Fields -->
+            <th>Volume Used (ml)</th>
+            <th>Previous Volume (ml)</th>
+            <th>New Volume (ml)</th>
+            <th>Total Volume (ml)</th>
+            <th>Volume per Bottle (ml)</th>
+
+            <th>Performed By</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $logs = $pdo->query("
+            SELECT 
+                l.*, 
+                i.item_name, 
+                i.is_consumable,
+                i.total_volume_ml,
+                i.volume_per_bottle_ml,
+                s.name AS staff_name
             FROM inventory_activity_log l
             JOIN inventory i ON l.item_id = i.item_id
             JOIN staff s ON l.staff_id = s.staff_id
             ORDER BY l.date_action DESC
-          ")->fetchAll();
+        ")->fetchAll();
 
-              if ($logs):
-                foreach ($logs as $log): ?>
-                  <tr>
-                    <td><?= date('M d, Y h:i A', strtotime($log['date_action'])) ?></td>
-                    <td class="fw-semibold"><?= htmlspecialchars($log['item_name']) ?></td>
-                    <td>
-                      <span
-                        class="badge 
-                    <?= $log['action_type'] == 'add' ? 'bg-success' : ($log['action_type'] == 'remove' ? 'bg-danger' : 'bg-info') ?>">
-                        <?= ucfirst($log['action_type']) ?>
-                      </span>
-                    </td>
-                    <td><?= $log['quantity_added'] ?></td>
-                    <td><?= $log['previous_quantity'] ?></td>
-                    <td><?= $log['new_quantity'] ?></td>
-                    <td class="text-muted"><?= htmlspecialchars($log['staff_name']) ?></td>
-                  </tr>
-                <?php endforeach;
-              else: ?>
-                <tr>
-                  <td colspan="7" class="text-center text-muted py-3">
-                    No activity logs available.
-                  </td>
-                </tr>
-              <?php endif; ?>
-            </tbody>
-          </table>
+        if ($logs):
+            foreach ($logs as $log):
+
+                $isConsumable = $log['is_consumable'] == 1;
+
+                // NORMAL ITEMS (0 if consumable)
+                $qtyAdded = $isConsumable ? 0 : $log['quantity_added'];
+                $prevQty  = $isConsumable ? 0 : $log['previous_quantity'];
+                $newQty   = $isConsumable ? 0 : $log['new_quantity'];
+
+                // CONSUMABLE ITEMS (0 if normal)
+                $usedML       = $log['volume_used'] ?? 0;
+                $prevVol      = $log['previous_volume_ml'] ?? 0;
+                $newVol       = $log['new_remaining_volume'] ?? 0;
+                $totalVol     = $log['total_volume_ml'] ?? 0;
+                $volPerBottle = $log['volume_per_bottle_ml'] ?? 0;
+        ?>
+        <tr>
+            <td><?= date('M d, Y h:i A', strtotime($log['date_action'])) ?></td>
+
+            <td class="fw-semibold"><?= htmlspecialchars($log['item_name']) ?></td>
+
+            <td>
+                <span class="badge 
+                    <?= $log['action_type'] == 'add' ? 'bg-success' : ($log['action_type'] == 'use' ? 'bg-info' : 'bg-danger') ?>">
+                    <?= ucfirst($log['action_type']) ?>
+                </span>
+            </td>
+
+            <!-- NORMAL ITEM VALUES -->
+            <td><?= $qtyAdded ?></td>
+            <td><?= $prevQty ?></td>
+            <td><?= $newQty ?></td>
+
+            <!-- CONSUMABLE ITEM VALUES -->
+            <td><?= $usedML ?></td>
+            <td><?= $prevVol ?></td>
+            <td><?= $newVol ?></td>
+            <td><?= $totalVol ?></td>
+            <td><?= $volPerBottle ?></td>
+
+            <td class="text-muted"><?= htmlspecialchars($log['staff_name']) ?></td>
+        </tr>
+
+        <?php
+            endforeach;
+        else:
+        ?>
+        <tr>
+            <td colspan="12" class="text-center text-muted py-3">
+                No activity logs available.
+            </td>
+        </tr>
+        <?php endif; ?>
+    </tbody>
+</table>
+
         </div>
       </div>
     </div>
   </div>
+  <style>
+/* Compact Clean Table Style */
+#inventoryLogTable {
+    font-size: 0.85rem;
+}
+
+#inventoryLogTable thead th {
+    padding: 8px 6px !important;
+    font-size: 0.78rem;
+    letter-spacing: 0.5px;
+}
+
+#inventoryLogTable tbody td {
+    padding: 6px 6px !important;
+}
+
+#inventoryLogTable.table-bordered > :not(caption) > * > * {
+    border-width: 1px;
+}
+
+#inventoryLogTable tbody tr {
+    height: 38px;
+}
+
+#inventoryLogTable td, 
+#inventoryLogTable th {
+    vertical-align: middle !important;
+}
+
+/* badge smaller */
+#inventoryLogTable .badge {
+    font-size: 0.70rem;
+    padding: 4px 6px;
+}
+</style>
+
 
   <!-- Profile Modal -->
   <div class="modal fade" id="profileModal" tabindex="-1">
