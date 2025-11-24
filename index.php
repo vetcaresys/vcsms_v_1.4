@@ -13,6 +13,58 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="assets/css/index.css">
+  <style>
+    .vcs-footer {
+      background: #ffffff;
+      border-top: 1px solid #e5e5e5;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .footer-link {
+      margin: 0 10px;
+      text-decoration: none;
+      color: #6c757d;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+
+    .footer-link:hover {
+      color: #0d6efd;
+    }
+
+    .footer-social {
+      color: #6c757d;
+      margin-left: 12px;
+      font-size: 1.3rem;
+      transition: 0.2s;
+    }
+
+    .footer-social:hover {
+      color: #0d6efd;
+      transform: translateY(-2px);
+    }
+
+    .vcs-footer h4 {
+      font-size: 1.5rem;
+      color: #0d6efd;
+    }
+
+    .vcs-footer p {
+      font-size: 0.9rem;
+    }
+
+    #contact {
+      background: #ffffff;
+      /* solid white */
+      position: relative;
+      z-index: 2;
+    }
+
+    #contact form {
+      background: #fff !important;
+      border-radius: 12px;
+    }
+  </style>
 </head>
 
 <body class="d-flex flex-column min-vh-100 bg-light">
@@ -63,19 +115,6 @@
     </div>
   </header>
 
-  <style>
-    #contact {
-      background: #ffffff;
-      /* solid white */
-      position: relative;
-      z-index: 2;
-    }
-
-    #contact form {
-      background: #fff !important;
-      border-radius: 12px;
-    }
-  </style>
   <section id="contact" class="py-5">
     <div class="container">
       <h2 class="text-center mb-4">Have a Question?</h2>
@@ -102,24 +141,76 @@
     </div>
   </section>
 
+  <section id="about" class="py-5" style="background-color: #f8f9fb; position: relative; z-index: 5;">
+    <div class="container">
+      <h2 class="text-center mb-4 fw-bold text-primary">About VetCareSys</h2>
+      <p class="text-center mb-5" style="color: #495057; font-weight: 500; opacity: 1;">
+        VetCareSys is a web-based veterinary management system that helps clinics organize pet records,
+        schedules, and staff with ease. Built for clinic owners in Misamis Occidental, it brings clarity,
+        structure, and reliability into everyday clinic operations.
+      </p>
 
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 text-center p-4 bg-white">
+            <i class="bi bi-journal-medical fs-1 text-primary mb-3"></i>
+            <h5 class="fw-bold">Record Management</h5>
+            <p style="color: #495057; opacity: 1;">Manage pet health records efficiently and securely.</p>
+          </div>
+        </div>
 
-  <footer class="bg-light text-center text-lg-start border-top mt-5">
-    <div class="container py-3">
-      <p class="mb-1 text-muted">&copy; 2025 VetCareSys. All rights reserved.</p>
-      <!-- <p class="mb-2">
-                <a href="index.php" class="text-decoration-none me-3">Home</a>
-                <a href="about.php" class="text-decoration-none me-3">About</a>
-                <a href="contact.php" class="text-decoration-none">Contact</a>
-            </p>
-            <div>
-                <a href="#" class="text-muted me-3"><i class="bi bi-facebook"></i></a>
-                <a href="#" class="text-muted me-3"><i class="bi bi-twitter"></i></a>
-                <a href="#" class="text-muted"><i class="bi bi-instagram"></i></a>
-            </div> -->
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 text-center p-4 bg-white">
+            <i class="bi bi-people-fill fs-1 text-primary mb-3"></i>
+            <h5 class="fw-bold">Staff & Doctors</h5>
+            <p style="color: #495057; opacity: 1;">Organize roles, staff accounts, and doctor schedules.</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100 text-center p-4 bg-white">
+            <i class="bi bi-geo-alt-fill fs-1 text-primary mb-3"></i>
+            <h5 class="fw-bold">Clinic Mapping</h5>
+            <p style="color: #495057; opacity: 1;">Built-in GPS map locator for easier clinic discovery.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="vcs-footer mt-5">
+    <div class="container py-4">
+
+      <div class="row align-items-center gy-4">
+
+        <!-- Logo + Tagline -->
+        <div class="col-md-4 text-center text-md-start">
+          <h4 class="fw-bold mb-1">VetCareSys</h4>
+          <p class="text-muted small mb-0">Your trusted companion in clinic management.</p>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="col-md-4 text-center">
+          <a href="index.php" class="footer-link">Home</a>
+          <a href="#about" class="footer-link">About</a>
+          <a href="#contact" class="footer-link">Contact</a>
+        </div>
+
+        <!-- Social Icons -->
+        <div class="col-md-4 text-center text-md-end">
+          <a href="#" class="footer-social"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="footer-social"><i class="bi bi-twitter"></i></a>
+          <a href="#" class="footer-social"><i class="bi bi-instagram"></i></a>
+        </div>
+
+      </div>
+
+      <div class="text-center pt-3">
+        <p class="text-muted small mb-0">&copy; 2025 VetCareSys. All rights reserved.</p>
+      </div>
+
     </div>
   </footer>
-
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
