@@ -1,20 +1,15 @@
 <?php
-require __DIR__ . '/vendor/autoload.php';
+// config.php
+$host = 'mysql1001.site4now.net';
+$db   = 'db_ac09f6_vetcare';
+$user = 'ac09f6_vetcare';
+$pass = 'A123456789';
+$charset = 'utf8mb4';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
-
-$host    = $_ENV['DB_HOST'];
-$db      = $_ENV['DB_NAME'];
-$user    = $_ENV['DB_USER'];
-$pass    = $_ENV['DB_PASS'];
-$charset = $_ENV['DB_CHARSET'] ?? 'utf8mb4';
-
-// Timezone
-date_default_timezone_set($_ENV['TIMEZONE'] ?? 'Asia/Manila');
+// Set the default timezone to Manila (Asia/Manila)
+date_default_timezone_set('Asia/Manila');
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -22,8 +17,8 @@ $options = [
 ];
 
 try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
+     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+     throw new PDOException($e->getMessage(), (int)$e->getCode());
 }
 ?>
