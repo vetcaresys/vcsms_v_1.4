@@ -9,9 +9,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'clinic_owner') {
 
 $user_id = $_SESSION['user_id'];
 
-/* ============================
-   GET USER INFORMATION
-   ============================ */
+// get user information
 $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -24,9 +22,7 @@ $profilePic = (!empty($user['profile_picture']) && file_exists($picPath))
 $name = htmlspecialchars($_SESSION['name']);
 
 
-/* ============================
-   GET CLINIC INFORMATION
-   ============================ */
+// get clinic information
 $stmt = $pdo->prepare("SELECT * FROM clinics WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $clinic = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -34,10 +30,7 @@ $clinic = $stmt->fetch(PDO::FETCH_ASSOC);
 $clinic_id = $clinic['clinic_id'] ?? null;
 $_SESSION['clinic_id'] = $clinic_id;
 
-
-/* ============================
-   DASHBOARD STATS
-   ============================ */
+// dashboard stats
 $totalAppointments = 0;
 $activeStaff = 0;
 $servicesOffered = 0;
@@ -73,9 +66,7 @@ if ($clinic_id) {
 }
 
 
-/* ============================
-   INCOME COMPUTATION SECTION
-   ============================ */
+// income computation section
 
 $dailyIncome = 0;
 $weeklyIncome = 0;
@@ -245,9 +236,9 @@ $end_default = date('Y-m-d');
             justify-content: center;
             font-size: 26px;
         }
-    </style>
+    /* </style>
 
-    <style>
+    <style> */
         .vcs-footer {
             background: #ffffff;
             border-top: 1px solid #e5e5e5;
@@ -313,22 +304,22 @@ $end_default = date('Y-m-d');
         }
 
         @media print {
-    body * {
-        visibility: hidden !important;
-    }
+            body * {
+                visibility: hidden !important;
+            }
 
-    #printSection, #printSection * {
-        visibility: visible !important;
-    }
+            #printSection,
+            #printSection * {
+                visibility: visible !important;
+            }
 
-    #printSection {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-    }
-}
-
+            #printSection {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
     </style>
 
 </head>
@@ -349,6 +340,17 @@ $end_default = date('Y-m-d');
         </script>
         <?php unset($_SESSION['success']);
     endif; ?>
+
+    <?php if (!empty($_SESSION['update_msg'])): ?>
+        <script>
+            Swal.fire({
+                icon: <?= (stripos($_SESSION['update_msg'], '❌') !== false || stripos($_SESSION['update_msg'], '⚠️') !== false) ? "'error'" : "'success'" ?>,
+                title: 'Profile Update',
+                text: <?= json_encode($_SESSION['update_msg']) ?>,
+                confirmButtonColor: '#3085d6'
+            });
+        </script>
+        <?php unset($_SESSION['update_msg']); endif; ?>
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
@@ -422,6 +424,7 @@ $end_default = date('Y-m-d');
             </div>
         </div>
     </nav>
+    
 
     <!-- Main Content -->
     <div class="container py-5">
@@ -547,12 +550,6 @@ $end_default = date('Y-m-d');
             </div>
         </div>
 
-        <!-- <div class="card mt-4">
-            <div class="card-body">
-                <h4 class="text-primary fw-bold mb-3"><i class="bi bi-graph-up"></i> Income Chart (Last 30 Days)</h4>
-                <canvas id="incomeChart" height="120"></canvas>
-            </div>
-        </div> -->
         <div class="containers mt-4">
 
             <div class="container">
@@ -626,63 +623,61 @@ $end_default = date('Y-m-d');
 
                     <!-- Table + Yearly Chart -->
                     <div class="row g-3">
+                        <div class="no-print">
+                            <button id="printBtn" class="btn btn-outline-secondary btn-sm me-2">
+                                <i class="bi bi-printer"></i> Print
+                            </button>
+                            <button id="exportPdfBtn" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                        <div id="exportSection" class="row g-3">
 
-                        <!-- Table -->
-                        <div class="col-lg-8">
-                            <div id="printSection">
-                                <div class="card p-3 border-1" style="border:1px solid #dee2e6;">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h5 class="mb-0">Detailed Income Table</h5>
-                                        <div class="no-print">
-                                            <button id="printBtn" class="btn btn-outline-secondary btn-sm me-2">
-                                                <i class="bi bi-printer"></i> Print
-                                            </button>
-                                            <button id="exportPdfBtn" class="btn btn-outline-primary btn-sm">
-                                                <i class="bi bi-file-earmark-pdf"></i> Export PDF
-                                            </button>
+                            <!-- Table -->
+                            <div class="col-lg-8">
+                                <div id="printSection">
+                                    <div class="card p-3 border-1" style="border:1px solid #dee2e6;">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h5 class="mb-0">Detailed Income Table</h5>
                                         </div>
-                                    </div>
 
-                                    <div class="table-wrap">
-                                        <table class="table table-hover table-bordered">
-                                            <thead class="table-light sticky-top">
-                                                <tr>
-                                                    <th>Date Used</th>
-                                                    <th>Record ID</th>
-                                                    <th>Pet</th>
-                                                    <th>Owner</th>
-                                                    <th>Item</th>
-                                                    <th>Quantity</th>
-                                                    <th>Unit Price</th>
-                                                    <th>Income (₱)</th>
-                                                    <th>Staff</th>
-                                                    <th>Notes</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="reportTableBody"></tbody>
-                                        </table>
+                                        <div class="table-wrap">
+                                            <table class="table table-hover table-bordered">
+                                                <thead class="table-light sticky-top">
+                                                    <tr>
+                                                        <th>Date Used</th>
+                                                        <th>Record ID</th>
+                                                        <th>Pet</th>
+                                                        <th>Owner</th>
+                                                        <th>Item</th>
+                                                        <th>Quantity</th>
+                                                        <th>Unit Price</th>
+                                                        <th>Income (₱)</th>
+                                                        <th>Staff</th>
+                                                        <th>Notes</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="reportTableBody"></tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Chart -->
-                        <div class="col-lg-4">
-                            <div class="card p-3 border-1" style="border:1px solid #dee2e6;">
-                                <h5 class="mb-3">Yearly Income (12 months)</h5>
-                                <canvas id="yearlyChart" height="220"></canvas>
+                            <!-- Chart -->
+                            <div class="col-lg-4">
+                                <div class="card p-3 border-1" style="border:1px solid #dee2e6;">
+                                    <h5 class="mb-3">Yearly Income (12 months)</h5>
+                                    <canvas id="yearlyChart" height="220"></canvas>
+                                </div>
                             </div>
+
                         </div>
 
                     </div>
-
                 </div> <!-- MAIN BORDER WRAPPER END -->
-
             </div>
         </div>
-
-    </div>
-
     </div>
 
     <!-- Profile Modal -->
@@ -824,6 +819,7 @@ $end_default = date('Y-m-d');
         </div>
     </div>
 
+    <!-- inquiry form -->
     <section id="contact" class="py-5">
         <div class="container">
             <h2 class="text-center mb-4">Have a Question?</h2>
@@ -850,6 +846,7 @@ $end_default = date('Y-m-d');
         </div>
     </section>
 
+    <!-- about us -->
     <section id="about" class="py-5" style="background-color: #f8f9fb; position: relative; z-index: 5;">
         <div class="container">
             <h2 class="text-center mb-4 fw-bold text-primary">About VetCareSys</h2>
@@ -921,35 +918,20 @@ $end_default = date('Y-m-d');
         </div>
     </footer>
 
+    <!-- Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/message_alert.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/logout.js"></script>
+    <script src="js/show_password.js"></script>
+    <script src="js/notification.js"></script>
+    <script src="js/report.js"></script>
 
-    <script>
-        // Check URL parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('sent') === '1') {
-            Swal.fire({
-                title: "Message Sent!",
-                text: "Your inquiry has been successfully submitted.",
-                icon: "success",
-                confirmButtonColor: "#0d6efd"
-            });
-        }
-    </script>
-
-    <?php if (!empty($_SESSION['update_msg'])): ?>
-        <script>
-            Swal.fire({
-                icon: <?= (stripos($_SESSION['update_msg'], '❌') !== false || stripos($_SESSION['update_msg'], '⚠️') !== false) ? "'error'" : "'success'" ?>,
-                title: 'Profile Update',
-                text: <?= json_encode($_SESSION['update_msg']) ?>,
-                confirmButtonColor: '#3085d6'
-            });
-        </script>
-        <?php unset($_SESSION['update_msg']); endif; ?>
-
-    <!-- JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.getElementById('toggleSidebar').addEventListener('click', function () {
             document.getElementById('sidebarMenu').classList.toggle('active');
@@ -970,420 +952,6 @@ $end_default = date('Y-m-d');
             });
         </script>
     <?php endif; ?>
-
-    <script>
-        document.getElementById('logoutBtn').addEventListener('click', function (e) {
-            e.preventDefault(); // Prevent form from submitting instantly
-
-            Swal.fire({
-                title: 'Are you sure you want to logout?',
-                text: "You’ll be logged out of your current session.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, logout',
-                cancelButtonText: 'No, stay here'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Submit the form only if confirmed
-                    document.getElementById('logoutForm').submit();
-                }
-            });
-        });
-    </script>
-
-    <!-- for the show password -->
-    <script>
-        document.querySelectorAll('.toggle-pass').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetId = btn.getAttribute('data-target');
-                const input = document.getElementById(targetId);
-                const icon = btn.querySelector('i');
-
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.classList.replace('bi-eye', 'bi-eye-slash');
-                } else {
-                    input.type = 'password';
-                    icon.classList.replace('bi-eye-slash', 'bi-eye');
-                }
-            });
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            loadAdminNotifications();
-
-            // Load when bell icon is clicked
-            document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
-
-            // 💡 NEW: Listener for Mark All button
-            document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
-        });
-
-        function loadAdminNotifications() {
-            fetch("../clinic_fetch_notifications.php")
-                .then(res => res.json())
-                .then(data => {
-                    const list = document.getElementById("notif_list");
-                    const count = document.getElementById("notif_count");
-                    const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
-
-                    list.innerHTML = "";
-                    let unreadCount = 0;
-
-                    if (!data || data.length === 0) {
-                        list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
-                        count.textContent = "";
-                        markAllBtn.disabled = true; // Disable button if no notifs
-                        return;
-                    }
-
-                    // Locate the loadAdminNotifications function and replace the following loop:
-                    data.forEach(n => {
-                        if (n.status === "unread") unreadCount++;
-
-                        list.innerHTML += `
-                        <li>
-                            <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
-                            data-id="${n.notif_id}">
-                                <div class="w-100"> 
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <small class="text-secondary fw-semibold" style="font-size: 0.75rem;">
-                                            <i class="bi bi-calendar"></i> ${n.display_date}
-                                        </small>
-                                        <small class="text-muted" style="font-size: 0.7rem;">
-                                            <i class="bi bi-clock"></i> ${n.display_time}
-                                        </small>
-                                    </div>
-
-                                    <span style="
-                                        font-size: 0.85rem; 
-                                        max-width: 100%; 
-                                        display: block; 
-                                        overflow: hidden; 
-                                        text-overflow: ellipsis; 
-                                        white-space: nowrap;
-                                        /* Conditional Style: Use font-weight: bold (700) if unread, normal (400) if read */
-                                        font-weight: ${n.status === "unread" ? '700' : '400'};
-                                    ">
-                                    ${n.status === "unread" ? `<span class="badge bg-danger ms-2">New</span>` : ""}
-
-                                        ${n.subject}
-
-                                    </span>
-                                    
-                                    <small class="text-muted" style="font-size: 0.78rem;">${n.message}</small>
-                                </div>
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider my-0"></li>
-                    `;
-                    });
-                    count.textContent = unreadCount > 0 ? unreadCount : "";
-                    markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
-                });
-        }
-
-        // 💡 NEW: Function to mark all notifications as read
-        function markAllAsRead() {
-            Swal.fire({
-                title: 'Mark all as read?',
-                text: "All current unread notifications will be marked as read.",
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, Mark All'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Fetch the new PHP endpoint to update the database
-                    fetch("../clinic_mark_all_as_read.php", { method: 'POST' })
-                        .then(response => {
-                            if (response.ok) {
-                                Swal.fire('Success!', 'All notifications marked as read.', 'success');
-                                // Reload the notifications immediately after success
-                                loadAdminNotifications();
-                            } else {
-                                Swal.fire('Error!', 'Could not mark all as read.', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Fetch error:', error);
-                            Swal.fire('Error!', 'Network or server issue.', 'error');
-                        });
-                }
-            });
-        }
-
-        // Mark as read when opening a notification (Your original function, updated for clarity)
-        document.addEventListener("click", function (e) {
-            if (e.target.closest(".notif-item")) {
-                const notifItem = e.target.closest(".notif-item");
-                const id = notifItem.dataset.id;
-                // Only send the request if it's currently marked as unread
-                if (notifItem.classList.contains('bg-light')) {
-                    fetch(`../mark_as_read.php?id=${id}`);
-                    // Simple visual update after click
-                    notifItem.classList.remove('bg-light');
-                    notifItem.querySelector('.badge')?.remove();
-                    loadAdminNotifications(); // Reload count
-                }
-            }
-        });
-    </script>
-
-
-    <!-- for the calendar -->
-    <script>
-        const monthYear = document.getElementById('monthYear');
-        const calendarDays = document.getElementById('calendarDays');
-        const selectedDateDisplay = document.getElementById('selectedDate');
-        const appointmentList = document.getElementById('appointmentList');
-
-        let date = new Date();
-        let selectedDate = null;
-        let appointments = {}; // Stores appointments grouped by date (YYYY-MM-DD)
-        let rawAppointments = []; // Stores the raw list of appointments from the PHP script
-
-        // Function to fetch and process data from PHP
-        async function fetchAppointments() {
-            // IMPORTANT: Replace 'get_appointments.php' with the correct path to your PHP file.
-            const url = 'fetch_all_appointments.php';
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const fetchedData = await response.json();
-
-                if (fetchedData.error) {
-                    console.error("Server Error:", fetchedData.error);
-                    return;
-                }
-
-                // Store the raw list for easy lookup in displayAppointments
-                rawAppointments = fetchedData;
-
-                // Group appointments by date
-                const newAppointments = {};
-                rawAppointments.forEach(appt => {
-                    const dateKey = appt.dateKey; // YYYY-MM-DD from PHP
-
-                    if (!newAppointments[dateKey]) {
-                        newAppointments[dateKey] = [];
-                    }
-                    newAppointments[dateKey].push(appt);
-                });
-
-                appointments = newAppointments;
-
-                console.log("Appointments loaded from DB:", appointments);
-                renderCalendar(); // Re-render to display the fetched appointments
-
-            } catch (error) {
-                console.error("Error fetching appointments:", error);
-            }
-        }
-
-        function renderCalendar() {
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const today = new Date();
-
-            monthYear.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-            calendarDays.innerHTML = '';
-
-            // Day Names Row
-            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            dayNames.forEach(name => {
-                const dayNameDiv = document.createElement('div');
-                dayNameDiv.textContent = name;
-                dayNameDiv.style.fontWeight = 'bold';
-                dayNameDiv.style.padding = '5px 15px';
-                dayNameDiv.style.textAlign = 'center';
-                calendarDays.appendChild(dayNameDiv);
-            });
-
-            // Empty cells for alignment
-            for (let i = 0; i < firstDay.getDay(); i++) {
-                const empty = document.createElement('div');
-                empty.classList.add('day'); // To match height/style
-                empty.style.minHeight = '100px';
-                empty.style.background = '#f2f4f8';
-                empty.style.cursor = 'default';
-                empty.style.boxShadow = 'none';
-                calendarDays.appendChild(empty);
-            }
-
-            // Day Cells
-            for (let day = 1; day <= lastDay.getDate(); day++) {
-                const dayDiv = document.createElement('div');
-                dayDiv.classList.add('day');
-
-                // Format date key to match PHP output: YYYY-MM-DD
-                const monthString = (month + 1).toString().padStart(2, '0');
-                const dayString = day.toString().padStart(2, '0');
-                const fullDate = `${year}-${monthString}-${dayString}`;
-
-                // Highlight today
-                if (
-                    day === today.getDate() &&
-                    month === today.getMonth() &&
-                    year === today.getFullYear()
-                ) {
-                    dayDiv.classList.add('today');
-                }
-
-                // Highlight selected date
-                if (fullDate === selectedDate) {
-                    dayDiv.classList.add('selected');
-                }
-
-                const number = document.createElement('div');
-                number.classList.add('day-number');
-                number.textContent = day;
-                dayDiv.appendChild(number);
-
-                // Mini appointment previews using fetched data
-                const dayAppointments = appointments[fullDate] || [];
-                dayAppointments.slice(0, 3).forEach(appt => {
-                    const mini = document.createElement('span');
-                    mini.classList.add('mini-appt');
-                    // Set the color based on the appointment status color from PHP
-                    mini.style.color = appt.color;
-                    mini.textContent = "• " + appt.title;
-                    dayDiv.appendChild(mini);
-                });
-
-                if (dayAppointments.length > 3) {
-                    const more = document.createElement('span');
-                    more.classList.add('mini-appt');
-                    more.textContent = `+${dayAppointments.length - 3} more`;
-                    dayDiv.appendChild(more);
-                }
-
-                dayDiv.addEventListener('click', () => selectDate(fullDate));
-                calendarDays.appendChild(dayDiv);
-            }
-            // Initial display for the current date if selectedDate is null
-            if (!selectedDate) {
-                selectDate(`${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`);
-            }
-        }
-
-        function selectDate(dateKey) {
-            // Clear previous selection highlight
-            document.querySelectorAll('.day.selected').forEach(el => el.classList.remove('selected'));
-            selectedDate = dateKey;
-
-            // Find and highlight the new selected day in the current view
-            const [_, month, day] = dateKey.split('-');
-            const currentViewMonth = date.getMonth() + 1;
-            if (parseInt(month) === currentViewMonth) {
-                // Find the dayDiv that contains the day number
-                const dayDivs = calendarDays.querySelectorAll('.day');
-                for (const div of dayDivs) {
-                    const dayNumberEl = div.querySelector('.day-number');
-                    if (dayNumberEl && parseInt(dayNumberEl.textContent) === parseInt(day)) {
-                        div.classList.add('selected');
-                        break;
-                    }
-                }
-            }
-
-            displayAppointments();
-        }
-
-        function displayAppointments() {
-            const displayDate = new Date(selectedDate);
-            selectedDateDisplay.textContent = `Appointments on ${displayDate.toDateString()}`;
-            const dayAppointments = appointments[selectedDate] || [];
-            appointmentList.innerHTML = '';
-
-            if (dayAppointments.length === 0) {
-                appointmentList.innerHTML = '<p class="no-appointments">No appointments yet.</p>';
-            } else {
-                dayAppointments.forEach(appt => {
-                    const div = document.createElement('div');
-                    div.className = 'appointment-card';
-
-                    // Set border color based on status from PHP
-                    div.style.borderLeftColor = appt.color;
-
-                    // Card Header (Pet Name - Service)
-                    const title = document.createElement('h4');
-                    title.textContent = appt.title;
-                    div.appendChild(title);
-
-                    // Time and Status
-                    const timeStatus = document.createElement('div');
-                    timeStatus.className = 'time-status';
-
-                    const timeSpan = document.createElement('span');
-                    timeSpan.textContent = appt.extendedProps.time;
-
-                    timeStatus.appendChild(timeSpan);
-
-                    const statusSpan = document.createElement('span');
-                    statusSpan.className = 'status-badge';
-                    statusSpan.textContent = appt.extendedProps.status;
-                    statusSpan.style.backgroundColor = appt.color; // Use the same color for the badge
-                    timeStatus.appendChild(statusSpan);
-
-                    div.appendChild(timeStatus);
-
-                    // Details
-                    const clinic = document.createElement('p');
-                    clinic.innerHTML = `<strong>Clinic:</strong> ${appt.extendedProps.clinic}`;
-                    div.appendChild(clinic);
-
-
-
-                    const doctor = document.createElement('p');
-                    doctor.innerHTML = `<strong>Doctor:</strong> ${appt.extendedProps.doctor} (${appt.extendedProps.specialization})`;
-                    div.appendChild(doctor);
-
-                    console.log("here" + appt.extendedProps.time);
-
-                    appointmentList.appendChild(div);
-                });
-            }
-        }
-
-        document.getElementById('prev').onclick = () => {
-            date.setMonth(date.getMonth() - 1);
-            // When changing months, keep the selected date if it exists in the new month
-            // Otherwise, default the selection to the 1st of the month.
-            const newDay = Math.min(parseInt(selectedDate.split('-')[2]), new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate());
-            const monthString = (date.getMonth() + 1).toString().padStart(2, '0');
-            const dayString = newDay.toString().padStart(2, '0');
-            selectedDate = `${date.getFullYear()}-${monthString}-${dayString}`;
-
-            renderCalendar();
-            displayAppointments();
-        };
-
-        document.getElementById('next').onclick = () => {
-            date.setMonth(date.getMonth() + 1);
-            // When changing months, keep the selected date if it exists in the new month
-            const newDay = Math.min(parseInt(selectedDate.split('-')[2]), new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate());
-            const monthString = (date.getMonth() + 1).toString().padStart(2, '0');
-            const dayString = newDay.toString().padStart(2, '0');
-            selectedDate = `${date.getFullYear()}-${monthString}-${dayString}`;
-
-            renderCalendar();
-            displayAppointments();
-        };
-
-        // Start the process: fetch data, then render the calendar.
-        fetchAppointments(); 
-    </script>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -1426,164 +994,6 @@ $end_default = date('Y-m-d');
                 });
         });
     </script>
-
-    <!-- Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <script>
-        // Helpers
-        function fmt(num) {
-            return new Intl.NumberFormat('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
-        }
-
-        async function fetchRange(start, end) {
-            const params = new URLSearchParams({ start, end });
-            const res = await fetch(`fetch_income_range.php?${params.toString()}`);
-            const data = await res.json();
-            return data;
-        }
-
-        async function fetchYearly() {
-            const res = await fetch('fetch_yearly_income.php');
-            return await res.json();
-        }
-
-        async function loadReport(start, end) {
-            document.getElementById('reportTableBody').innerHTML = '<tr><td colspan="10" class="text-center p-3">Loading...</td></tr>';
-            const data = await fetchRange(start, end);
-
-            if (data.error) {
-                alert(data.error);
-                return;
-            }
-
-            // populate table rows
-            const tbody = document.getElementById('reportTableBody');
-            tbody.innerHTML = '';
-            let total = 0;
-            let count = 0;
-            const dailyTotals = {};
-
-            data.rows.forEach(row => {
-                count++;
-                total += parseFloat(row.income);
-
-                // sum per day
-                dailyTotals[row.date_used] = (dailyTotals[row.date_used] || 0) + parseFloat(row.income);
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                <td>${row.date_used}</td>
-                <td>${row.record_id}</td>
-                <td>${row.pet_name || ''}</td>
-                <td>${row.owner_name || ''}</td>
-                <td>${row.item_name || ''}</td>
-                <td>${row.quantity_used}</td>
-                <td>₱${fmt(row.unit_price)}</td>
-                <td>₱${fmt(row.income)}</td>
-                <td>${row.staff_name || ''}</td>
-                <td>${row.notes || ''}</td>
-            `;
-                tbody.appendChild(tr);
-            });
-
-            // summary
-            document.getElementById('totalIncome').textContent = '₱' + fmt(total);
-            document.getElementById('totalCount').textContent = `${count} rows`;
-
-            // highest day
-            let highestDay = null, highestAmt = 0;
-            Object.entries(dailyTotals).forEach(([d, amt]) => {
-                if (amt > highestAmt) { highestAmt = amt; highestDay = d; }
-            });
-
-            document.getElementById('highestDay').textContent = highestDay ?? '—';
-            document.getElementById('highestAmount').textContent = '₱' + fmt(highestAmt);
-
-            // avg per day
-            const days = Object.keys(dailyTotals).length || 1;
-            document.getElementById('averageDay').textContent = '₱' + fmt(total / days);
-            document.getElementById('daysCount').textContent = `${days} days`;
-        }
-
-        // Print
-        document.getElementById('printBtn').addEventListener('click', () => {
-            window.print();
-        });
-
-        // Export PDF (jsPDF + html2canvas)
-        document.getElementById('exportPdfBtn').addEventListener('click', async () => {
-            const optTitle = `Income_Report_${document.getElementById('startDate').value}_${document.getElementById('endDate').value}`;
-            const element = document.querySelector('.container');
-            // capture
-            const canvas = await html2canvas(element, { scale: 2 });
-            const imgData = canvas.toDataURL('image/png');
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            // Calculate width and height to fit A4
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
-            pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pdfHeight);
-            pdf.save(optTitle + '.pdf');
-        });
-
-        // quick range logic
-        document.getElementById('quickRange').addEventListener('change', (e) => {
-            const val = e.target.value;
-            if (!val) return;
-            const days = parseInt(val);
-            const end = new Date();
-            const start = new Date();
-            start.setDate(end.getDate() - (days - 1));
-            document.getElementById('startDate').value = start.toISOString().slice(0, 10);
-            document.getElementById('endDate').value = end.toISOString().slice(0, 10);
-        });
-
-        // apply button
-        document.getElementById('applyBtn').addEventListener('click', () => {
-            const s = document.getElementById('startDate').value;
-            const e = document.getElementById('endDate').value;
-            if (!s || !e) return alert('Please select a date range');
-            loadReport(s, e);
-        });
-
-        // initial load
-        (async function () {
-            const s = document.getElementById('startDate').value;
-            const e = document.getElementById('endDate').value;
-            await loadReport(s, e);
-
-            // Yearly chart
-            const yearly = await fetchYearly();
-            const ctx = document.getElementById('yearlyChart').getContext('2d');
-            const months = yearly.months || [];
-            const incomes = yearly.incomes || [];
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Income (₱)',
-                        data: incomes,
-                        borderRadius: 6,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true, ticks: { callback: val => '₱' + val } }
-                    }
-                }
-            });
-
-        })();
-    </script>
-
 </body>
 
 </html>

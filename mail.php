@@ -5,19 +5,29 @@ use PHPMailer\PHPMailer\Exception;
 
 require 'vendor/autoload.php';
 
+// Load .env
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 $mail = new PHPMailer(true);
 
-$mail->isSMTP();
-$mail->Host       = 'smtp.gmail.com';
-$mail->SMTPAuth   = true;
-$mail->Username   = 'vetcaresys@gmail.com';
-$mail->Password   = 'ddghlcrdfyroulbj'; // your app password
-$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-$mail->Port       = 587;
+try {
+    $mail->isSMTP();
+    $mail->Host       = $_ENV['MAIL_HOST'];
+    $mail->SMTPAuth   = true;
+    $mail->Username   = $_ENV['MAIL_USERNAME'];
+    $mail->Password   = $_ENV['MAIL_PASSWORD'];
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = $_ENV['MAIL_PORT'];
 
-$mail->isHTML(true);
+    $mail->isHTML(true);
 
-// Optional debugging line
-// $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+    // Optional debugging line
+    // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
 
-return $mail;
+    $mail->setFrom($_ENV['MAIL_FROM'], $_ENV['MAIL_FROM_NAME']);
+
+    return $mail;
+} catch (Exception $e) {
+    echo "Mailer Error: " . $e->getMessage();
+}
