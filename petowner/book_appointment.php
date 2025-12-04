@@ -212,136 +212,6 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
 
 <body class="bg-light">
 
-    <?php include 'booking_alert.php' ?>
-    <?php include 'navbar.php' ?>
-    <?php include 'user_profile_modal.php' ?>
-    <?php include 'appointment_booking_header.php' ?>
-    <?php include 'pending_appointments.php' ?>
-    <?php include 'approved_appointments.php' ?>
-    <?php include 'booking_modal.php' ?>
-    <?php include 'footer.php'; ?>
-
-    <script src="js/cancel_appointment.js"></script>
-    <script src="js/doctor_schedule_loader.js"></script>
-    <script src="js/profile_toggle.js"></script>
-    <script src="js/cancel_appointment.js"></script>
-    <script src="js/clinic_selector.js"></script>
-
-    <script>
-        function validatePhone(input) {
-            // Allow only digits while typing
-            input.value = input.value.replace(/[^0-9]/g, '');
-
-            // Regex validation (must start with 09 and be 11 digits)
-            const regex = /^09\d{9}$/;
-            if (!regex.test(input.value)) {
-                input.setCustomValidity("Invalid phone number. Must start with 09 and be 11 digits long.");
-            } else {
-                input.setCustomValidity("");
-            }
-        }
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('clinicSelect').addEventListener('change', function () {
-            const clinicId = this.value;
-            const serviceSelect = document.getElementById('serviceSelect');
-
-            if (!clinicId) {
-                serviceSelect.innerHTML = '<option value="">Please select a clinic first</option>';
-                serviceSelect.disabled = true;
-                return;
-            }
-
-            // Fetch services from PHP
-            fetch('get_services.php?clinic_id=' + clinicId)
-                .then(res => res.json())
-                .then(data => {
-                    serviceSelect.innerHTML = '';
-                    if (data.length > 0) {
-                        serviceSelect.disabled = false;
-                        serviceSelect.innerHTML = '<option value="">-- Select Service --</option>';
-                        data.forEach(service => {
-                            const opt = document.createElement('option');
-                            opt.value = service.service_id;
-                            opt.textContent = `${service.service_name}`;
-                            serviceSelect.appendChild(opt);
-                        });
-                    } else {
-                        serviceSelect.disabled = true;
-                        serviceSelect.innerHTML = '<option value="">No services available</option>';
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    serviceSelect.disabled = true;
-                    serviceSelect.innerHTML = '<option value="">Error loading services</option>';
-                });
-        });
-    </script>
-
-    <script>
-        // for the get_doctors.php
-        document.getElementById('clinicSelect').addEventListener('change', function () {
-            const clinicId = this.value;
-            const doctorSelect = document.getElementById('doctorSelect');
-
-            if (!clinicId) {
-                doctorSelect.innerHTML = '<option value="">-- Optional: Select Doctor --</option>';
-                doctorSelect.disabled = true;
-                return;
-            }
-
-            fetch('get_doctors.php?clinic_id=' + clinicId)
-                .then(res => res.json())
-                .then(data => {
-                    const doctorSelect = document.getElementById('doctorSelect');
-                    doctorSelect.innerHTML = '<option value="">Select Doctor</option>';
-
-                    if (data.length > 0) {
-                        doctorSelect.disabled = false;
-                        data.forEach(doctor => {
-                            const opt = document.createElement('option');
-                            opt.value = doctor.doctor_id; // make sure this matches your PHP output
-                            opt.textContent = doctor.name + " (" + doctor.specialization + ")";
-                            doctorSelect.appendChild(opt);
-                        });
-                    } else {
-                        doctorSelect.disabled = true;
-                        doctorSelect.innerHTML = '<option value="">No doctors available</option>';
-                    }
-                });
-
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const searchInput = document.getElementById("searchInput");
-            const statusFilter = document.getElementById("statusFilter");
-            const rows = document.querySelectorAll("#appointmentsTable tbody tr");
-
-            function filterTable() {
-                const searchText = searchInput.value.toLowerCase();
-                const statusValue = statusFilter.value.toLowerCase();
-
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    const status = row.querySelector("td:last-child").textContent.toLowerCase();
-
-                    const matchesSearch = text.includes(searchText);
-                    const matchesStatus = !statusValue || status.includes(statusValue);
-
-                    row.style.display = (matchesSearch && matchesStatus) ? "" : "none";
-                });
-            }
-
-            searchInput.addEventListener("keyup", filterTable);
-            statusFilter.addEventListener("change", filterTable);
-        });
-    </script>
-
     <?php if (isset($_SESSION['profile_msg'])): ?>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -356,119 +226,30 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
         <?php unset($_SESSION['profile_msg']);
     endif; ?>
 
+    <?php include 'booking_alert.php' ?>
+    <?php include 'navbar.php' ?>
+    <?php include 'user_profile_modal.php' ?>
+    <?php include 'appointment_booking_header.php' ?>
+    <?php include 'pending_appointments.php' ?>
+    <?php include 'approved_appointments.php' ?>
+    <?php include 'booking_modal.php' ?>
+    <?php include 'footer.php'; ?>
 
-    <script>
-        function confirmLogout() {
-            Swal.fire({
-                title: "Logout?",
-                text: "Are you sure you want to log out?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#dc3545",
-                cancelButtonColor: "#6c757d",
-                confirmButtonText: "Yes, logout"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('logoutForm').submit();
-                }
-            });
-        }
-    </script>
-    <script>
-        $(document).ready(function () {
-            $('#appointmentsTable').DataTable({
-                "pageLength": 5, // default 5 per page
-                "lengthMenu": [5, 10, 25, 50], // options
-                "ordering": true,
-                "info": true, // enables "Showing 1 to X of Y entries"
-                "language": {
-                    "search": "🔍 Search:"
-                }
-            });
-        });
-    </script>
+    <script src="js/cancel_appointment.js"></script>
+    <script src="js/doctor_schedule_loader.js"></script>
+    <script src="js/profile_toggle.js"></script>
+    <script src="js/cancel_appointment.js"></script>
+    <script src="js/clinic_selector.js"></script>
+    <script src="js/validation.js"></script>
+    <script src="js/logout_confirm.js"></script>
+    <script src="js/clinic_services.js"></script>
+    <script src="js/appointment_refresh.js"></script>
+    <script src="js/clinic_schedule.js"></script>
+    <script src="js/password_toggle.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        let lastUpdated = null;
-
-        function refreshAppointments() {
-            $.get('get_appointments.php', function (data) {
-                const table = $('#appointmentsTable').DataTable();
-
-                const temp = $('<table>').html(data);
-                const newest = $(temp).find('tr:first').data('updated');
-
-                // Notify if something changed
-                if (lastUpdated && newest !== lastUpdated) {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Appointment Updated',
-                        text: 'One or more of your appointments have been changed by the clinic.',
-                        timer: 4000,
-                        showConfirmButton: false
-                    });
-                }
-
-                lastUpdated = newest;
-
-                table.clear().draw();
-                $('#appointmentsTable tbody').html(data);
-                table.rows.add($('#appointmentsTable tbody tr')).draw(); // re-init
-            });
-        }
-
-        // Poll every 15 seconds
-        setInterval(refreshAppointments, 15000);
-
-        // Load immediately
-        refreshAppointments();
-    </script>
-
-    <script>
-        $(document).ready(function () {
-            $('#clinicSelect').on('change', function () {
-                var clinicId = $(this).val();
-
-                if (clinicId) {
-                    $.ajax({
-                        url: 'get_clinic_schedule.php',
-                        method: 'GET',
-                        data: { clinic_id: clinicId },
-                        success: function (response) {
-                            $('#clinicScheduleDisplay').html(response);
-                        },
-                        error: function () {
-                            $('#clinicScheduleDisplay').html('<div class="text-danger">Failed to load schedule. Try again.</div>');
-                        }
-                    });
-                } else {
-                    $('#clinicScheduleDisplay').html('Please select a clinic to view available schedules.');
-                }
-            });
-        });
-    </script>
-
-    <script>
-        document.getElementById('logoutBtn').addEventListener('click', function (e) {
-            e.preventDefault(); // Prevent form from submitting instantly
-
-            Swal.fire({
-                title: 'Are you sure you want to logout?',
-                text: "You’ll be logged out of your current session.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, logout',
-                cancelButtonText: 'No, stay here'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Submit the form only if confirmed
-                    document.getElementById('logoutForm').submit();
-                }
-            });
-        });
-    </script>
+    <!-- notifications -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             loadAdminNotifications();
@@ -591,25 +372,6 @@ $approvedAppointments = $approvedStmt->fetchAll(PDO::FETCH_ASSOC);
                     loadAdminNotifications(); // Reload count
                 }
             }
-        });
-    </script>
-
-    <!-- for the show password -->
-    <script>
-        document.querySelectorAll('.toggle-pass').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetId = btn.getAttribute('data-target');
-                const input = document.getElementById(targetId);
-                const icon = btn.querySelector('i');
-
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.classList.replace('bi-eye', 'bi-eye-slash');
-                } else {
-                    input.type = 'password';
-                    icon.classList.replace('bi-eye-slash', 'bi-eye');
-                }
-            });
         });
     </script>
 </body>

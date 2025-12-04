@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($user['role'] !== 'admin' && !$user['is_verified']) {
       $_SESSION['resend_email'] = $email;
       $_SESSION['error'] = "Please verify your email before logging in. 
-                <a href='resend_verification.php' class='btn btn-sm btn-link'>Resend Verification Email</a>";
+                <a href='resend_verification.php' class='btn btn-sm btn-link'>Send Verification Email</a>";
       header('Location: login.php');
       exit; // redirect clears the POST
     } elseif ($user['role'] === 'clinic_owner') {

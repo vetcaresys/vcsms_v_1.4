@@ -15,16 +15,12 @@ unset($_SESSION['resend_email']); // para dili magsige resend
  * 🔹 Helper function: Build one email template for all accounts
  */
 function buildVerificationEmail($name, $email, $token, $extraParams = '') {
-    $verifyUrl = "https://localhost/vcsms_v_1.4/verify.php?email=" . urlencode($email) . "&token=$token" . $extraParams;
-
-    // Change to your actual hosted logo path
-    $clinicLogo = "https://localhost/vcsms_v_1.4/assets/img/VetCareSystemLogo.png"; 
+    $verifyUrl = "https://localhost/vcsms_v_1.4/verify.php?email=" . urlencode($email) . "&token=$token" . $extraParams; 
 
     return "
     <div style='font-family: Arial, sans-serif; padding:20px; background:#f4f6f9;'>
         <div style='max-width:600px; margin:0 auto; background:#fff; border-radius:8px; overflow:hidden;'>
             <div style='background:#0984e3; color:white; text-align:center; padding:15px;'>
-                <img src='$clinicLogo' alt='VetCareSys' style='max-height:60px;'><br>
                 <h2 style='margin:10px 0;'>VetCareSys</h2>
             </div>
             <div style='padding:20px; color:#333;'>
