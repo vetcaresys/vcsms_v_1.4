@@ -202,6 +202,22 @@ $stmt = $pdo->prepare("
 $stmt->execute([$clinic_id]);
 $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+if (isset($_POST['doctor_id'])) {
+    $doctor_id = $_POST['doctor_id'];
+
+    $stmt = $pdo->prepare("
+        SELECT day_of_week, start_time, end_time
+        FROM doctor_visits
+        WHERE doctor_id = ? AND clinic_id = ?
+        ORDER BY FIELD(day_of_week, 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')
+    ");
+    $stmt->execute([$doctor_id, $clinic_id]);
+
+    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+    exit;
+}
+
+
 // --- Staff profile info ---
 $staff_id = $_SESSION['staff_id'];
 $stmt = $pdo->prepare("SELECT * FROM staff WHERE staff_id = ?");
@@ -343,12 +359,6 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                         <div class="alert alert-success"><?php echo $update_message; ?></div>
                     <?php endif; ?>
 
-                    <!-- View Doctor Visits Button -->
-                    <div class="mb-3 text-end">
-                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#doctorVisitsModal">
-                            View Doctor Visits
-                        </button>
-                    </div>
                     <thead class="table-primary">
                         <tr>
                             <th>Pet</th>
@@ -392,19 +402,22 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                 <td>
                                     <?php if ($appt['status'] === 'pending'): ?>
                                         <a href="#" class="btn btn-sm btn-info text-white view-appointment"
-                                            data-id="<?= $appt['appointment_id']; ?>">
-                                            <i class="bi bi-eye"></i> View
+                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle="tooltip"
+                                            data-bs-placement="top" title="View Record">
+                                            <i class="bi bi-eye"></i>
                                         </a>
                                         <a href="?update=<?= $appt['appointment_id']; ?>&status=approved"
                                             class="btn btn-sm btn-success me-1 action-appointment" data-status="approved"
-                                            data-id="<?= $appt['appointment_id']; ?>">
-                                            Approve
+                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle="tooltip"
+                                            data-bs-placement="top" title="Approve Record">
+                                            <i class="bi bi-check-circle-fill"></i>
                                         </a>
                                     <?php elseif ($appt['status'] === 'approved'): ?>
                                         <a href="?update=<?= $appt['appointment_id']; ?>&status=completed"
                                             class="btn btn-sm btn-primary me-1 action-appointment" data-status="completed"
-                                            data-id="<?= $appt['appointment_id']; ?>">
-                                            Complete
+                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle="tooltip"
+                                            data-bs-placement="top" title="Approve Record">
+                                            <i class="bi bi-check2-square"></i>
                                         </a>
                                     <?php else: ?>
                                         <em class="text-muted">No further actions</em>
@@ -556,70 +569,6 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         </div>
     </div>
 
-    <!-- 🩺 Doctor Visits Modal -->
-    <div class="modal fade" id="doctorVisitsModal" tabindex="-1" aria-labelledby="doctorVisitsModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content shadow-lg">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="doctorVisitsModalLabel">Doctor Visit Schedules</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <?php
-                    // 🩺 Fetch doctor visit schedules for this clinic
-                    $stmt = $pdo->prepare("
-                    SELECT dv.*, d.name AS doctor_name
-                    FROM doctor_visits dv
-                    JOIN staff d ON dv.doctor_id = d.staff_id
-                    WHERE dv.clinic_id = ?
-                    ORDER BY d.name, FIELD(dv.day_of_week, 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'), dv.start_time
-                ");
-                    $stmt->execute([$clinic_id]);
-                    $doctorVisits = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                    if (count($doctorVisits) > 0):
-                        // Group by doctor
-                        $grouped = [];
-                        foreach ($doctorVisits as $visit) {
-                            $grouped[$visit['doctor_name']][] = $visit;
-                        }
-                        ?>
-                        <?php foreach ($grouped as $doctorName => $visits): ?>
-                            <div class="card mb-3 border-0 shadow-sm">
-                                <div class="card-header bg-light fw-bold">
-                                    👨‍⚕️ Dr. <?= htmlspecialchars($doctorName) ?>
-                                </div>
-                                <div class="card-body p-0">
-                                    <table class="table table-striped mb-0">
-                                        <thead class="table-secondary">
-                                            <tr>
-                                                <th>Day</th>
-                                                <th>Start Time</th>
-                                                <th>End Time</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($visits as $v): ?>
-                                                <tr>
-                                                    <td><?= htmlspecialchars($v['day_of_week']) ?></td>
-                                                    <td><?= date("h:i A", strtotime($v['start_time'])) ?></td>
-                                                    <td><?= date("h:i A", strtotime($v['end_time'])) ?></td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="alert alert-info text-center">No doctor visit schedules found for this clinic.</div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- 👁️ View & Edit Appointment Modal -->
     <div class="modal fade" id="viewAppointmentModal" tabindex="-1" aria-labelledby="viewAppointmentModalLabel"
         aria-hidden="true">
@@ -720,6 +669,60 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             </div>
         </div>
     </div>
+
+   <script>
+    document.getElementById("edit_doctor_id").addEventListener("change", function () {
+    let doctorId = this.value;
+
+    let visitBox = document.getElementById("doctorVisits");
+    visitBox.innerHTML = "<em class='text-muted'>Loading...</em>";
+
+    if (doctorId === "") {
+        visitBox.innerHTML = "<em class='text-muted'>Select a doctor to view visitations...</em>";
+        return;
+    }
+
+    // AJAX request
+    fetch("", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "doctor_id=" + doctorId
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                visitBox.innerHTML = "<em class='text-danger'>No visitation schedule found for this doctor.</em>";
+                return;
+            }
+
+            let html = "";
+            data.forEach(v => {
+                html += `
+                    <div class="p-2 mb-1 border rounded bg-white">
+                        <strong>${v.day_of_week}</strong><br>
+                        ${formatTime(v.start_time)} - ${formatTime(v.end_time)}
+                    </div>
+                `;
+            });
+
+            visitBox.innerHTML = html;
+        })
+        .catch(err => {
+            visitBox.innerHTML = "<em class='text-danger'>Error loading visitations.</em>";
+            console.error(err);
+        });
+});
+
+// Helper: convert 24h → 12h format
+function formatTime(timeString) {
+    let [hour, minute] = timeString.split(":");
+    let h = parseInt(hour);
+    let ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    return `${h}:${minute} ${ampm}`;
+}
+
+   </script>
 
     <script>
         $(document).ready(function () {
@@ -862,7 +865,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
     <script>
         $(document).ready(function () {
             $('#appointmentsTable').DataTable({
-                "pageLength": 10,
+                "pageLength": 5,
                 "lengthMenu": [5, 10, 25, 50, 100],
                 "order": [], // ❌ remove auto-sorting
                 "language": {

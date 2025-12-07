@@ -44,8 +44,6 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- FullCalendar CSS + JS -->
-
     <style>
         #calendar {
             max-width: 100%;
@@ -57,421 +55,34 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
             font-weight: 500;
         }
     </style>
-
-
     <link rel="stylesheet" href="css/index.css">
 </head>
 
 <body class="bg-light">
 
-    <!-- 🌟 Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="index.php">VetCareSys</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="topNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a href="index.php" class="nav-link text-white">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="visitation.php" class="nav-link text-white">Visitations</a>
-                    </li>
-                </ul>
+    <?php if (isset($_SESSION['success'])): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Successful',
+                text: 'Welcome back!',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        </script>
+        <?php unset($_SESSION['success']); endif; ?>
 
-                <ul class="navbar-nav mb-2 mb-lg-0">
-                    <li class="nav-item dropdown me-3">
-                        <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown">
-                            <i class="bi bi-bell-fill" style="font-size: 1.35rem;"></i>
-                            <span id="notif_count"
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                style="font-size: 0.65rem; padding: 3px 6px;">
-                            </span>
-                        </a>
+    <?php include 'includes/navbar.php' ?>
 
-                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 320px; max-height: 400px;"
-                            id="notif_list_container">
+    <?php include 'includes/dashboard.php' ?>
 
-                            <li class="d-flex justify-content-between align-items-center mb-2 px-2">
-                                <h6 class="mb-0">Notifications</h6>
-                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none"
-                                    style="font-size: 0.8rem;" disabled>
-                                    Mark all as read
-                                </button>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
+    <?php include 'includes/add_edit_profile_modal.php' ?>
 
-                            <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
-                                <li class="text-center text-muted">Loading...</li>
-                            </div>
-                        </ul>
-                    </li>
-                </ul>
-
-                <div class="dropdown"> <a href="#"
-                        class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
-                        id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile" class="rounded-circle me-2"
-                            width="35" height="35">
-                        <strong><?= $name ?></strong>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal"><i
-                                    class="bi bi-person"></i> My Profile</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <form method="POST" action="../logout.php" id="logoutForm" class="m-0">
-                                <button class="dropdown-item text-danger" type="submit" class="btn btn-light btn-sm" id="logoutBtn"><i
-                                        class="bi bi-box-arrow-right"></i> Logout</button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-dark">Doctor Dashboard</h2>
-            <span class="text-muted">Updated every 15s</span>
-        </div>
-
-        <div class="row g-4" id="dashboard-widgets">
-            <!-- Realtime doctor cards -->
-        </div>
-
-        <div class="containers mt-4">
-        <div class="calendar">
-            <header>
-                <button id="prev">&#8592;</button>
-                <h2 id="monthYear"></h2>
-                <button id="next">&#8594;</button>
-            </header>
-            <div class="days" id="calendarDays"></div>
-        </div>
-
-        <div class="appointments">
-            <h3 id="selectedDate">Select a date</h3>
-            <div id="appointmentList"></div>
-        </div>
-        </div>
-
-    </div>
-
-    <!-- Profile Modal -->
-    <div class="modal fade" id="profileModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-
-                <!-- View Profile -->
-                <div id="viewProfile">
-                    <div class="modal-header">
-                        <h5 class="modal-title">My Profile</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body text-center">
-
-                        <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile" class="rounded-circle mb-3"
-                            width="100">
-
-                        <h4 class="fw-bold mb-3"><?= $name ?></h4>
-
-                        <div class="table-responsive">
-                            <table class="table table-bordered align-middle text-start">
-                                <tbody>
-                                    <!-- Staff Info -->
-                                    <tr>
-                                        <th width="35%">Email</th>
-                                        <td><?= htmlspecialchars($doctor['email']) ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Contact Number</th>
-                                        <td><?= htmlspecialchars($doctor['contact_number']) ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Role</th>
-                                        <td><?= htmlspecialchars($doctor['role']) ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Clinic</th>
-                                        <td><?= htmlspecialchars($_SESSION['clinic_name'] ?? 'N/A') ?></td>
-                                    </tr>
-
-                                    <!-- Doctor Info -->
-                                    <tr>
-                                        <th>Specialization</th>
-                                        <td><?= htmlspecialchars($doctorInfo['specialization'] ?? 'N/A') ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Education</th>
-                                        <td><?= htmlspecialchars($doctorInfo['education'] ?? 'N/A') ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Years of Experience</th>
-                                        <td><?= htmlspecialchars($doctorInfo['experience'] ?? 'N/A') ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>License Number</th>
-                                        <td><?= htmlspecialchars($doctorInfo['license_no'] ?? 'N/A') ?></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary" onclick="toggleEdit(true)">Edit Profile</button>
-                    </div>
-
-                </div>
-
-                <script>
-                    function submitProfileForm() {
-                        Swal.fire({
-                            title: "Profile Updated!",
-                            text: "Your profile has been successfully updated.",
-                            icon: "success",
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then(() => {
-                            document.getElementById("editProfileForm").submit();
-                        });
-                    }
-                </script>
-
-                <!-- Edit Profile -->
-                <div id="editProfile" style="display:none;">
-                    <form id="editProfileForm" action="update_profile.php" method="POST" enctype="multipart/form-data">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Edit Profile</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Full Name</label>
-                                <input type="text" name="name" class="form-control"
-                                    value="<?= htmlspecialchars($doctor['name']) ?>" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control"
-                                    value="<?= htmlspecialchars($doctor['email']) ?>" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Contact Number</label>
-                                <input type="text" name="contact_number" class="form-control"
-                                    value="<?= htmlspecialchars($doctor['contact_number']) ?>">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Profile Picture</label>
-                                <input type="file" name="profile_picture" class="form-control">
-                            </div>
-
-                            <hr>
-                            <h6 class="fw-bold mt-3">Doctor Details</h6>
-
-                            <div class="mb-3">
-                                <label class="form-label">Specialization</label>
-                                <input type="text" name="specialization" class="form-control"
-                                    value="<?= htmlspecialchars($doctorInfo['specialization'] ?? '') ?>">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Educational Background</label>
-                                <input type="text" name="education" class="form-control"
-                                    value="<?= htmlspecialchars($doctorInfo['education'] ?? '') ?>">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Years of Experience</label>
-                                <input type="text" name="experience" class="form-control"
-                                    value="<?= htmlspecialchars($doctorInfo['experience'] ?? '') ?>">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">License Number</label>
-                                <input type="text" name="license_no" class="form-control"
-                                    value="<?= htmlspecialchars($doctorInfo['license_no'] ?? '') ?>">
-                            </div>
-
-                            <hr>
-                            <h6 class="text-primary">Change Password (optional)</h6>
-
-                            <!-- Current Password -->
-                            <div class="mb-3 position-relative">
-                                <label class="form-label">Current Password</label>
-                                <div class="input-group">
-                                    <input type="password" name="current_password" id="currentPassword"
-                                        class="form-control" placeholder="Enter current password">
-                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
-                                        data-target="currentPassword">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- New Password -->
-                            <div class="mb-3 position-relative">
-                                <label class="form-label">New Password</label>
-                                <div class="input-group">
-                                    <input type="password" name="new_password" id="newPassword" class="form-control"
-                                        minlength="6" placeholder="Enter new password">
-                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
-                                        data-target="newPassword">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Confirm Password -->
-                            <div class="mb-3 position-relative">
-                                <label class="form-label">Confirm New Password</label>
-                                <div class="input-group">
-                                    <input type="password" name="confirm_password" id="confirmPassword"
-                                        class="form-control" minlength="6" placeholder="Re-enter new password">
-                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
-                                        data-target="confirmPassword">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="modal-footer d-flex">
-                            <button type="button" class="btn btn-success" onclick="submitProfileForm()">
-                                Save Changes
-                            </button>
-                            <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-            </div>
-        </div>
-    </div>
+    <?php include 'includes/footer.php' ?>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- for the logout session -->
-    <script>
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            Swal.fire({
-                title: 'Are you sure you want to logout?',
-                text: "You’ll be logged out of your current session.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, logout',
-                cancelButtonText: 'No, stay here'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('logoutForm').submit();
-                }
-            });
-        });
-    </script>
-    <script>
-        async function loadDashboard() {
-            let res = await fetch("doctor_dashboard.php");
-            let data = await res.json();
 
-            document.getElementById("dashboard-widgets").innerHTML = `
-    <div class="col-md-3">
-      <div class="card shadow-sm border-0">
-        <div class="card-body d-flex align-items-center">
-          <div class="me-3 bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
-            <i class="bi bi-hourglass-split fs-4"></i>
-          </div>
-          <div>
-            <h6 class="mb-1 text-muted">Pending Appointments</h6>
-            <h4 class="mb-0">${data.pending || 0}</h4>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card shadow-sm border-0">
-        <div class="card-body d-flex align-items-center">
-          <div class="me-3 bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
-            <i class="bi bi-calendar-check fs-4"></i>
-          </div>
-          <div>
-            <h6 class="mb-1 text-muted">Today’s Appointments</h6>
-            <h4 class="mb-0">${data.today || 0}</h4>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card shadow-sm border-0">
-        <div class="card-body d-flex align-items-center">
-          <div class="me-3 bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
-            <i class="bi bi-check-circle fs-4"></i>
-          </div>
-          <div>
-            <h6 class="mb-1 text-muted">Completed</h6>
-            <h4 class="mb-0">${data.completed || 0}</h4>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card shadow-sm border-0">
-        <div class="card-body d-flex align-items-center">
-          <div class="me-3 bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
-            <i class="bi bi-heart-pulse fs-4"></i>
-          </div>
-          <div>
-            <h6 class="mb-1 text-muted">Pets Handled</h6>
-            <h4 class="mb-0">${data.pets || 0}</h4>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card shadow-sm border-0">
-        <div class="card-body d-flex align-items-center">
-          <div class="me-3 bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
-            <i class="bi bi-journal-medical fs-4"></i>
-          </div>
-          <div>
-            <h6 class="mb-1 text-muted">Records Added</h6>
-            <h4 class="mb-0">${data.records || 0}</h4>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-        }
-        loadDashboard();
-        setInterval(loadDashboard, 15000);
-
-    </script>
-
-    <script>
-        function toggleEdit(editMode) {
-            if (!editMode) {
-                document.querySelector("#editProfile form").reset();
-            }
-            document.getElementById("viewProfile").style.display = editMode ? "none" : "block";
-            document.getElementById("editProfile").style.display = editMode ? "block" : "none";
-        }
-    </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             loadAdminNotifications();
@@ -599,270 +210,251 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 
     <!-- for the calendar -->
     <script>
-    const monthYear = document.getElementById('monthYear');
-    const calendarDays = document.getElementById('calendarDays');
-    const selectedDateDisplay = document.getElementById('selectedDate');
-    const appointmentList = document.getElementById('appointmentList');
+        const monthYear = document.getElementById('monthYear');
+        const calendarDays = document.getElementById('calendarDays');
+        const selectedDateDisplay = document.getElementById('selectedDate');
+        const appointmentList = document.getElementById('appointmentList');
 
-    let date = new Date();
-    let selectedDate = null;
-    let appointments = {}; // Stores appointments grouped by date (YYYY-MM-DD)
-    let rawAppointments = []; // Stores the raw list of appointments from the PHP script
+        let date = new Date();
+        let selectedDate = null;
+        let appointments = {}; // Stores appointments grouped by date (YYYY-MM-DD)
+        let rawAppointments = []; // Stores the raw list of appointments from the PHP script
 
-    // Function to fetch and process data from PHP
-    async function fetchAppointments() {
-        // IMPORTANT: Replace 'get_appointments.php' with the correct path to your PHP file.
-        const url = '../fetch_all_appointments.php'; 
-        
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const fetchedData = await response.json();
+        // Function to fetch and process data from PHP
+        async function fetchAppointments() {
+            // IMPORTANT: Replace 'get_appointments.php' with the correct path to your PHP file.
+            const url = '../fetch_all_appointments.php';
 
-            if (fetchedData.error) {
-                console.error("Server Error:", fetchedData.error);
-                return;
-            }
-
-            // Store the raw list for easy lookup in displayAppointments
-            rawAppointments = fetchedData; 
-            
-            // Group appointments by date
-            const newAppointments = {};
-            rawAppointments.forEach(appt => {
-                const dateKey = appt.dateKey; // YYYY-MM-DD from PHP
-                
-                if (!newAppointments[dateKey]) {
-                    newAppointments[dateKey] = [];
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                newAppointments[dateKey].push(appt);
+                const fetchedData = await response.json();
+
+                if (fetchedData.error) {
+                    console.error("Server Error:", fetchedData.error);
+                    return;
+                }
+
+                // Store the raw list for easy lookup in displayAppointments
+                rawAppointments = fetchedData;
+
+                // Group appointments by date
+                const newAppointments = {};
+                rawAppointments.forEach(appt => {
+                    const dateKey = appt.dateKey; // YYYY-MM-DD from PHP
+
+                    if (!newAppointments[dateKey]) {
+                        newAppointments[dateKey] = [];
+                    }
+                    newAppointments[dateKey].push(appt);
+                });
+
+                appointments = newAppointments;
+
+                console.log("Appointments loaded from DB:", appointments);
+                renderCalendar(); // Re-render to display the fetched appointments
+
+            } catch (error) {
+                console.error("Error fetching appointments:", error);
+            }
+        }
+
+        function renderCalendar() {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const today = new Date();
+
+            monthYear.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+            calendarDays.innerHTML = '';
+
+            // Day Names Row
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayNames.forEach(name => {
+                const dayNameDiv = document.createElement('div');
+                dayNameDiv.textContent = name;
+                dayNameDiv.style.fontWeight = 'bold';
+                dayNameDiv.style.padding = '5px 15px';
+                dayNameDiv.style.textAlign = 'center';
+                calendarDays.appendChild(dayNameDiv);
             });
 
-            appointments = newAppointments;
-            
-            console.log("Appointments loaded from DB:", appointments);
-            renderCalendar(); // Re-render to display the fetched appointments
-
-        } catch (error) {
-            console.error("Error fetching appointments:", error);
-        }
-    }
-
-    function renderCalendar() {
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const today = new Date();
-
-        monthYear.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-        calendarDays.innerHTML = '';
-
-        // Day Names Row
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        dayNames.forEach(name => {
-            const dayNameDiv = document.createElement('div');
-            dayNameDiv.textContent = name;
-            dayNameDiv.style.fontWeight = 'bold';
-            dayNameDiv.style.padding = '5px 15px';
-            dayNameDiv.style.textAlign = 'center';
-            calendarDays.appendChild(dayNameDiv);
-        });
-        
-        // Empty cells for alignment
-        for (let i = 0; i < firstDay.getDay(); i++) {
-            const empty = document.createElement('div');
-            empty.classList.add('day'); // To match height/style
-            empty.style.minHeight = '100px'; 
-            empty.style.background = '#f2f4f8'; 
-            empty.style.cursor = 'default';
-            empty.style.boxShadow = 'none';
-            calendarDays.appendChild(empty);
-        }
-        
-        // Day Cells
-        for (let day = 1; day <= lastDay.getDate(); day++) {
-            const dayDiv = document.createElement('div');
-            dayDiv.classList.add('day');
-
-            // Format date key to match PHP output: YYYY-MM-DD
-            const monthString = (month + 1).toString().padStart(2, '0');
-            const dayString = day.toString().padStart(2, '0');
-            const fullDate = `${year}-${monthString}-${dayString}`; 
-
-            // Highlight today
-            if (
-                day === today.getDate() &&
-                month === today.getMonth() &&
-                year === today.getFullYear()
-            ) {
-                dayDiv.classList.add('today');
+            // Empty cells for alignment
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                const empty = document.createElement('div');
+                empty.classList.add('day'); // To match height/style
+                empty.style.minHeight = '100px';
+                empty.style.background = '#f2f4f8';
+                empty.style.cursor = 'default';
+                empty.style.boxShadow = 'none';
+                calendarDays.appendChild(empty);
             }
 
-            // Highlight selected date
-            if (fullDate === selectedDate) {
-                dayDiv.classList.add('selected');
+            // Day Cells
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('day');
+
+                // Format date key to match PHP output: YYYY-MM-DD
+                const monthString = (month + 1).toString().padStart(2, '0');
+                const dayString = day.toString().padStart(2, '0');
+                const fullDate = `${year}-${monthString}-${dayString}`;
+
+                // Highlight today
+                if (
+                    day === today.getDate() &&
+                    month === today.getMonth() &&
+                    year === today.getFullYear()
+                ) {
+                    dayDiv.classList.add('today');
+                }
+
+                // Highlight selected date
+                if (fullDate === selectedDate) {
+                    dayDiv.classList.add('selected');
+                }
+
+                const number = document.createElement('div');
+                number.classList.add('day-number');
+                number.textContent = day;
+                dayDiv.appendChild(number);
+
+                // Mini appointment previews using fetched data
+                const dayAppointments = appointments[fullDate] || [];
+                dayAppointments.slice(0, 3).forEach(appt => {
+                    const mini = document.createElement('span');
+                    mini.classList.add('mini-appt');
+                    // Set the color based on the appointment status color from PHP
+                    mini.style.color = appt.color;
+                    mini.textContent = "• " + appt.title;
+                    dayDiv.appendChild(mini);
+                });
+
+                if (dayAppointments.length > 3) {
+                    const more = document.createElement('span');
+                    more.classList.add('mini-appt');
+                    more.textContent = `+${dayAppointments.length - 3} more`;
+                    dayDiv.appendChild(more);
+                }
+
+                dayDiv.addEventListener('click', () => selectDate(fullDate));
+                calendarDays.appendChild(dayDiv);
             }
-
-            const number = document.createElement('div');
-            number.classList.add('day-number');
-            number.textContent = day;
-            dayDiv.appendChild(number);
-
-            // Mini appointment previews using fetched data
-            const dayAppointments = appointments[fullDate] || [];
-            dayAppointments.slice(0, 3).forEach(appt => {
-                const mini = document.createElement('span');
-                mini.classList.add('mini-appt');
-                // Set the color based on the appointment status color from PHP
-                mini.style.color = appt.color; 
-                mini.textContent = "• " + appt.title;
-                dayDiv.appendChild(mini);
-            });
-
-            if (dayAppointments.length > 3) {
-                const more = document.createElement('span');
-                more.classList.add('mini-appt');
-                more.textContent = `+${dayAppointments.length - 3} more`;
-                dayDiv.appendChild(more);
+            // Initial display for the current date if selectedDate is null
+            if (!selectedDate) {
+                selectDate(`${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`);
             }
-
-            dayDiv.addEventListener('click', () => selectDate(fullDate));
-            calendarDays.appendChild(dayDiv);
         }
-        // Initial display for the current date if selectedDate is null
-        if (!selectedDate) {
-            selectDate(`${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`);
-        }
-    }
 
-    function selectDate(dateKey) {
-        // Clear previous selection highlight
-        document.querySelectorAll('.day.selected').forEach(el => el.classList.remove('selected'));
-        selectedDate = dateKey;
-        
-        // Find and highlight the new selected day in the current view
-        const [_, month, day] = dateKey.split('-');
-        const currentViewMonth = date.getMonth() + 1;
-        if (parseInt(month) === currentViewMonth) {
-            // Find the dayDiv that contains the day number
-            const dayDivs = calendarDays.querySelectorAll('.day');
-            for (const div of dayDivs) {
-                const dayNumberEl = div.querySelector('.day-number');
-                if (dayNumberEl && parseInt(dayNumberEl.textContent) === parseInt(day)) {
-                    div.classList.add('selected');
-                    break;
+        function selectDate(dateKey) {
+            // Clear previous selection highlight
+            document.querySelectorAll('.day.selected').forEach(el => el.classList.remove('selected'));
+            selectedDate = dateKey;
+
+            // Find and highlight the new selected day in the current view
+            const [_, month, day] = dateKey.split('-');
+            const currentViewMonth = date.getMonth() + 1;
+            if (parseInt(month) === currentViewMonth) {
+                // Find the dayDiv that contains the day number
+                const dayDivs = calendarDays.querySelectorAll('.day');
+                for (const div of dayDivs) {
+                    const dayNumberEl = div.querySelector('.day-number');
+                    if (dayNumberEl && parseInt(dayNumberEl.textContent) === parseInt(day)) {
+                        div.classList.add('selected');
+                        break;
+                    }
                 }
             }
+
+            displayAppointments();
         }
-        
-        displayAppointments();
-    }
 
-    function displayAppointments() {
-        const displayDate = new Date(selectedDate);
-        selectedDateDisplay.textContent = `Appointments on ${displayDate.toDateString()}`;
-        const dayAppointments = appointments[selectedDate] || [];
-        appointmentList.innerHTML = '';
+        function displayAppointments() {
+            const displayDate = new Date(selectedDate);
+            selectedDateDisplay.textContent = `Appointments on ${displayDate.toDateString()}`;
+            const dayAppointments = appointments[selectedDate] || [];
+            appointmentList.innerHTML = '';
 
-        if (dayAppointments.length === 0) {
-            appointmentList.innerHTML = '<p class="no-appointments">No appointments yet.</p>';
-        } else {
-            dayAppointments.forEach(appt => {
-                const div = document.createElement('div');
-                div.className = 'appointment-card';
-                
-                // Set border color based on status from PHP
-                div.style.borderLeftColor = appt.color;
+            if (dayAppointments.length === 0) {
+                appointmentList.innerHTML = '<p class="no-appointments">No appointments yet.</p>';
+            } else {
+                dayAppointments.forEach(appt => {
+                    const div = document.createElement('div');
+                    div.className = 'appointment-card';
 
-                // Card Header (Pet Name - Service)
-                const title = document.createElement('h4');
-                title.textContent = appt.title;
-                div.appendChild(title);
+                    // Set border color based on status from PHP
+                    div.style.borderLeftColor = appt.color;
 
-                // Time and Status
-                const timeStatus = document.createElement('div');
-                timeStatus.className = 'time-status';
-                
-                const timeSpan = document.createElement('span');
-                timeSpan.textContent = appt.extendedProps.time;
-                
-                timeStatus.appendChild(timeSpan);
-                
-                const statusSpan = document.createElement('span');
-                statusSpan.className = 'status-badge';
-                statusSpan.textContent = appt.extendedProps.status;
-                statusSpan.style.backgroundColor = appt.color; // Use the same color for the badge
-                timeStatus.appendChild(statusSpan);
+                    // Card Header (Pet Name - Service)
+                    const title = document.createElement('h4');
+                    title.textContent = appt.title;
+                    div.appendChild(title);
 
-                div.appendChild(timeStatus);
+                    // Time and Status
+                    const timeStatus = document.createElement('div');
+                    timeStatus.className = 'time-status';
 
-                // Details
-                const clinic = document.createElement('p');
-                clinic.innerHTML = `<strong>Clinic:</strong> ${appt.extendedProps.clinic}`;
-                div.appendChild(clinic);
+                    const timeSpan = document.createElement('span');
+                    timeSpan.textContent = appt.extendedProps.time;
 
-                
+                    timeStatus.appendChild(timeSpan);
 
-                const doctor = document.createElement('p');
-                doctor.innerHTML = `<strong>Doctor:</strong> ${appt.extendedProps.doctor} (${appt.extendedProps.specialization})`;
-                div.appendChild(doctor);
+                    const statusSpan = document.createElement('span');
+                    statusSpan.className = 'status-badge';
+                    statusSpan.textContent = appt.extendedProps.status;
+                    statusSpan.style.backgroundColor = appt.color; // Use the same color for the badge
+                    timeStatus.appendChild(statusSpan);
 
-                console.log("here"+appt.extendedProps.time);
+                    div.appendChild(timeStatus);
 
-                appointmentList.appendChild(div);
-            });
+                    // Details
+                    const clinic = document.createElement('p');
+                    clinic.innerHTML = `<strong>Clinic:</strong> ${appt.extendedProps.clinic}`;
+                    div.appendChild(clinic);
+
+
+
+                    const doctor = document.createElement('p');
+                    doctor.innerHTML = `<strong>Doctor:</strong> ${appt.extendedProps.doctor} (${appt.extendedProps.specialization})`;
+                    div.appendChild(doctor);
+
+                    console.log("here" + appt.extendedProps.time);
+
+                    appointmentList.appendChild(div);
+                });
+            }
         }
-    }
 
-    document.getElementById('prev').onclick = () => {
-        date.setMonth(date.getMonth() - 1);
-        // When changing months, keep the selected date if it exists in the new month
-        // Otherwise, default the selection to the 1st of the month.
-        const newDay = Math.min(parseInt(selectedDate.split('-')[2]), new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate());
-        const monthString = (date.getMonth() + 1).toString().padStart(2, '0');
-        const dayString = newDay.toString().padStart(2, '0');
-        selectedDate = `${date.getFullYear()}-${monthString}-${dayString}`;
+        document.getElementById('prev').onclick = () => {
+            date.setMonth(date.getMonth() - 1);
+            // When changing months, keep the selected date if it exists in the new month
+            // Otherwise, default the selection to the 1st of the month.
+            const newDay = Math.min(parseInt(selectedDate.split('-')[2]), new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate());
+            const monthString = (date.getMonth() + 1).toString().padStart(2, '0');
+            const dayString = newDay.toString().padStart(2, '0');
+            selectedDate = `${date.getFullYear()}-${monthString}-${dayString}`;
 
-        renderCalendar();
-        displayAppointments();
-    };
+            renderCalendar();
+            displayAppointments();
+        };
 
-    document.getElementById('next').onclick = () => {
-        date.setMonth(date.getMonth() + 1);
-        // When changing months, keep the selected date if it exists in the new month
-        const newDay = Math.min(parseInt(selectedDate.split('-')[2]), new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate());
-        const monthString = (date.getMonth() + 1).toString().padStart(2, '0');
-        const dayString = newDay.toString().padStart(2, '0');
-        selectedDate = `${date.getFullYear()}-${monthString}-${dayString}`;
+        document.getElementById('next').onclick = () => {
+            date.setMonth(date.getMonth() + 1);
+            // When changing months, keep the selected date if it exists in the new month
+            const newDay = Math.min(parseInt(selectedDate.split('-')[2]), new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate());
+            const monthString = (date.getMonth() + 1).toString().padStart(2, '0');
+            const dayString = newDay.toString().padStart(2, '0');
+            selectedDate = `${date.getFullYear()}-${monthString}-${dayString}`;
 
-        renderCalendar();
-        displayAppointments();
-    };
+            renderCalendar();
+            displayAppointments();
+        };
 
-    // Start the process: fetch data, then render the calendar.
-    fetchAppointments(); 
-    </script>
-
-    <!-- for the show password -->
-    <script>
-        document.querySelectorAll('.toggle-pass').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetId = btn.getAttribute('data-target');
-                const input = document.getElementById(targetId);
-                const icon = btn.querySelector('i');
-
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.classList.replace('bi-eye', 'bi-eye-slash');
-                } else {
-                    input.type = 'password';
-                    icon.classList.replace('bi-eye-slash', 'bi-eye');
-                }
-            });
-        });
+        // Start the process: fetch data, then render the calendar.
+        fetchAppointments(); 
     </script>
 
 </body>
