@@ -149,7 +149,7 @@ if (isset($_GET['update'], $_GET['status'])) {
     $notifStmt->execute([
         $petowner_id,
         'pet_owner',
-        $clinic_id ,
+        $clinic_id,
         $notification_message,
         $notification_subject,
         substr($appointment_date, 0, 10),
@@ -248,101 +248,443 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="includes/css/manage_customer_appointment.css">
-
     <style>
+        /* 🌟 Global Styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fb;
+    color: #2e2e2e;
+    line-height: 1.6;
+}
 
+/* 🧭 Navbar */
+.navbar {
+    background: linear-gradient(90deg, #0d6efd, #007bff);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 50%;
+    background: #fff;
+    padding: 3px;
+    margin-right: 10px;
+    transition: transform 0.2s ease;
+}
+
+.navbar-brand img:hover {
+    transform: scale(1.08);
+}
+
+/* Links */
+.nav-link {
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #ffc107 !important;
+}
+
+/* 🧾 Summary Cards */
+.summary-card {
+    border: none;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.summary-card h5 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.summary-card h2 {
+    font-weight: 700;
+    font-size: 2rem;
+}
+
+/* 💼 Tables */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 0.95rem;
+}
+
+.table thead {
+    background-color: #0d6efd;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.table tbody tr:hover {
+    background-color: #f2f7ff;
+}
+
+/* 🪄 Buttons */
+.btn {
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* 🧩 Modals */
+.modal-content {
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    border-radius: 15px 15px 0 0;
+    background: linear-gradient(90deg, #0d6efd, #007bff);
+    color: white;
+}
+
+.modal-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+/* 🧍 Form */
+.form-label {
+    font-weight: 600;
+    color: #333;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* ⚡ Sweet alert pop */
+.swal2-popup {
+    font-family: 'Inter', sans-serif !important;
+    border-radius: 15px !important;
+}
+
+/* 🌈 Badges */
+.badge {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+/* 🐾 Page Titles */
+h4.text-primary {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #0d6efd !important;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 📦 Footer vibe */
+.container-footer {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+/* 🧭 Datatables */
+div.dataTables_wrapper .dataTables_filter input {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+div.dataTables_wrapper .dataTables_length select {
+    border-radius: 6px;
+}
+
+/* 🧁 Animations */
+.card,
+.modal-content {
+    transition: all 0.25s ease-in-out;
+}
+
+/* 🩵 Table container border and shadow */
+.table-responsive {
+    border: 2px solid #cfe2ff;
+    /* light blue border */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    padding: 1rem;
+}
+
+/* 🩵 Table border styling */
+.table {
+    border: 1px solid #dee2e6;
+    border-collapse: separate !important;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* 🩵 Header style */
+.table thead.table-primary th {
+    background-color: #0d6efd !important;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* 🩵 Row hover effect */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa !important;
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* 🩵 Cell padding and borders */
+.table td,
+.table th {
+    vertical-align: middle;
+    border-color: #dee2e6;
+    padding: 0.75rem;
+}
+
+/* 🩵 Make the badge look tighter */
+.badge {
+    font-size: 0.85rem;
+    padding: 0.45em 0.6em;
+}
+
+/* 🩵 Add smooth animation to buttons */
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* 🌟 Global Styles */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fb;
+      color: #2e2e2e;
+      line-height: 1.6;
+      background: linear-gradient(135deg, #f0f4ff, #ffffff);
+      min-height: 100vh;
+    }
+
+    /* 🧭 Navbar */
+    .navbar {
+      background: linear-gradient(90deg, #0d6efd, #007bff);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand img {
+      width: 38px;
+      height: 38px;
+      object-fit: cover;
+      border-radius: 50%;
+      background: #fff;
+      padding: 3px;
+      margin-right: 10px;
+      transition: transform 0.2s ease;
+    }
+
+    .navbar-brand img:hover {
+      transform: scale(1.08);
+    }
+
+    /* Links */
+    .nav-link {
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: #ffc107 !important;
+    }
+
+    /* 🧾 Summary Cards */
+    .summary-card {
+      border: none;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .summary-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .summary-card h5 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+    }
+
+    .summary-card h2 {
+      font-weight: 700;
+      font-size: 2rem;
+    }
+
+    /* 💼 Tables */
+    .table {
+      border-radius: 10px;
+      overflow: hidden;
+      font-size: 0.95rem;
+    }
+
+    .table thead {
+      background-color: #0d6efd;
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+    }
+
+    .table tbody tr:hover {
+      background-color: #f2f7ff;
+    }
+
+    /* 🪄 Buttons */
+    .btn {
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    /* 🧩 Modals */
+    .modal-content {
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+      border-radius: 15px 15px 0 0;
+      background: linear-gradient(90deg, #0d6efd, #007bff);
+      color: white;
+    }
+
+    .modal-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+    }
+
+    /* 🧍 Form */
+    .form-label {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-control {
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ⚡ Sweet alert pop */
+    .swal2-popup {
+      font-family: 'Inter', sans-serif !important;
+      border-radius: 15px !important;
+    }
+
+    /* 🌈 Badges */
+    .badge {
+      font-size: 0.85rem;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+
+    /* 🐾 Page Titles */
+    h4.text-primary {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      color: #0d6efd !important;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* 📦 Footer vibe */
+    .container-footer {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 0.9rem;
+      color: #777;
+    }
+
+    /* 🧭 Datatables */
+    div.dataTables_wrapper .dataTables_filter input {
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    div.dataTables_wrapper .dataTables_length select {
+      border-radius: 6px;
+    }
+
+    /* 🧁 Animations */
+    .card,
+    .modal-content {
+      transition: all 0.25s ease-in-out;
+    }
+
+    @media (max-width: 576px) {
+      .navbar-brand img {
+        width: 28px;
+        height: 28px;
+      }
+
+      .dropdown-toggle strong {
+        display: none;
+        /* hide name on very small screens */
+      }
+    }
     </style>
 </head>
 
 <body class="bg-light">
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="index.php">VetCareSys</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="topNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a href="index.php" class="nav-link text-white">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="manage_petowner.php" class="nav-link text-white">Manage Client</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="manage_pet_details.php" class="nav-link text-white">Pet Details</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="manage_customer_appointment.php" class="nav-link text-white">Appointments</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="manage_records.php" class="nav-link text-white">Medical Records</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="manage_inventory.php" class="nav-link text-white">Inventory</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav mb-2 mb-lg-0">
-                    <li class="nav-item dropdown me-3">
-                        <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown">
-                            <i class="bi bi-bell-fill" style="font-size: 1.35rem;"></i>
-                            <span id="notif_count"
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                style="font-size: 0.65rem; padding: 3px 6px;">
-                            </span>
-                        </a>
-
-                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 320px; max-height: 400px;"
-                            id="notif_list_container">
-
-                            <li class="d-flex justify-content-between align-items-center mb-2 px-2">
-                                <h6 class="mb-0">Notifications</h6>
-                                <button id="mark_all_btn" class="btn btn-link btn-sm p-0 text-decoration-none"
-                                    style="font-size: 0.8rem;" disabled>
-                                    Mark all as read
-                                </button>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-
-                            <div id="notif_list" style="max-height: 350px; overflow-y: auto;">
-                                <li class="text-center text-muted">Loading...</li>
-                            </div>
-                        </ul>
-                    </li>
-                </ul>
-                <!-- Profile Dropdown -->
-                <div class="dropdown">
-                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
-                        id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile" class="rounded-circle me-2"
-                            width="35" height="35">
-                        <strong><?= $name ?></strong>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser">
-                        <li>
-                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">
-                                <i class="bi bi-person"></i> My Profile
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <form method="POST" action="../logout.php" id="logoutForm" class="m-0">
-                                <button class="dropdown-item text-danger" type="submit" id="logoutBtn">
-                                    <i class="bi bi-box-arrow-right"></i> Logout
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <?php include 'includes/body/navbar.php' ?>
 
     <!--  Main Content -->
     <div class="container py-5">
@@ -402,21 +744,21 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                 <td>
                                     <?php if ($appt['status'] === 'pending'): ?>
                                         <a href="#" class="btn btn-sm btn-info text-white view-appointment"
-                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle="tooltip"
+                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle=" tooltip"
                                             data-bs-placement="top" title="View Record">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                         <a href="?update=<?= $appt['appointment_id']; ?>&status=approved"
                                             class="btn btn-sm btn-success me-1 action-appointment" data-status="approved"
-                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle="tooltip"
+                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle=" tooltip"
                                             data-bs-placement="top" title="Approve Record">
                                             <i class="bi bi-check-circle-fill"></i>
                                         </a>
                                     <?php elseif ($appt['status'] === 'approved'): ?>
                                         <a href="?update=<?= $appt['appointment_id']; ?>&status=completed"
                                             class="btn btn-sm btn-primary me-1 action-appointment" data-status="completed"
-                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle="tooltip"
-                                            data-bs-placement="top" title="Approve Record">
+                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle=" tooltip"
+                                            data-bs-placement="top" title="Complete Record">
                                             <i class="bi bi-check2-square"></i>
                                         </a>
                                     <?php else: ?>
@@ -431,142 +773,6 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         <?php else: ?>
             <div class="alert alert-info">No appointments found yet.</div>
         <?php endif; ?>
-    </div>
-
-    <!-- Profile Modal -->
-    <div class="modal fade" id="profileModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content border-0 shadow">
-
-                <!-- VIEW PROFILE -->
-                <div id="viewProfile">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title">My Profile</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-
-                    <div class="modal-body text-center">
-                        <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile Picture"
-                            class="rounded-circle border border-3 border-primary mb-3" width="130" height="130"
-                            style="object-fit: cover;">
-                        <h4 class="fw-bold text-primary mb-3"><?= htmlspecialchars($staff['name']) ?></h4>
-
-                        <!-- 🧾 Info Table -->
-                        <div class="table-responsive">
-                            <table class="table table-bordered align-middle">
-                                <tbody>
-                                    <tr>
-                                        <th style="width:30%">Full Name</th>
-                                        <td><?= htmlspecialchars($staff['name']) ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Email</th>
-                                        <td><?= htmlspecialchars($staff['email']) ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Contact Number</th>
-                                        <td><?= htmlspecialchars($staff['contact_number'] ?? 'Not provided') ?></td>
-                                    </tr>
-                                    <tr>
-                                        <th>Role</th>
-                                        <td><?= htmlspecialchars($staff['role']) ?></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button class="btn btn-outline-primary" onclick="toggleEdit(true)">
-                            <i class="bi bi-pencil-square me-1"></i> Edit Profile
-                        </button>
-                    </div>
-                </div>
-
-                <!-- EDIT PROFILE -->
-                <div id="editProfile" style="display:none;">
-                    <form action="update_profile.php" method="POST" enctype="multipart/form-data">
-                        <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title">Edit Profile</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Full Name</label>
-                                <input type="text" name="name" class="form-control"
-                                    value="<?= htmlspecialchars($staff['name']) ?>" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control"
-                                    value="<?= htmlspecialchars($staff['email']) ?>" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Contact Number</label>
-                                <input type="text" name="contact_number" class="form-control"
-                                    value="<?= htmlspecialchars($staff['contact_number']) ?>">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Profile Picture</label>
-                                <input type="file" name="profile_picture" class="form-control">
-                            </div>
-
-                            <hr>
-                            <h6 class="text-primary">Change Password (optional)</h6>
-
-                            <!-- Current Password -->
-                            <div class="mb-3 position-relative">
-                                <label class="form-label">Current Password</label>
-                                <div class="input-group">
-                                    <input type="password" name="current_password" id="currentPassword"
-                                        class="form-control" placeholder="Enter current password">
-                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
-                                        data-target="currentPassword">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- New Password -->
-                            <div class="mb-3 position-relative">
-                                <label class="form-label">New Password</label>
-                                <div class="input-group">
-                                    <input type="password" name="new_password" id="newPassword" class="form-control"
-                                        minlength="6" placeholder="Enter new password">
-                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
-                                        data-target="newPassword">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Confirm Password -->
-                            <div class="mb-3 position-relative">
-                                <label class="form-label">Confirm New Password</label>
-                                <div class="input-group">
-                                    <input type="password" name="confirm_password" id="confirmPassword"
-                                        class="form-control" minlength="6" placeholder="Re-enter new password">
-                                    <button class="btn btn-outline-secondary toggle-pass" type="button"
-                                        data-target="confirmPassword">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Cancel</button>
-                            <button type="submit" class="btn btn-success">Save Changes</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- 👁️ View & Edit Appointment Modal -->
@@ -638,7 +844,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                     <div class="mb-3">
                                         <label class="form-label">Assign Doctor</label>
                                         <select name="doctor_id" id="edit_doctor_id" class="form-select">
-                                            <option value="">-- Select Doctor --</option>
+                                            <option value=""> Select Doctor </option>
                                             <?php
                                             $stmt = $pdo->prepare("SELECT staff_id, name FROM staff WHERE clinic_id = ? AND role = 'doctor'");
                                             $stmt->execute([$clinic_id]);
@@ -650,6 +856,15 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
+
+                                    <div class="mb-3">
+                                        <label>Doctor Schedule</label>
+                                        <div id="editDoctorSchedule"
+                                            style="border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+                                            <em>Select a doctor to view their clinic visit schedules.</em>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
 
@@ -670,59 +885,30 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         </div>
     </div>
 
-   <script>
-    document.getElementById("edit_doctor_id").addEventListener("change", function () {
-    let doctorId = this.value;
+    <script>
+        // When doctor is changed in EDIT MODAL
+$(document).on("change", "#edit_doctor_id", function () {
+    let doctorId = $(this).val();
+    let clinicId = <?= $clinic_id ?>;  // STAFF CLINIC IS ALWAYS FIXED
 
-    let visitBox = document.getElementById("doctorVisits");
-    visitBox.innerHTML = "<em class='text-muted'>Loading...</em>";
-
-    if (doctorId === "") {
-        visitBox.innerHTML = "<em class='text-muted'>Select a doctor to view visitations...</em>";
+    if (!doctorId) {
+        $("#editDoctorSchedule").html("<em>No doctor selected.</em>");
         return;
     }
 
-    // AJAX request
-    fetch("", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "doctor_id=" + doctorId
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.length === 0) {
-                visitBox.innerHTML = "<em class='text-danger'>No visitation schedule found for this doctor.</em>";
-                return;
-            }
-
-            let html = "";
-            data.forEach(v => {
-                html += `
-                    <div class="p-2 mb-1 border rounded bg-white">
-                        <strong>${v.day_of_week}</strong><br>
-                        ${formatTime(v.start_time)} - ${formatTime(v.end_time)}
-                    </div>
-                `;
-            });
-
-            visitBox.innerHTML = html;
-        })
-        .catch(err => {
-            visitBox.innerHTML = "<em class='text-danger'>Error loading visitations.</em>";
-            console.error(err);
-        });
+    $.ajax({
+        url: "fetch_doctor_schedule.php",
+        type: "POST",
+        data: {
+            doctor_id: doctorId,
+            clinic_id: clinicId
+        },
+        success: function (response) {
+            $("#editDoctorSchedule").html(response);
+        }
+    });
 });
-
-// Helper: convert 24h → 12h format
-function formatTime(timeString) {
-    let [hour, minute] = timeString.split(":");
-    let h = parseInt(hour);
-    let ampm = h >= 12 ? "PM" : "AM";
-    h = h % 12 || 12;
-    return `${h}:${minute} ${ampm}`;
-}
-
-   </script>
+    </script>
 
     <script>
         $(document).ready(function () {
@@ -878,129 +1064,6 @@ function formatTime(timeString) {
             });
         });
     </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            loadAdminNotifications();
-
-            // Load when bell icon is clicked
-            document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
-
-            // 💡 NEW: Listener for Mark All button
-            document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
-        });
-
-        function loadAdminNotifications() {
-            fetch("../../emp_fetch_notifications.php")
-                .then(res => res.json())
-                .then(data => {
-                    const list = document.getElementById("notif_list");
-                    const count = document.getElementById("notif_count");
-                    const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
-
-                    list.innerHTML = "";
-                    let unreadCount = 0;
-
-                    if (!data || data.length === 0) {
-                        list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
-                        count.textContent = "";
-                        markAllBtn.disabled = true; // Disable button if no notifs
-                        return;
-                    }
-
-                    // Locate the loadAdminNotifications function and replace the following loop:
-                    data.forEach(n => {
-                        if (n.status === "unread") unreadCount++;
-
-                        list.innerHTML += `
-                        <li>
-                            <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
-                            data-id="${n.notif_id}">
-                                <div class="w-100"> 
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <small class="text-secondary fw-semibold" style="font-size: 0.75rem;">
-                                            <i class="bi bi-calendar"></i> ${n.display_date}
-                                        </small>
-                                        <small class="text-muted" style="font-size: 0.7rem;">
-                                            <i class="bi bi-clock"></i> ${n.display_time}
-                                        </small>
-                                    </div>
-
-                                    <span style="
-                                        font-size: 0.85rem; 
-                                        max-width: 100%; 
-                                        display: block; 
-                                        overflow: hidden; 
-                                        text-overflow: ellipsis; 
-                                        white-space: nowrap;
-                                        /* Conditional Style: Use font-weight: bold (700) if unread, normal (400) if read */
-                                        font-weight: ${n.status === "unread" ? '700' : '400'};
-                                    ">
-                                    ${n.status === "unread" ? `<span class="badge bg-danger ms-2">New</span>` : ""}
-
-                                        ${n.subject}
-
-                                    </span>
-                                    
-                                    <small class="text-muted" style="font-size: 0.78rem;">${n.message}</small>
-                                </div>
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider my-0"></li>
-                    `;
-                    });
-                    count.textContent = unreadCount > 0 ? unreadCount : "";
-                    markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
-                });
-        }
-
-        // 💡 NEW: Function to mark all notifications as read
-        function markAllAsRead() {
-            Swal.fire({
-                title: 'Mark all as read?',
-                text: "All current unread notifications will be marked as read.",
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, Mark All'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Fetch the new PHP endpoint to update the database
-                    fetch("../../emp_mark_all_as_read.php", { method: 'POST' })
-                        .then(response => {
-                            if (response.ok) {
-                                Swal.fire('Success!', 'All notifications marked as read.', 'success');
-                                // Reload the notifications immediately after success
-                                loadAdminNotifications();
-                            } else {
-                                Swal.fire('Error!', 'Could not mark all as read.', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Fetch error:', error);
-                            Swal.fire('Error!', 'Network or server issue.', 'error');
-                        });
-                }
-            });
-        }
-
-        // Mark as read when opening a notification (Your original function, updated for clarity)
-        document.addEventListener("click", function (e) {
-            if (e.target.closest(".notif-item")) {
-                const notifItem = e.target.closest(".notif-item");
-                const id = notifItem.dataset.id;
-
-                // Only send the request if it's currently marked as unread
-                if (notifItem.classList.contains('bg-light')) {
-                    fetch(`../../mark_as_read.php?id=${id}`);
-                    // Simple visual update after click
-                    notifItem.classList.remove('bg-light');
-                    notifItem.querySelector('.badge')?.remove();
-                    loadAdminNotifications(); // Reload count
-                }
-            }
-        });
-    </script>
 
     <script>
         $(document).ready(function () {
@@ -1038,47 +1101,6 @@ function formatTime(timeString) {
                 // Remove the query string after showing
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
-        });
-    </script>
-
-    <!-- for the show password -->
-    <script>
-        document.querySelectorAll('.toggle-pass').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetId = btn.getAttribute('data-target');
-                const input = document.getElementById(targetId);
-                const icon = btn.querySelector('i');
-
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.classList.replace('bi-eye', 'bi-eye-slash');
-                } else {
-                    input.type = 'password';
-                    icon.classList.replace('bi-eye-slash', 'bi-eye');
-                }
-            });
-        });
-    </script>
-
-    <script>
-        document.getElementById('logoutBtn').addEventListener('click', function (e) {
-            e.preventDefault(); // Prevent form from submitting instantly
-
-            Swal.fire({
-                title: 'Are you sure you want to logout?',
-                text: "You’ll be logged out of your current session.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, logout',
-                cancelButtonText: 'No, stay here'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Submit the form only if confirmed
-                    document.getElementById('logoutForm').submit();
-                }
-            });
         });
     </script>
 </body>

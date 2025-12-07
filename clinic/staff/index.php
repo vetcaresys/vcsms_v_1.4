@@ -138,117 +138,138 @@ $inquiries = $stmt->fetchColumn();
       font-weight: bold;
       color: #212529;
     }
+
+    /* Make all dashboard cards equal height */
+.dashboard-cards .col-md-3 {
+  display: flex;
+}
+
+.dash-card {
+  flex: 1; /* stretch to fill column */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  min-height: 120px; /* ensures consistent height */
+}
+
   </style>
 
   <div class="container py-5">
     <h2 class="mb-4 text-primary"><i class="bi bi-speedometer2"></i> Staff Dashboard</h2>
 
     <div class="row g-4 dashboard-cards">
-      <!-- 🐾 Registered Pets -->
-      <div class="col-md-3">
-        <div class="dash-card">
-          <div class="dash-icon bg-primary">
-            <i class="bi bi-heart-pulse"></i>
-          </div>
-          <div>
-            <p class="label">Registered Pets</p>
-            <h3 class="value" id="petsCount">0</h3>
-          </div>
-        </div>
+  <!-- 🐾 Registered Pets -->
+  <div class="col-md-3">
+    <div class="dash-card">
+      <div class="dash-icon bg-primary">
+        <i class="bi bi-heart-pulse"></i>
       </div>
-
-      <!-- 👥 Pet Owners -->
-      <div class="col-md-3">
-        <div class="dash-card">
-          <div class="dash-icon bg-success">
-            <i class="bi bi-person-badge"></i>
-          </div>
-          <div>
-            <p class="label">Pet Owners</p>
-            <h3 class="value" id="ownersCount">0</h3>
-          </div>
-        </div>
-      </div>
-
-      <!-- ⏳ Pending Appointments -->
-      <div class="col-md-3">
-        <div class="dash-card">
-          <div class="dash-icon bg-warning text-dark">
-            <i class="bi bi-clock-history"></i>
-          </div>
-          <div>
-            <p class="label">Pending Appointments</p>
-            <h3 class="value" id="pendingCount">0</h3>
-          </div>
-        </div>
-      </div>
-
-      <!-- ✅ Approved Appointments -->
-      <div class="col-md-3">
-        <div class="dash-card">
-          <div class="dash-icon bg-info">
-            <i class="bi bi-check2-square"></i>
-          </div>
-          <div>
-            <p class="label">Approved Appointments</p>
-            <h3 class="value" id="approvedCount">0</h3>
-          </div>
-        </div>
-      </div>
-
-      <!-- 🩺 Completed Appointments -->
-      <div class="col-md-3">
-        <div class="dash-card">
-          <div class="dash-icon bg-success">
-            <i class="bi bi-check-circle"></i>
-          </div>
-          <div>
-            <p class="label">Completed Appointments</p>
-            <h3 class="value" id="completedCount">0</h3>
-          </div>
-        </div>
-      </div>
-
-      <!-- 📄 Medical Records -->
-      <div class="col-md-3">
-        <div class="dash-card">
-          <div class="dash-icon bg-danger">
-            <i class="bi bi-file-earmark-medical"></i>
-          </div>
-          <div>
-            <p class="label">Medical Records</p>
-            <h3 class="value" id="recordsCount">0</h3>
-          </div>
-        </div>
-      </div>
-
-      <!-- ⚠️ Low Stock -->
-      <div class="col-md-3">
-        <div class="dash-card">
-          <div class="dash-icon bg-danger">
-            <i class="bi bi-exclamation-triangle"></i>
-          </div>
-          <div>
-            <p class="label">Low Stock Items</p>
-            <h3 class="value" id="lowStockCount">0</h3>
-          </div>
-        </div>
-      </div>
-
-      <!-- ✉️ Unread Inquiries -->
-      <div class="col-md-3">
-        <div class="dash-card">
-          <div class="dash-icon bg-secondary">
-            <i class="bi bi-envelope"></i>
-          </div>
-          <div>
-            <p class="label">Unread Inquiries</p>
-            <h3 class="value" id="inquiriesCount">0</h3>
-          </div>
-        </div>
+      <div>
+        <p class="label">Registered Pets</p>
+        <h3 class="value" id="petsCount">0</h3>
       </div>
     </div>
   </div>
+
+  <!-- 👥 Pet Owners -->
+  <div class="col-md-3">
+    <div class="dash-card">
+      <div class="dash-icon bg-success">
+        <i class="bi bi-person-badge"></i>
+      </div>
+      <div>
+        <p class="label">Pet Owners</p>
+        <h3 class="value" id="ownersCount">0</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⏳ Pending Appointments -->
+  <div class="col-md-3">
+    <div class="dash-card">
+      <div class="dash-icon bg-warning text-dark">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <div>
+        <p class="label">Pending Appointments</p>
+        <h3 class="value" id="pendingCount">0</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Approved Appointments -->
+  <div class="col-md-3">
+    <div class="dash-card">
+      <div class="dash-icon bg-info">
+        <i class="bi bi-check2-square"></i>
+      </div>
+      <div>
+        <p class="label">Approved Appointments</p>
+        <h3 class="value" id="approvedCount">0</h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 dashboard-cards mt-3">
+  <!-- 🩺 Completed Appointments -->
+  <div class="col-md-3">
+    <div class="dash-card">
+      <div class="dash-icon bg-success">
+        <i class="bi bi-check-circle"></i>
+      </div>
+      <div>
+        <p class="label">Completed Appointments</p>
+        <h3 class="value" id="completedCount">0</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📄 Medical Records -->
+  <div class="col-md-3">
+    <div class="dash-card">
+      <div class="dash-icon bg-danger">
+        <i class="bi bi-file-earmark-medical"></i>
+      </div>
+      <div>
+        <p class="label">Medical Records</p>
+        <h3 class="value" id="recordsCount">0</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⚠️ Low Stock -->
+  <div class="col-md-3">
+    <div class="dash-card">
+      <div class="dash-icon bg-danger">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <div>
+        <p class="label">Low Stock Items</p>
+        <h3 class="value" id="lowStockCount">0</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✉️ Unread Inquiries -->
+  <div class="col-md-3">
+    <div class="dash-card">
+      <div class="dash-icon bg-secondary">
+        <i class="bi bi-envelope"></i>
+      </div>
+      <div>
+        <p class="label">Unread Inquiries</p>
+        <h3 class="value" id="inquiriesCount">0</h3>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
   <div class="containers mt-4">

@@ -1,15 +1,10 @@
 <?php
-require 'vendor/autoload.php'; // already have this for PHPMailer, also works for Dotenv
-
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
-
 session_start();
 require 'config.php'; // This file provides the $pdo object
 
 // --- Configuration ---
-$apiKey = $_ENV['SEMAPHORE_API_KEY']; // **CRITICAL: Replace with your actual Semaphore API KEY**
-$senderName = $_ENV['SEMAPHORE_SENDER']; // Your preferred sender name.
+$apiKey = '836eff6e31b18cbd39e1e33c3b24c29f'; // **CRITICAL: Replace with your actual Semaphore API KEY**
+$senderName ='VetCareSys'; // Your preferred sender name.
 
 // --- 1. Reminder Generation Function (Creates the SMS records) ---
 function generate_reminders($pdo) {

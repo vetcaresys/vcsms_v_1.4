@@ -134,3 +134,34 @@
         </div>
     </div>
 </div>
+
+<script>
+    // When clinic changes, load doctors for that clinic
+document.getElementById('clinicSelect').addEventListener('change', function () {
+    const clinicId = this.value;
+
+    // Reset doctor fields
+    document.getElementById('doctorSelect').innerHTML = '<option value="">Select Doctor</option>';
+    document.getElementById('doctorSpecialization').style.display = 'none';
+    document.getElementById('doctorScheduleDisplay').innerHTML = 'Select a doctor to view schedule.';
+
+    if (clinicId === '') return;
+
+    // Fetch doctors
+    fetch('ajax_get_doctors.php?clinic_id=' + clinicId)
+        .then(response => response.json())
+        .then(data => {
+            const doctorSelect = document.getElementById('doctorSelect');
+            doctorSelect.innerHTML = '<option value="">Select Doctor</option>';
+
+            data.forEach(doc => {
+                doctorSelect.innerHTML += `
+                    <option value="${doc.staff_id}" data-specialization="${doc.specialization}">
+                        ${doc.name}
+                    </option>
+                `;
+            });
+        });
+});
+
+</script>

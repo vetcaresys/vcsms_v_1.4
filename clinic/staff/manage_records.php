@@ -83,22 +83,21 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
 
     <?php include 'includes/body/navbar.php' ?>
 
+    <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addRecordModal">
+        <i class="bi bi-plus-circle"></i> Add Record
+    </button>
+
     <div class="container py-5">
         <div class="card shadow-sm">
             <div class="card-body">
                 <h2 class="card-title text-primary"><i class="bi bi-clipboard2-pulse"></i> Manage Pet Records</h2>
                 <p class="text-muted">Review and manage pet medical records from your clinic.</p>
 
-                <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addRecordModal">
-                    <i class="bi bi-plus-circle"></i> Add Record
-                </button>
-
-
                 <!-- Record Table -->
                 <div class="card-body">
 
                     <table id="recordsTable" class="table table-striped table-hover table-bordered align-middle">
-                        <thead class="table-dark">
+                        <thead class="table-primary">
                             <tr>
                                 <th>Pet Owner</th>
                                 <th>Pet Name</th>
