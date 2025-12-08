@@ -70,11 +70,11 @@
                                             <!-- Edit button triggers modal -->
                                             <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal"
                                                 data-bs-target="#editModal<?= $row['schedule_id'] ?>">
-                                                <i class="bi bi-pencil"></i> Edit
+                                                <i class="bi bi-pencil-square"></i>
                                             </button>
                                             <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                 onclick="confirmDelete(<?= $row['schedule_id'] ?>)">
-                                                <i class="bi bi-trash"></i> Delete
+                                                <i class="bi bi-trash"></i>
                                             </a>
                                         </td>
                                     </tr>

@@ -84,13 +84,13 @@
                                                         <!-- Edit button -->
                                                         <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
                                                             data-bs-target="#editServiceModal<?= $row['service_id']; ?>">
-                                                            <i class="bi bi-pencil-square"></i> Edit
+                                                            <i class="bi bi-pencil-square"></i>
                                                         </button>
 
                                                         <!-- Delete button -->
                                                         <button type="button" class="btn btn-sm btn-danger"
                                                             onclick="confirmDelete(<?= $row['service_id']; ?>)">
-                                                            <i class="bi bi-trash"></i> Delete
+                                                            <i class="bi bi-trash"></i>
                                                         </button>
                                                     </div>
                                                 </td>

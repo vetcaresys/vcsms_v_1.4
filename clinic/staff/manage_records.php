@@ -22,15 +22,23 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 
 // 🐾 Fetch existing pet records
 $stmt = $pdo->prepare("
-    SELECT pr.record_id, pr.date_recorded, p.pet_name, u.name AS owner_name, rt.template_name, p.birth_date
+    SELECT 
+        pr.record_id, 
+        pr.date_recorded, 
+        p.pet_name, 
+        u.name AS owner_name, 
+        rt.template_name, 
+        p.birth_date
     FROM pet_records pr
     JOIN pets p ON pr.pet_id = p.pet_id
     JOIN users u ON p.owner_id = u.user_id
     JOIN record_templates rt ON pr.template_id = rt.template_id
+    WHERE pr.clinic_id = ?
     ORDER BY pr.date_recorded DESC
 ");
-$stmt->execute();
+$stmt->execute([$clinic_id]);
 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 // 🧩 Fetch available templates for modal dropdown
 $templates = $pdo->query("SELECT template_id, template_name FROM record_templates")->fetchAll(PDO::FETCH_ASSOC);
@@ -80,18 +88,17 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
         </script>
     <?php endif; ?>
 
-
     <?php include 'includes/body/navbar.php' ?>
-
-    <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addRecordModal">
-        <i class="bi bi-plus-circle"></i> Add Record
-    </button>
 
     <div class="container py-5">
         <div class="card shadow-sm">
             <div class="card-body">
                 <h2 class="card-title text-primary"><i class="bi bi-clipboard2-pulse"></i> Manage Pet Records</h2>
                 <p class="text-muted">Review and manage pet medical records from your clinic.</p>
+
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRecordModal">
+                    <i class="bi bi-plus-circle"></i> Add Record
+                </button>
 
                 <!-- Record Table -->
                 <div class="card-body">
@@ -137,7 +144,6 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                                             })
                                         </script>
                                     </td>
-
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -248,7 +254,9 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                     </div>
 
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Save Record</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save"></i> Save Record
+                        </button>
                     </div>
 
                 </form>
@@ -288,7 +296,9 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">Save Changes</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
                     </div>
                 </form>
             </div>
@@ -326,7 +336,7 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
 
                     <div class="modal-footer">
                         <button type="button" onclick="applyConsumableUsage()" class="btn btn-success">
-                            Save Usage
+                            <i class="bi bi-save"></i> Save Usage
                         </button>
                     </div>
                 </div>

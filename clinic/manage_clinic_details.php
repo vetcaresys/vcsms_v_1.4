@@ -119,13 +119,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include 'assets/body/alert_popup.php' ?>
     <?php include 'assets/body/navbar.php' ?>
     <?php include 'assets/body/clinic_form.php' ?>
-    <?php include 'assets/body/profile_modal.php' ?>
     <?php include 'assets/body/edit_user_modal.php' ?>
     <?php include 'assets/body/footer_all.php' ?>
  
-    <script src="assets/js/logout.js"></script>
-    <script src="assets/js/show_password.js"></script>
-    <script src="assets/js/notifications.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

@@ -15,10 +15,17 @@ if (empty($_POST['pet_id']) || empty($_POST['template_id'])) {
 
 $pet_id = (int)$_POST['pet_id'];
 $template_id = (int)$_POST['template_id'];
+$clinic_id = $_SESSION['clinic_id']; // ✅ IMPORTANT
 
 // Extract dynamic template fields
 $data = $_POST;
-unset($data['pet_id'], $data['template_id'], $data['item_id'], $data['quantity_used'], $data['consumable_used_ml']);
+unset(
+    $data['pet_id'],
+    $data['template_id'],
+    $data['item_id'],
+    $data['quantity_used'],
+    $data['consumable_used_ml']
+);
 
 $recordData = json_encode($data, JSON_UNESCAPED_UNICODE);
 
@@ -30,12 +37,12 @@ try {
 
     $pdo->beginTransaction();
 
-    // 1️⃣ Insert main pet record
+    // 1️⃣ Insert main pet record — NOW WITH clinic_id
     $stmt = $pdo->prepare("
-        INSERT INTO pet_records (pet_id, staff_id, doctor_id, template_id, data)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO pet_records (pet_id, staff_id, doctor_id, template_id, clinic_id, data)
+        VALUES (?, ?, ?, ?, ?, ?)
     ");
-    $stmt->execute([$pet_id, $staff_id, $doctor_id, $template_id, $recordData]);
+    $stmt->execute([$pet_id, $staff_id, $doctor_id, $template_id, $clinic_id, $recordData]);
 
     $record_id = $pdo->lastInsertId();
 
@@ -100,7 +107,6 @@ try {
                 ");
                 $stmtUpdate->execute([$new_remaining, $new_remaining, $new_remaining, $item_id]);
 
-
                 // Log consumable usage
                 $log = $pdo->prepare("
                     INSERT INTO inventory_usage (inventory_id, used_ml, staff_id)
@@ -145,5 +151,4 @@ try {
 
     die("An error occurred while saving the record.");
 }
-
 ?>

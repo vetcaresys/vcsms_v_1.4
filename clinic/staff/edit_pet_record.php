@@ -1,26 +1,38 @@
 <?php
+session_start();
 include '../../config.php';
 
-$id = $_GET['id'] ?? null;
-if (!$id) {
-  http_response_code(400);
-  echo "Invalid record ID";
-  exit;
+// 🔐 Ensure logged in staff/doctor
+if (!isset($_SESSION['staff_id']) || !in_array($_SESSION['role'], ['staff', 'doctor'])) {
+    http_response_code(403);
+    echo "<div class='text-danger'>Unauthorized access</div>";
+    exit;
 }
 
+$clinic_id = $_SESSION['clinic_id'];  // ✅ filter by clinic
+$id = $_GET['id'] ?? null;
+
+if (!$id) {
+    http_response_code(400);
+    echo "Invalid record ID";
+    exit;
+}
+
+// ✅ SECURED QUERY (clinic filtered)
 $stmt = $pdo->prepare("
   SELECT pr.*, rt.template_name, rt.fields AS template_fields, p.pet_name
   FROM pet_records pr
   JOIN record_templates rt ON pr.template_id = rt.template_id
   JOIN pets p ON pr.pet_id = p.pet_id
   WHERE pr.record_id = ?
+    AND pr.clinic_id = ?   -- 🔥 CRITICAL FIX
 ");
-$stmt->execute([$id]);
+$stmt->execute([$id, $clinic_id]);
 $record = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$record) {
-  echo "<div class='text-danger'>Record not found.</div>";
-  exit;
+    echo "<div class='text-danger'>Record not found or not authorized.</div>";
+    exit;
 }
 
 $templateFields = json_decode($record['template_fields'], true)['fields'];
@@ -35,22 +47,20 @@ echo "<div class='mb-3'>
       </div>";
 
 foreach ($templateFields as $field) {
-  $label = $field['label'];
-  $type = $field['type'];
-  $name = strtolower(str_replace(' ', '_', $label));
-  $value = htmlspecialchars($recordData[$name] ?? '');
+    $label = $field['label'];
+    $type = $field['type'];
+    $name = strtolower(str_replace(' ', '_', $label));
+    $value = htmlspecialchars($recordData[$name] ?? '');
 
-  echo "<div class='mb-3'>";
-  echo "<label class='form-label'>{$label}</label>";
+    echo "<div class='mb-3'>";
+    echo "<label class='form-label'>{$label}</label>";
 
-  if ($type === 'textarea') {
-    echo "<textarea name='{$name}' class='form-control'>{$value}</textarea>";
-  } else {
-    echo "<input type='{$type}' name='{$name}' class='form-control' value='{$value}'>";
-  }
+    if ($type === 'textarea') {
+        echo "<textarea name='{$name}' class='form-control'>{$value}</textarea>";
+    } else {
+        echo "<input type='{$type}' name='{$name}' class='form-control' value='{$value}'>";
+    }
 
-  echo "</div>";
+    echo "</div>";
 }
 ?>
-
-

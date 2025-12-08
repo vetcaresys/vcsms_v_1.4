@@ -78,7 +78,6 @@ $profilePic = !empty($staff['profile_picture']) ? $staff['profile_picture'] : 'd
 $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -308,7 +307,6 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         <?php unset($_SESSION['alert']); ?>
     <?php endif; ?>
 
-
     <?php include 'includes/body/navbar.php' ?>
 
     <!-- Add Pet Button -->
@@ -403,7 +401,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="submit" class="btn btn-success w-100">
+                        <button type="submit" class="btn btn-success float-end">
                             <i class="bi bi-save"></i> Save Pet
                         </button>
                     </form>
@@ -412,6 +410,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         </div>
     </div>
 
+    <!-- registered pets -->
     <div class="container my-5">
         <div class="card shadow-sm p-4">
             <h4 class="text-primary mb-4"><i class="bi bi-list-ul"></i> Registered Pets</h4>
@@ -464,7 +463,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 
                             // Edit Button
                             echo "<td>
-                                <button class='btn btn-warning btn-sm' data-bs-toggle='modal' data-bs-target='#editPet{$pet_id}'>
+                                <button class='btn btn-warning btn-sm' data-bs-toggle='modal' data-bs-target='#editPet{$pet_id}' >
                                     <i class='bi bi-pencil-square'></i>
                                 </button>
                             </td>";
@@ -515,7 +514,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                         " . (!empty($pet['photo']) ? "<small class='text-muted'>Current: " . htmlspecialchars($pet['photo']) . "</small>" : "") . "
                                       </div>
                         
-                                      <button type='submit' class='btn btn-success w-100'>
+                                      <button type='submit' class='btn btn-success float-end'>
                                         <i class='bi bi-save'></i> Update Pet
                                       </button>
                                     </form>

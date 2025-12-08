@@ -24,7 +24,6 @@ $profilePic = !empty($staff['profile_picture']) ? $staff['profile_picture'] : 'd
 $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 //end sa profile
 
-
 // ✅ Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $owner_name = trim($_POST['name']);
@@ -63,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $ownersStmt = $pdo->prepare("SELECT * FROM users WHERE role = 'pet_owner' ORDER BY user_id DESC");
 $ownersStmt->execute();
 $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 
 <!DOCTYPE html>
@@ -98,7 +96,6 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
     <?php endif; ?>
 
     <?php include 'includes/body/navbar.php' ?>
-
 
     <!-- Add Pet Owner Button -->
     <div class="container my-5 text-start">
@@ -141,10 +138,10 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
                                             data-id="<?= $o['user_id'] ?>" data-name="<?= htmlspecialchars($o['name']) ?>"
                                             data-email="<?= htmlspecialchars($o['email']) ?>"
                                             data-contact="<?= htmlspecialchars($o['contact_number']) ?>"
-                                            data-address="<?= htmlspecialchars($o['address']) ?>">
+                                            data-address="<?= htmlspecialchars($o['address']) ?>" data-bs-toggle="tooltip"
+                                            data-bs-placement="top" title="Edit">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
-
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -157,45 +154,6 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php endif; ?>
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Modal -->
-    <div class="modal fade" id="editOwnerModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="editOwnerForm" method="POST" action="edit_petowner.php">
-                    <div class="modal-header bg-warning">
-                        <h5 class="modal-title">Edit Pet Owner</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="user_id" id="edit_user_id">
-                        <div class="mb-3">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" name="name" id="edit_name" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="email" id="edit_email" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Contact</label>
-                            <input type="text" name="contact" id="edit_contact" class="form-control" maxlength="11"
-                                pattern="\d{11}" title="Contact number must be 11 digits (e.g., 09xxxxxxxxx)" required
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            <textarea name="address" id="edit_address" class="form-control"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Save Changes</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -257,13 +215,71 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
                                 required></textarea>
                         </div>
 
-                        <button type="submit" class="btn btn-success w-100">Register</button>
+                        <button type="submit" class="btn btn-success float-end">
+                            <i class="bi bi-save"></i> Register
+                        </button>
                     </form>
 
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editOwnerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="editOwnerForm" method="POST" action="edit_petowner.php">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title">Edit Pet Owner</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" id="edit_user_id">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="name" id="edit_name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" id="edit_email" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Contact</label>
+                            <input type="text" name="contact" id="edit_contact" class="form-control" maxlength="11"
+                                pattern="\d{11}" title="Contact number must be 11 digits (e.g., 09xxxxxxxxx)" required
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea name="address" id="edit_address" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success float-end">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-light">
+        <div class="container text-center small">
+            All Rights Reserved. &copy; 2025 VetCareSys
+        </div>
+    </footer>
+
+    <style>
+        .footer-light {
+            background: #f8f9fa;
+            color: #333;
+            padding: 12px 0;
+            border-top: 1px solid #ddd;
+        }
+    </style>
 
     <script>
         function toggleEdit(isEdit) {

@@ -143,7 +143,7 @@ if ($clinic_id) {
     $monthlyIncome = $stmt->fetchColumn() ?? 0;
 
     // YEARLY INCOME
-$stmt = $pdo->prepare("
+    $stmt = $pdo->prepare("
 SELECT 
     SUM(
         CASE 
@@ -161,14 +161,8 @@ WHERE s.clinic_id = ?
 AND YEAR(r.date_used) = YEAR(CURDATE())
 ");
 
-$stmt->execute([$clinic_id]);
-$yearlyIncome = $stmt->fetchColumn() ?? 0;
-}
-
-$clinic_id = $_SESSION['clinic_id'] ?? null;
-if (!$clinic_id) {
-    echo "No clinic selected.";
-    exit;
+    $stmt->execute([$clinic_id]);
+    $yearlyIncome = $stmt->fetchColumn() ?? 0;
 }
 
 // Default date range (last 30 days)
@@ -184,40 +178,54 @@ $end_default = date('Y-m-d');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinic Owner Dashboard - VetCareSys</title>
     <link rel="icon" type="image/jpg" href="../assets/img/favicon-removebg-preview.png">
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/index.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
     <link rel="stylesheet" href="assets/css/footer.css">
+
+    <!-- Chart.js (only once) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <!-- PDF + Canvas -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 </head>
+
 <body>
 
     <?php include 'assets/body/alert_popup.php' ?>
     <?php include 'assets/body/navbar.php' ?>
     <?php include 'assets/body/dashboard.php' ?>
-    <?php include 'assets/body/profile_modal.php' ?>
     <?php include 'assets/body/edit_user_modal.php' ?>
     <?php include 'assets/body/inquiry_form.php' ?>
     <?php include 'assets/body/about_us.php' ?>
-    <?php include 'assets/body/footer.php' ?>
+    <?php include 'assets/body/footer_all.php' ?>
 
     <script src="assets/js/message_alert.js"></script>
     <script src="assets/js/calendar.js"></script>
-    <script src="assets/js/logout.js"></script>
-    <script src="assets/js/show_password.js"></script>
     <script src="assets/js/report.js"></script>
     <script src="assets/js/sidebar_toggle.js"></script>
     <script src="assets/js/income_chart.js"></script>
-    <script src="assets/js/notifications.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

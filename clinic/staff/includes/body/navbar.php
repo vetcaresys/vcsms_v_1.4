@@ -102,11 +102,11 @@
                     <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile Picture"
                         class="rounded-circle border border-3 border-primary mb-3" width="130" height="130"
                         style="object-fit: cover;">
-                    <h4 class="fw-bold text-primary mb-3"><?= htmlspecialchars($staff['name']) ?></h4>
+                    <h4 class="fw-bold text-primary mb-3 justify-content-start"><?= htmlspecialchars($staff['name']) ?></h4>
 
                     <!-- 🧾 Info Table -->
                     <div class="table-responsive">
-                        <table class="table table-bordered align-middle">
+                        <table class="table table-bordered align-middle text-start">
                             <tbody>
                                 <tr>
                                     <th style="width:30%">Full Name</th>
@@ -214,7 +214,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" onclick="toggleEdit(false)">Cancel</button>
-                        <button type="submit" class="btn btn-success">Save Changes</button>
+                        <button type="submit" class="btn btn-success"><i class='bi bi-save'></i> Save Changes</button>
                     </div>
                 </form>
             </div>

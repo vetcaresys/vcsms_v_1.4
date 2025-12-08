@@ -181,14 +181,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'])) {
     sendAppointmentEmail($pdo, $appointment_id, $clinic_id);
 }
 
-// --- Fetch all appointments ---
+// --- Fetch specific clinic appointments ---
 $stmt = $pdo->prepare("
-    SELECT a.*, p.pet_name, p.owner_id, s.service_name, 
-           u.name AS owner_name, u.email AS owner_email, u.contact_number AS owner_contact
+    SELECT 
+        a.appointment_id,
+        a.clinic_id,
+        a.pet_id,
+        a.owner_id,
+        a.service_id,
+        a.doctor_id,
+        a.appointment_date,
+        a.appointment_start,
+        a.appointment_end,
+        a.status,
+        a.updated_at,
+        p.pet_name,
+        u.name AS owner_name,
+        u.email AS owner_email,
+        u.contact_number AS owner_contact,
+        s.service_name
     FROM appointments a
     JOIN pets p ON a.pet_id = p.pet_id
+    JOIN users u ON a.owner_id = u.user_id
     JOIN clinic_services s ON a.service_id = s.service_id
-    JOIN users u ON p.owner_id = u.user_id
     WHERE a.clinic_id = ?
     ORDER BY 
         CASE a.status
@@ -197,7 +212,9 @@ $stmt = $pdo->prepare("
             WHEN 'completed' THEN 3
             WHEN 'cancelled' THEN 4
             ELSE 5
-        END ASC
+        END ASC,
+        a.appointment_date ASC,
+        a.appointment_start ASC
 ");
 $stmt->execute([$clinic_id]);
 $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -217,7 +234,6 @@ if (isset($_POST['doctor_id'])) {
     exit;
 }
 
-
 // --- Staff profile info ---
 $staff_id = $_SESSION['staff_id'];
 $stmt = $pdo->prepare("SELECT * FROM staff WHERE staff_id = ?");
@@ -227,7 +243,6 @@ $staff = $stmt->fetch(PDO::FETCH_ASSOC);
 $name = htmlspecialchars($staff['name']);
 $profilePic = !empty($staff['profile_picture']) ? $staff['profile_picture'] : 'default.png';
 $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
-
 ?>
 
 <!DOCTYPE html>
@@ -250,435 +265,435 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
     <link rel="stylesheet" href="includes/css/manage_customer_appointment.css">
     <style>
         /* 🌟 Global Styles */
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f8f9fb;
-    color: #2e2e2e;
-    line-height: 1.6;
-}
-
-/* 🧭 Navbar */
-.navbar {
-    background: linear-gradient(90deg, #0d6efd, #007bff);
-    font-family: 'Poppins', sans-serif;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-brand {
-    font-weight: 700;
-    font-size: 1.25rem;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-}
-
-.navbar-brand img {
-    width: 38px;
-    height: 38px;
-    object-fit: cover;
-    border-radius: 50%;
-    background: #fff;
-    padding: 3px;
-    margin-right: 10px;
-    transition: transform 0.2s ease;
-}
-
-.navbar-brand img:hover {
-    transform: scale(1.08);
-}
-
-/* Links */
-.nav-link {
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.nav-link:hover {
-    color: #ffc107 !important;
-}
-
-/* 🧾 Summary Cards */
-.summary-card {
-    border: none;
-    border-radius: 12px;
-    background: #fff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.summary-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-}
-
-.summary-card h5 {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-}
-
-.summary-card h2 {
-    font-weight: 700;
-    font-size: 2rem;
-}
-
-/* 💼 Tables */
-.table {
-    border-radius: 10px;
-    overflow: hidden;
-    font-size: 0.95rem;
-}
-
-.table thead {
-    background-color: #0d6efd;
-    color: white;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-}
-
-.table tbody tr:hover {
-    background-color: #f2f7ff;
-}
-
-/* 🪄 Buttons */
-.btn {
-    border-radius: 8px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-/* 🧩 Modals */
-.modal-content {
-    border-radius: 15px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.modal-header {
-    border-radius: 15px 15px 0 0;
-    background: linear-gradient(90deg, #0d6efd, #007bff);
-    color: white;
-}
-
-.modal-title {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-}
-
-/* 🧍 Form */
-.form-label {
-    font-weight: 600;
-    color: #333;
-}
-
-.form-control {
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-/* ⚡ Sweet alert pop */
-.swal2-popup {
-    font-family: 'Inter', sans-serif !important;
-    border-radius: 15px !important;
-}
-
-/* 🌈 Badges */
-.badge {
-    font-size: 0.85rem;
-    padding: 6px 10px;
-    border-radius: 8px;
-}
-
-/* 🐾 Page Titles */
-h4.text-primary {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    color: #0d6efd !important;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-/* 📦 Footer vibe */
-.container-footer {
-    text-align: center;
-    margin-top: 50px;
-    font-size: 0.9rem;
-    color: #777;
-}
-
-/* 🧭 Datatables */
-div.dataTables_wrapper .dataTables_filter input {
-    border-radius: 8px;
-    border: 1px solid #ddd;
-}
-
-div.dataTables_wrapper .dataTables_length select {
-    border-radius: 6px;
-}
-
-/* 🧁 Animations */
-.card,
-.modal-content {
-    transition: all 0.25s ease-in-out;
-}
-
-/* 🩵 Table container border and shadow */
-.table-responsive {
-    border: 2px solid #cfe2ff;
-    /* light blue border */
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    background-color: #ffffff;
-    padding: 1rem;
-}
-
-/* 🩵 Table border styling */
-.table {
-    border: 1px solid #dee2e6;
-    border-collapse: separate !important;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-/* 🩵 Header style */
-.table thead.table-primary th {
-    background-color: #0d6efd !important;
-    color: white;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-/* 🩵 Row hover effect */
-.table-hover tbody tr:hover {
-    background-color: #f8f9fa !important;
-    transition: background-color 0.2s ease-in-out;
-}
-
-/* 🩵 Cell padding and borders */
-.table td,
-.table th {
-    vertical-align: middle;
-    border-color: #dee2e6;
-    padding: 0.75rem;
-}
-
-/* 🩵 Make the badge look tighter */
-.badge {
-    font-size: 0.85rem;
-    padding: 0.45em 0.6em;
-}
-
-/* 🩵 Add smooth animation to buttons */
-.btn {
-    transition: all 0.2s ease-in-out;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-}
-
-/* 🌟 Global Styles */
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8f9fb;
-      color: #2e2e2e;
-      line-height: 1.6;
-      background: linear-gradient(135deg, #f0f4ff, #ffffff);
-      min-height: 100vh;
-    }
-
-    /* 🧭 Navbar */
-    .navbar {
-      background: linear-gradient(90deg, #0d6efd, #007bff);
-      font-family: 'Poppins', sans-serif;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar-brand {
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-    }
-
-    .navbar-brand img {
-      width: 38px;
-      height: 38px;
-      object-fit: cover;
-      border-radius: 50%;
-      background: #fff;
-      padding: 3px;
-      margin-right: 10px;
-      transition: transform 0.2s ease;
-    }
-
-    .navbar-brand img:hover {
-      transform: scale(1.08);
-    }
-
-    /* Links */
-    .nav-link {
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    .nav-link:hover {
-      color: #ffc107 !important;
-    }
-
-    /* 🧾 Summary Cards */
-    .summary-card {
-      border: none;
-      border-radius: 12px;
-      background: #fff;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .summary-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .summary-card h5 {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-    }
-
-    .summary-card h2 {
-      font-weight: 700;
-      font-size: 2rem;
-    }
-
-    /* 💼 Tables */
-    .table {
-      border-radius: 10px;
-      overflow: hidden;
-      font-size: 0.95rem;
-    }
-
-    .table thead {
-      background-color: #0d6efd;
-      color: white;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-    }
-
-    .table tbody tr:hover {
-      background-color: #f2f7ff;
-    }
-
-    /* 🪄 Buttons */
-    .btn {
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-
-    .btn:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    /* 🧩 Modals */
-    .modal-content {
-      border-radius: 15px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .modal-header {
-      border-radius: 15px 15px 0 0;
-      background: linear-gradient(90deg, #0d6efd, #007bff);
-      color: white;
-    }
-
-    .modal-title {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-    }
-
-    /* 🧍 Form */
-    .form-label {
-      font-weight: 600;
-      color: #333;
-    }
-
-    .form-control {
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-
-    /* ⚡ Sweet alert pop */
-    .swal2-popup {
-      font-family: 'Inter', sans-serif !important;
-      border-radius: 15px !important;
-    }
-
-    /* 🌈 Badges */
-    .badge {
-      font-size: 0.85rem;
-      padding: 6px 10px;
-      border-radius: 8px;
-    }
-
-    /* 🐾 Page Titles */
-    h4.text-primary {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      color: #0d6efd !important;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    /* 📦 Footer vibe */
-    .container-footer {
-      text-align: center;
-      margin-top: 50px;
-      font-size: 0.9rem;
-      color: #777;
-    }
-
-    /* 🧭 Datatables */
-    div.dataTables_wrapper .dataTables_filter input {
-      border-radius: 8px;
-      border: 1px solid #ddd;
-    }
-
-    div.dataTables_wrapper .dataTables_length select {
-      border-radius: 6px;
-    }
-
-    /* 🧁 Animations */
-    .card,
-    .modal-content {
-      transition: all 0.25s ease-in-out;
-    }
-
-    @media (max-width: 576px) {
-      .navbar-brand img {
-        width: 28px;
-        height: 28px;
-      }
-
-      .dropdown-toggle strong {
-        display: none;
-        /* hide name on very small screens */
-      }
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fb;
+            color: #2e2e2e;
+            line-height: 1.6;
+        }
+
+        /* 🧭 Navbar */
+        .navbar {
+            background: linear-gradient(90deg, #0d6efd, #007bff);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            width: 38px;
+            height: 38px;
+            object-fit: cover;
+            border-radius: 50%;
+            background: #fff;
+            padding: 3px;
+            margin-right: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-brand img:hover {
+            transform: scale(1.08);
+        }
+
+        /* Links */
+        .nav-link {
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #ffc107 !important;
+        }
+
+        /* 🧾 Summary Cards */
+        .summary-card {
+            border: none;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card h5 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        .summary-card h2 {
+            font-weight: 700;
+            font-size: 2rem;
+        }
+
+        /* 💼 Tables */
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+            font-size: 0.95rem;
+        }
+
+        .table thead {
+            background-color: #0d6efd;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f2f7ff;
+        }
+
+        /* 🪄 Buttons */
+        .btn {
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* 🧩 Modals */
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            border-radius: 15px 15px 0 0;
+            background: linear-gradient(90deg, #0d6efd, #007bff);
+            color: white;
+        }
+
+        .modal-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        /* 🧍 Form */
+        .form-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ⚡ Sweet alert pop */
+        .swal2-popup {
+            font-family: 'Inter', sans-serif !important;
+            border-radius: 15px !important;
+        }
+
+        /* 🌈 Badges */
+        .badge {
+            font-size: 0.85rem;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        /* 🐾 Page Titles */
+        h4.text-primary {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: #0d6efd !important;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 📦 Footer vibe */
+        .container-footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        /* 🧭 Datatables */
+        div.dataTables_wrapper .dataTables_filter input {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        div.dataTables_wrapper .dataTables_length select {
+            border-radius: 6px;
+        }
+
+        /* 🧁 Animations */
+        .card,
+        .modal-content {
+            transition: all 0.25s ease-in-out;
+        }
+
+        /* 🩵 Table container border and shadow */
+        .table-responsive {
+            border: 2px solid #cfe2ff;
+            /* light blue border */
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            background-color: #ffffff;
+            padding: 1rem;
+        }
+
+        /* 🩵 Table border styling */
+        .table {
+            border: 1px solid #dee2e6;
+            border-collapse: separate !important;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        /* 🩵 Header style */
+        .table thead.table-primary th {
+            background-color: #0d6efd !important;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* 🩵 Row hover effect */
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa !important;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        /* 🩵 Cell padding and borders */
+        .table td,
+        .table th {
+            vertical-align: middle;
+            border-color: #dee2e6;
+            padding: 0.75rem;
+        }
+
+        /* 🩵 Make the badge look tighter */
+        .badge {
+            font-size: 0.85rem;
+            padding: 0.45em 0.6em;
+        }
+
+        /* 🩵 Add smooth animation to buttons */
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* 🌟 Global Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fb;
+            color: #2e2e2e;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #f0f4ff, #ffffff);
+            min-height: 100vh;
+        }
+
+        /* 🧭 Navbar */
+        .navbar {
+            background: linear-gradient(90deg, #0d6efd, #007bff);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand img {
+            width: 38px;
+            height: 38px;
+            object-fit: cover;
+            border-radius: 50%;
+            background: #fff;
+            padding: 3px;
+            margin-right: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-brand img:hover {
+            transform: scale(1.08);
+        }
+
+        /* Links */
+        .nav-link {
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #ffc107 !important;
+        }
+
+        /* 🧾 Summary Cards */
+        .summary-card {
+            border: none;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card h5 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        .summary-card h2 {
+            font-weight: 700;
+            font-size: 2rem;
+        }
+
+        /* 💼 Tables */
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+            font-size: 0.95rem;
+        }
+
+        .table thead {
+            background-color: #0d6efd;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f2f7ff;
+        }
+
+        /* 🪄 Buttons */
+        .btn {
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* 🧩 Modals */
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            border-radius: 15px 15px 0 0;
+            background: linear-gradient(90deg, #0d6efd, #007bff);
+            color: white;
+        }
+
+        .modal-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        /* 🧍 Form */
+        .form-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ⚡ Sweet alert pop */
+        .swal2-popup {
+            font-family: 'Inter', sans-serif !important;
+            border-radius: 15px !important;
+        }
+
+        /* 🌈 Badges */
+        .badge {
+            font-size: 0.85rem;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        /* 🐾 Page Titles */
+        h4.text-primary {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: #0d6efd !important;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 📦 Footer vibe */
+        .container-footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        /* 🧭 Datatables */
+        div.dataTables_wrapper .dataTables_filter input {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        div.dataTables_wrapper .dataTables_length select {
+            border-radius: 6px;
+        }
+
+        /* 🧁 Animations */
+        .card,
+        .modal-content {
+            transition: all 0.25s ease-in-out;
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand img {
+                width: 28px;
+                height: 28px;
+            }
+
+            .dropdown-toggle strong {
+                display: none;
+                /* hide name on very small screens */
+            }
+        }
     </style>
 </head>
 
@@ -775,7 +790,7 @@ div.dataTables_wrapper .dataTables_length select {
         <?php endif; ?>
     </div>
 
-    <!-- 👁️ View & Edit Appointment Modal -->
+    <!-- View & Edit Appointment Modal -->
     <div class="modal fade" id="viewAppointmentModal" tabindex="-1" aria-labelledby="viewAppointmentModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -878,7 +893,7 @@ div.dataTables_wrapper .dataTables_length select {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" id="toggleViewBtn">Edit</button>
                     <button type="submit" form="viewEditAppointmentForm" class="btn btn-success" id="saveChangesBtn"
-                        style="display:none;">Save Changes</button>
+                        style="display:none;"><i class="bi bi-save"></i> Save Changes</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -887,27 +902,27 @@ div.dataTables_wrapper .dataTables_length select {
 
     <script>
         // When doctor is changed in EDIT MODAL
-$(document).on("change", "#edit_doctor_id", function () {
-    let doctorId = $(this).val();
-    let clinicId = <?= $clinic_id ?>;  // STAFF CLINIC IS ALWAYS FIXED
+        $(document).on("change", "#edit_doctor_id", function () {
+            let doctorId = $(this).val();
+            let clinicId = <?= $clinic_id ?>;  // STAFF CLINIC IS ALWAYS FIXED
 
-    if (!doctorId) {
-        $("#editDoctorSchedule").html("<em>No doctor selected.</em>");
-        return;
-    }
+            if (!doctorId) {
+                $("#editDoctorSchedule").html("<em>No doctor selected.</em>");
+                return;
+            }
 
-    $.ajax({
-        url: "fetch_doctor_schedule.php",
-        type: "POST",
-        data: {
-            doctor_id: doctorId,
-            clinic_id: clinicId
-        },
-        success: function (response) {
-            $("#editDoctorSchedule").html(response);
-        }
-    });
-});
+            $.ajax({
+                url: "fetch_doctor_schedule.php",
+                type: "POST",
+                data: {
+                    doctor_id: doctorId,
+                    clinic_id: clinicId
+                },
+                success: function (response) {
+                    $("#editDoctorSchedule").html(response);
+                }
+            });
+        });
     </script>
 
     <script>

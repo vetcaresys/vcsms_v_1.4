@@ -206,7 +206,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Table + Yearly Chart -->
                 <div class="row g-3">
                     <div class="no-print">
@@ -217,47 +216,48 @@
                             <i class="bi bi-file-earmark-pdf"></i> Export PDF
                         </button>
                     </div>
-                    <div id="exportSection" class="row g-3">
+                    <!-- Table first -->
+                    <div class="col-12" id="exportSection">
+                        <div id="printSection">
+                            <h5>Detailed Income Table</h5>
+                            <table class="table table-bordered" style="width:100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr>
+                                        <th>Date Used</th>
+                                        <th>Record ID</th>
+                                        <th>Pet</th>
+                                        <th>Owner</th>
+                                        <th>Item</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Income (₱)</th>
+                                        <th>Staff</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                        <!-- Table -->
-                        <div class="col-lg-8">
-                            <div id="printSection">
-                                <div class="card p-3 border-1" style="border:1px solid #dee2e6;">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h5 class="mb-0">Detailed Income Table</h5>
-                                    </div>
+                    <!-- Chart below table -->
+                    <div class="col-12 mt-4">
+                        <div class="card p-3 border-1" style="border:1px solid #dee2e6;">
+                            <h5 class="mb-3 text-center">Yearly Income (12 months)</h5>
 
-                                    <div class="table-wrap">
-                                        <table class="table table-hover table-bordered">
-                                            <thead class="table-light sticky-top">
-                                                <tr>
-                                                    <th>Date Used</th>
-                                                    <th>Record ID</th>
-                                                    <th>Pet</th>
-                                                    <th>Owner</th>
-                                                    <th>Item</th>
-                                                    <th>Quantity</th>
-                                                    <th>Unit Price</th>
-                                                    <th>Income (₱)</th>
-                                                    <th>Staff</th>
-                                                    <th>Notes</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="reportTableBody"></tbody>
-                                        </table>
-                                    </div>
+                            <!-- CENTERED CHART WRAPPER -->
+                            <div style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+        ">
+                                <div style="width: 150%; max-width: 850px;">
+                                    <canvas id="yearlyChart"></canvas>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Chart -->
-                        <div class="col-lg-4">
-                            <div class="card p-3 border-1" style="border:1px solid #dee2e6;">
-                                <h5 class="mb-3">Yearly Income (12 months)</h5>
-                                <canvas id="yearlyChart" height="220"></canvas>
-                            </div>
                         </div>
-
                     </div>
 
                 </div>
@@ -265,3 +265,45 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('printBtn').addEventListener('click', async () => {
+        const printSection = document.getElementById('printSection');
+        const chart = document.getElementById('yearlyChart');
+
+        // Convert chart canvas to image
+        const chartImg = chart.toDataURL("image/png");
+
+        // Clone the print section
+        const clonedSection = printSection.cloneNode(true);
+
+        // Append chart image below the table
+        const imgEl = document.createElement('img');
+        imgEl.src = chartImg;
+        imgEl.style.width = '100%';
+        imgEl.style.marginTop = '20px';
+        clonedSection.appendChild(imgEl);
+
+        // Open print window
+        const w = window.open("", "", "height=900,width=1000");
+
+        w.document.write("<html><head><title>Print</title>");
+        w.document.write("<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'>");
+        w.document.write(`<style>
+        body { padding: 10px; font-size: 12px; }
+        table { width: 100% !important; border-collapse: collapse !important; }
+        th, td { border: 1px solid #000 !important; padding: 5px; text-align: left; }
+        tr { page-break-inside: avoid !important; }
+        thead { display: table-header-group !important; }
+        img { display: block; page-break-inside: avoid; }
+        .no-print { display: none !important; }
+    </style>`);
+        w.document.write("</head><body>");
+        w.document.write(clonedSection.outerHTML);
+        w.document.write("</body></html>");
+
+        w.document.close();
+        w.focus();
+        w.print();
+    });
+</script>

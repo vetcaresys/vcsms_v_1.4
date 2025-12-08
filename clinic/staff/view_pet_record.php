@@ -2,9 +2,15 @@
 session_start();
 include '../../config.php';
 
-// 🔐 Ensure session clinic_id exists
+// 🔐 Ensure staff or doctor session exists
+if (!isset($_SESSION['staff_id']) || !in_array($_SESSION['role'], ['staff', 'doctor'])) {
+    echo "<div class='text-danger text-center mt-4'>⚠️ Unauthorized Access.</div>";
+    exit;
+}
+
+// Clinic authentication
 if (!isset($_SESSION['clinic_id'])) {
-    echo "<div class='text-danger text-center mt-4'>⚠️ Unauthorized Access. Please log in again.</div>";
+    echo "<div class='text-danger text-center mt-4'>⚠️ No clinic assigned.</div>";
     exit;
 }
 
@@ -27,7 +33,7 @@ if (!$record_id) {
     exit;
 }
 
-// Fetch record details
+// 🔥 SECURE: fetch record ONLY if it belongs to same clinic
 $stmt = $pdo->prepare("
     SELECT 
         pr.*, 
@@ -41,18 +47,21 @@ $stmt = $pdo->prepare("
     LEFT JOIN users u ON p.owner_id = u.user_id
     LEFT JOIN record_templates rt ON pr.template_id = rt.template_id
     WHERE pr.record_id = ?
+      AND pr.clinic_id = ?   -- 🔥 SECURITY FIX
 ");
-$stmt->execute([$record_id]);
+$stmt->execute([$record_id, $clinic_id]);
 $record = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$record) {
-    echo "<div class='text-danger text-center mt-4'>Record not found.</div>";
+    echo "<div class='text-danger text-center mt-4'>
+            Record not found or you do not have access.
+          </div>";
     exit;
 }
 
 $data = json_decode($record['data'], true);
 
-// Fetch USED items with consumable info
+// Fetch USED items
 $stmtItems = $pdo->prepare("
     SELECT 
         riu.quantity_used,
@@ -67,6 +76,7 @@ $stmtItems->execute([$record_id]);
 $usedItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+<!-- HTML CONTENT BELOW (unchanged) -->
 <div id="printSection">
 
     <div class="text-center mb-3">
@@ -88,9 +98,7 @@ $usedItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
     <!-- 🩺 CONSULTATION DETAILS -->
     <h6 class="fw-bold mt-4 text-success">Consultation / Medical Details</h6>
     <table class="table table-striped table-bordered table-sm">
-        <thead class="table-light">
-        <tr><th>Field</th><th>Value</th></tr>
-        </thead>
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
         <tbody>
         <?php if (!empty($data)): ?>
             <?php foreach ($data as $label => $value): ?>
@@ -108,13 +116,7 @@ $usedItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
     <!-- 🧴 MEDICINES USED -->
     <h6 class="fw-bold mt-4 text-info">Medicines / Supplies Used</h6>
     <table class="table table-bordered table-striped table-sm">
-        <thead class="table-light">
-        <tr>
-            <th>Item Name</th>
-            <th>Quantity / Volume Used</th>
-        </tr>
-        </thead>
-
+        <thead><tr><th>Item Name</th><th>Quantity / Volume Used</th></tr></thead>
         <tbody>
         <?php if (!empty($usedItems)): ?>
             <?php foreach ($usedItems as $item): ?>
@@ -122,23 +124,17 @@ $usedItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
                     <td><?= htmlspecialchars($item['item_name']) ?></td>
                     <td>
                         <?php if ($item['is_consumable']): ?>
-
                             <?php 
                                 $used_ml = floatval($item['quantity_used']); 
                                 $bSize = floatval($item['volume_per_bottle_ml']);
                                 $bottle_equiv = $bSize > 0 ? round($used_ml / $bSize, 2) : null;
                             ?>
-
                             <strong><?= $used_ml ?> ml</strong>
-
                             <?php if ($bottle_equiv): ?>
                                 <br><small class="text-muted">(≈ <?= $bottle_equiv ?> bottle<?= $bottle_equiv > 1 ? 's' : '' ?>)</small>
                             <?php endif; ?>
-
                         <?php else: ?>
-
                             <strong><?= intval($item['quantity_used']) ?> pcs</strong>
-
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -149,7 +145,6 @@ $usedItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
         </tbody>
     </table>
 
-    <!-- SIGNATURE -->
     <div class="text-end mt-4">
         <p><strong>Attending Veterinarian:</strong> ____________________________</p>
         <p>Date: ____________________________</p>

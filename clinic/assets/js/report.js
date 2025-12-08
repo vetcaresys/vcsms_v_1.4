@@ -73,25 +73,44 @@ async function loadReport(start, end) {
     document.getElementById('daysCount').textContent = `${days} days`;
 }
 
-// Print
-document.getElementById('printBtn').addEventListener('click', () => {
-    const printContents = document.getElementById('printSection').innerHTML;
-    const w = window.open("", "", "height=900,width=1000");
+function copyChartForExport() {
+    const original = document.getElementById('yearlyChart');
+    const exportCanvas = document.getElementById('yearlyChartExport');
+    const ctxExport = exportCanvas.getContext('2d');
 
-    w.document.write("<html><head><title>Print</title>");
-    w.document.write("<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'>");
-    w.document.write("<style>body { padding: 20px; }</style>");
-    w.document.write("</head><body>");
-    w.document.write(printContents);
-    w.document.write("</body></html>");
+    // Destroy previous export chart if exists
+    if (exportCanvas.chartInstance) {
+        exportCanvas.chartInstance.destroy();
+    }
 
-    w.document.close();
-    w.print();
-});
-
+    // Recreate chart in export canvas
+    exportCanvas.chartInstance = new Chart(ctxExport, {
+        type: 'bar',
+        data: {
+            labels: months,    // use the same months array
+            datasets: [{
+                label: 'Income (₱)',
+                data: incomes, // same income data
+                borderRadius: 6,
+                borderWidth: 1,
+                backgroundColor: '#0d6efd'
+            }]
+        },
+        options: {
+            responsive: false, // important for export
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, ticks: { callback: val => '₱' + val } }
+            }
+        }
+    });
+}
 
 // Export PDF (jsPDF + html2canvas)
 document.getElementById('exportPdfBtn').addEventListener('click', async () => {
+    // Copy chart to export canvas first
+    copyChartForExport();
+
     const filename = `Income_Report_${document.getElementById('startDate').value}_${document.getElementById('endDate').value}`;
     const element = document.getElementById('exportSection');
 
@@ -107,7 +126,6 @@ document.getElementById('exportPdfBtn').addEventListener('click', async () => {
     pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pdfHeight);
     pdf.save(filename + '.pdf');
 });
-
 
 // quick range logic
 document.getElementById('quickRange').addEventListener('change', (e) => {
@@ -140,6 +158,7 @@ document.getElementById('applyBtn').addEventListener('click', () => {
     const ctx = document.getElementById('yearlyChart').getContext('2d');
     const months = yearly.months || [];
     const incomes = yearly.incomes || [];
+
     new Chart(ctx, {
         type: 'bar',
         data: {
@@ -153,10 +172,12 @@ document.getElementById('applyBtn').addEventListener('click', () => {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false, // <-- important for filling container height
             scales: {
                 y: { beginAtZero: true, ticks: { callback: val => '₱' + val } }
             }
         }
     });
+
 
 })();
