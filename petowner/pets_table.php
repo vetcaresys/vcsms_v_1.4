@@ -5,7 +5,7 @@
 
         <!-- Export Buttons -->
         <div class="d-flex gap-2">
-            <button id="printTable" class="btn btn-light btn-sm"><i class="bi bi-printer"></i> Print</button>
+            <!-- <button id="printTable" class="btn btn-light btn-sm"><i class="bi bi-printer"></i> Print</button> -->
             <button id="exportExcel" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i>
                 Excel</button>
         </div>
@@ -107,10 +107,10 @@
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    <button class="btn btn-sm btn-danger"
+                                    <!-- <button class="btn btn-sm btn-danger"
                                         onclick="return confirmDelete(event, <?= $pet['pet_id']; ?>)">
                                         <i class="bi bi-trash"></i>
-                                    </button>
+                                    </button> -->
                                 </div>
                             </td>
                         </tr>

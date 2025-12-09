@@ -72,10 +72,10 @@
                                                 data-bs-target="#editModal<?= $row['schedule_id'] ?>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <a href="javascript:void(0);" class="btn btn-sm btn-danger"
+                                            <!-- <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                 onclick="confirmDelete(<?= $row['schedule_id'] ?>)">
                                                 <i class="bi bi-trash"></i>
-                                            </a>
+                                            </a> -->
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

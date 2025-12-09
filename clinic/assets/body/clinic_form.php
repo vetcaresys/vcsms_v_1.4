@@ -79,13 +79,14 @@
                         Upload your clinic logo (PNG, JPG recommended).
                     </div>
 
-                    <?php if (!empty($existingClinic['logo'])): ?>
+                    <?php if (!empty($existingClinic['logo']) && file_exists('../uploads/logos/' . $existingClinic['logo'])): ?>
                         <div class="mt-2">
                             <label class="form-label">Current Logo:</label><br>
-                            <img src="../<?= htmlspecialchars($existingClinic['logo']) ?>" alt="Clinic Logo"
+                            <img src="../uploads/logos/<?= htmlspecialchars($existingClinic['logo']) ?>" alt="Clinic Logo"
                                 style="max-width: 150px; max-height: 150px; border: 1px solid #ccc; padding: 5px; border-radius: 8px;">
                         </div>
                     <?php endif; ?>
+
                 </div>
 
                 <!-- SUBMIT BUTTON -->

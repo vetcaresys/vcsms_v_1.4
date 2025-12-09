@@ -88,10 +88,10 @@
                                                         </button>
 
                                                         <!-- Delete button -->
-                                                        <button type="button" class="btn btn-sm btn-danger"
+                                                        <!-- <button type="button" class="btn btn-sm btn-danger"
                                                             onclick="confirmDelete(<?= $row['service_id']; ?>)">
                                                             <i class="bi bi-trash"></i>
-                                                        </button>
+                                                        </button> -->
                                                     </div>
                                                 </td>
 

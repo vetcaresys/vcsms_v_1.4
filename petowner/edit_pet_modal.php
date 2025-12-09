@@ -138,9 +138,7 @@
                         <!-- Description -->
                         <div class="col-12">
                             <label class="form-label">Description</label>
-                            <textarea name="description" class="form-control" rows="3" required>
-                                                    <?= htmlspecialchars($pet['description']); ?>
-                                                </textarea>
+                            <textarea name="description" class="form-control" rows="3" required><?= htmlspecialchars($pet['description']); ?></textarea>
                         </div>
                     </div>
 

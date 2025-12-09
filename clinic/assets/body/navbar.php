@@ -60,9 +60,8 @@
                     </li>
                     <li>
                         <form method="POST" action="logout.php" id="logoutForm" class="m-0">
-                            <button class="dropdown-item text-danger" type="submit" id="logoutBtn">
-                                <i class="bi bi-box-arrow-right"></i> Logout
-                            </button>
+                            <button class="dropdown-item text-danger" type="submit" class="btn btn-light btn-sm"
+                                id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button>
                         </form>
                     </li>
                 </ul>

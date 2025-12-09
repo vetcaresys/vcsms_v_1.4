@@ -15,17 +15,82 @@ $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Profile picture
+// Profile picture path
 $profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'profile_default.jpg';
 $profilePicPath = "../uploads/profiles/" . $profilePic . "?t=" . time();
 $name = htmlspecialchars($user['name']);
+
+// Format contact number
+$contact = $user['contact_number'] ?? '';
+if (!empty($contact)) {
+    $contact = preg_replace('/\s+/', '', $contact);
+    if (preg_match('/^09\d{9}$/', $contact)) {
+        $contact = '+63' . substr($contact, 1);
+    } elseif (preg_match('/^639\d{9}$/', $contact)) {
+        $contact = '+' . $contact;
+    }
+} else {
+    $contact = 'N/A';
+}
+
+// Helper: Clinic logo
+function getLogoPath($logo)
+{
+    return !empty($logo) ? "../uploads/logos/" . basename($logo) : "assets/default-clinic.jpg";
+}
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $contact = trim($_POST['contact_number']);
+    $address = trim($_POST['address']);
+
+    $errors = [];
+
+    if (strlen($name) < 3) {
+        $errors[] = "Name must be at least 3 characters.";
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Invalid email format.";
+    }
+    if (!empty($contact) && !preg_match('/^09\d{9}$/', $contact)) {
+        $errors[] = "Contact number must be 11 digits starting with 09.";
+    }
+    if (empty($address)) {
+        $errors[] = "Address is required.";
+    }
+
+    // Validate profile picture
+    if (!empty($_FILES['profile_picture']['name'])) {
+        $allowed = ['jpg', 'jpeg', 'png'];
+        $ext = strtolower(pathinfo($_FILES['profile_picture']['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowed)) {
+            $errors[] = "Profile picture must be JPG or PNG.";
+        }
+        if ($_FILES['profile_picture']['size'] > 2 * 1024 * 1024) {
+            $errors[] = "Profile picture must not exceed 2MB.";
+        }
+    }
+
+    if (!empty($errors)) {
+        $_SESSION['error'] = implode("<br>", $errors);
+        header("Location: pet_owner_dashboard.php");
+        exit;
+    }
+
+    // Fetch notifications
+    $stmt = $pdo->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC");
+    $stmt->execute([$user_id]);
+    $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // ====== FILTERS ======
 $statusFilter = $_GET['status'] ?? 'all';
 $petFilter = $_GET['pet'] ?? '';
 $clinicFilter = $_GET['clinic'] ?? '';
 $search = $_GET['search'] ?? '';
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$page = max(1, intval($_GET['page'] ?? 1));
 $limit = 6;
 $offset = ($page - 1) * $limit;
 
@@ -46,19 +111,15 @@ if ($statusFilter !== 'all') {
     $sql .= " AND a.status = :status ";
     $params['status'] = $statusFilter;
 }
-
 if (!empty($petFilter)) {
     $sql .= " AND a.pet_id = :pet_id ";
     $params['pet_id'] = $petFilter;
 }
-
 if (!empty($clinicFilter)) {
     $sql .= " AND a.clinic_id = :clinic_id ";
     $params['clinic_id'] = $clinicFilter;
 }
-
 if (!empty($search)) {
-    // Use unique parameter names for each LIKE
     $sql .= " AND (
         p.pet_name LIKE :search1 OR
         cs.service_name LIKE :search2 OR
@@ -66,11 +127,9 @@ if (!empty($search)) {
         s.name LIKE :search4 OR
         a.message LIKE :search5
     )";
-    $params['search1'] = "%$search%";
-    $params['search2'] = "%$search%";
-    $params['search3'] = "%$search%";
-    $params['search4'] = "%$search%";
-    $params['search5'] = "%$search%";
+    foreach (range(1, 5) as $i) {
+        $params["search$i"] = "%$search%";
+    }
 }
 
 // ====== COUNT FOR PAGINATION ======
@@ -90,19 +149,18 @@ $finalSQL = "
     ORDER BY a.appointment_date DESC, a.appointment_start DESC
     LIMIT $limit OFFSET $offset
 ";
-
 $stmt = $pdo->prepare($finalSQL);
 $stmt->execute($params);
 $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// ====== LOAD PETS FOR FILTER ======
+// ====== LOAD PETS & CLINICS ======
 $pets = $pdo->prepare("SELECT * FROM pets WHERE owner_id = ?");
 $pets->execute([$user_id]);
 $pets = $pets->fetchAll(PDO::FETCH_ASSOC);
 
-// ====== LOAD CLINICS FOR FILTER ======
 $clinics = $pdo->query("SELECT clinic_id, clinic_name FROM clinics")->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -378,6 +436,7 @@ $clinics = $pdo->query("SELECT clinic_id, clinic_name FROM clinics")->fetchAll(P
     <?php include 'footer.php' ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/profile_toggle.js"></script>
 </body>
 
 </html>

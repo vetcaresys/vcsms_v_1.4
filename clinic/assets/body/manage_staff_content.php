@@ -83,10 +83,10 @@
                                                     <i class="bi bi-pencil-square me-1"></i>
                                                 </button>
 
-                                                <a href="?delete=<?= $staff['staff_id']; ?>"
+                                                <!-- <a href="?delete=<?= $staff['staff_id']; ?>"
                                                     class="btn btn-sm btn-danger delete-btn" data-id="<?= $staff['staff_id']; ?>">
                                                     <i class="bi bi-trash"></i>
-                                                </a>
+                                                </a> -->
                                             </div>
                                         </td>
                                     </tr>

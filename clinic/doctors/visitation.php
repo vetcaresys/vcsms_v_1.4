@@ -36,6 +36,39 @@ $profilePic = !empty($doctor['profile_picture']) ? $doctor['profile_picture'] : 
 $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
 
 /* --------------------------------------
+   HANDLE CLINIC LOGO
+---------------------------------------- */
+$logoFile = !empty($clinic['logo']) ? $clinic['logo'] : 'default.png'; // fallback if no logo
+
+if (isset($_FILES['logo']) && !empty($_FILES['logo']['name'])) {
+    $uploadDir = "../../uploads/logos/";
+    if (!is_dir($uploadDir))
+        mkdir($uploadDir, 0777, true);
+
+    $fileName = time() . "_" . basename($_FILES["logo"]["name"]);
+    $targetFile = $uploadDir . $fileName;
+    $fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+
+    if (in_array($fileType, ['jpg', 'jpeg', 'png', 'gif'])) {
+        if (move_uploaded_file($_FILES["logo"]["tmp_name"], $targetFile)) {
+            // Update database with new logo
+            $updateStmt = $pdo->prepare("UPDATE clinics SET logo = ? WHERE clinic_id = ?");
+            $updateStmt->execute([$fileName, $clinic_id]);
+
+            // Update local variable to reflect new logo immediately
+            $logoFile = $fileName;
+        } else {
+            $msg = "Failed to upload logo.";
+        }
+    } else {
+        $msg = "Invalid image type. Only JPG, JPEG, PNG, GIF allowed.";
+    }
+}
+
+// Full path to display in HTML
+$logoPath = "../../uploads/logos/" . $logoFile . "?t=" . time();
+
+/* --------------------------------------
    FETCH DOCTOR ADDITIONAL DETAILS
 ---------------------------------------- */
 $docInfoStmt = $pdo->prepare("SELECT * FROM doctors WHERE staff_id = ?");
@@ -48,6 +81,7 @@ $doctorInfo = $docInfoStmt->fetch(PDO::FETCH_ASSOC);
 $visits = $pdo->prepare("SELECT * FROM doctor_visits WHERE doctor_id = ? AND clinic_id = ?");
 $visits->execute([$doctor_id, $clinic_id]);
 $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <!DOCTYPE html>
@@ -59,7 +93,10 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
     <link rel="icon" type="image/jpg" href="../../assets/img/favicon-removebg-preview.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/css/bootstrap-timepicker.min.css">
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/js/bootstrap-timepicker.min.js"></script>
     <!-- Google Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
@@ -90,12 +127,33 @@ $visits = $visits->fetchAll(PDO::FETCH_ASSOC);
         </script>
         <?php unset($_SESSION['visit_success']); endif; ?>
 
+    <?php if (isset($_SESSION['visit_error'])): ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops!',
+                text: '<?= $_SESSION['visit_error']; ?>'
+            });
+        </script>
+        <?php unset($_SESSION['visit_error']); endif; ?>
+
+    <?php if (isset($_SESSION['visit_success'])): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '<?= $_SESSION['visit_success']; ?>'
+            });
+        </script>
+        <?php unset($_SESSION['visit_success']); endif; ?>
 
     <?php include 'includes/navbar.php' ?>
 
     <?php include 'includes/view_visitation.php' ?>
 
     <?php include 'includes/add_visitation_modal.php' ?>
+
+    <br><br>
 
     <?php include 'includes/footer.php' ?>
 

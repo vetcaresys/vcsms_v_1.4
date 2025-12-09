@@ -139,10 +139,10 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                     data-bs-placement="top" title="Edit">
                     <i class="bi bi-pencil-square"></i>
                   </button>
-                  <button class="btn btn-sm btn-danger" onclick="confirmDeleteCategory(<?= $category['category_id'] ?>)"
+                  <!-- <button class="btn btn-sm btn-danger" onclick="confirmDeleteCategory(<?= $category['category_id'] ?>)"
                     data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
                     <i class="bi bi-trash"></i>
-                  </button>
+                  </button> -->
                 </td>
               </tr>
 
@@ -599,10 +599,10 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                     data-bs-placement="top" title="Edit">
                     <i class="bi bi-pencil-square"></i>
                   </button>
-                  <button class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $item['item_id'] ?>)"
+                  <!-- <button class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $item['item_id'] ?>)"
                     data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
                     <i class="bi bi-trash"></i>
-                  </button>
+                  </button> -->
                 </td>
               </tr>
             <?php endforeach; ?>
