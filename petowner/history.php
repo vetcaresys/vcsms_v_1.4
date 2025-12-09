@@ -15,16 +15,95 @@ $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Fetch activity logs
-$logs_stmt = $pdo->prepare("SELECT * FROM user_activity_log WHERE user_id = ? ORDER BY created_at DESC");
-$logs_stmt->execute([$user_id]);
-$logs = $logs_stmt->fetchAll(PDO::FETCH_ASSOC);
-
 // Profile picture
 $profilePic = !empty($user['profile_picture']) ? $user['profile_picture'] : 'profile_default.jpg';
 $profilePicPath = "../uploads/profiles/" . $profilePic . "?t=" . time();
 $name = htmlspecialchars($user['name']);
+
+// ====== FILTERS ======
+$statusFilter = $_GET['status'] ?? 'all';
+$petFilter = $_GET['pet'] ?? '';
+$clinicFilter = $_GET['clinic'] ?? '';
+$search = $_GET['search'] ?? '';
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$limit = 6;
+$offset = ($page - 1) * $limit;
+
+// ====== BASE SQL ======
+$sql = "
+    FROM appointments a
+    LEFT JOIN pets p ON a.pet_id = p.pet_id
+    LEFT JOIN clinic_services cs ON a.service_id = cs.service_id
+    LEFT JOIN clinics c ON a.clinic_id = c.clinic_id
+    LEFT JOIN staff s ON a.doctor_id = s.staff_id
+    WHERE a.owner_id = :owner_id
+";
+
+// ====== APPLY FILTERS ======
+$params = ['owner_id' => $user_id];
+
+if ($statusFilter !== 'all') {
+    $sql .= " AND a.status = :status ";
+    $params['status'] = $statusFilter;
+}
+
+if (!empty($petFilter)) {
+    $sql .= " AND a.pet_id = :pet_id ";
+    $params['pet_id'] = $petFilter;
+}
+
+if (!empty($clinicFilter)) {
+    $sql .= " AND a.clinic_id = :clinic_id ";
+    $params['clinic_id'] = $clinicFilter;
+}
+
+if (!empty($search)) {
+    // Use unique parameter names for each LIKE
+    $sql .= " AND (
+        p.pet_name LIKE :search1 OR
+        cs.service_name LIKE :search2 OR
+        c.clinic_name LIKE :search3 OR
+        s.name LIKE :search4 OR
+        a.message LIKE :search5
+    )";
+    $params['search1'] = "%$search%";
+    $params['search2'] = "%$search%";
+    $params['search3'] = "%$search%";
+    $params['search4'] = "%$search%";
+    $params['search5'] = "%$search%";
+}
+
+// ====== COUNT FOR PAGINATION ======
+$countStmt = $pdo->prepare("SELECT COUNT(*) AS total $sql");
+$countStmt->execute($params);
+$totalRows = $countStmt->fetchColumn();
+$totalPages = ceil($totalRows / $limit);
+
+// ====== FETCH APPOINTMENTS ======
+$finalSQL = "
+    SELECT a.*, 
+           p.pet_name,
+           cs.service_name,
+           c.clinic_name,
+           s.name AS doctor_name
+    $sql
+    ORDER BY a.appointment_date DESC, a.appointment_start DESC
+    LIMIT $limit OFFSET $offset
+";
+
+$stmt = $pdo->prepare($finalSQL);
+$stmt->execute($params);
+$appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// ====== LOAD PETS FOR FILTER ======
+$pets = $pdo->prepare("SELECT * FROM pets WHERE owner_id = ?");
+$pets->execute([$user_id]);
+$pets = $pets->fetchAll(PDO::FETCH_ASSOC);
+
+// ====== LOAD CLINICS FOR FILTER ======
+$clinics = $pdo->query("SELECT clinic_id, clinic_name FROM clinics")->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -68,6 +147,70 @@ $name = htmlspecialchars($user['name']);
             font-size: 1.1rem;
         }
     </style>
+
+    <style>
+        .history-item {
+            border-left: 4px solid #0d6efd;
+            padding: 12px 15px;
+            border-radius: 6px;
+            background: white;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        .history-type {
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        /* Make filters stack nicely on mobile */
+        @media (max-width: 767px) {
+            .row.g-2>[class*='col-'] {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            input[name="search"] {
+                width: 100% !important;
+            }
+
+            .history-item i {
+                font-size: 0.9rem;
+            }
+
+            .history-item {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            .history-item .text-muted.small {
+                font-size: 0.78rem;
+            }
+
+            .nav-tabs .nav-link {
+                font-size: 0.9rem;
+                padding: 8px 10px;
+            }
+
+            /* Pagination buttons smaller */
+            .pagination .page-link {
+                padding: 5px 8px;
+                font-size: 0.85rem;
+            }
+        }
+
+        .history-item span.badge {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .pagination .page-item:not(:first-child):not(:last-child) {
+                display: none;
+                /* only show Prev and Next */
+            }
+        }
+    </style>
+
 </head>
 
 <body>
@@ -98,162 +241,143 @@ $name = htmlspecialchars($user['name']);
         <div class="card shadow-sm">
             <div class="card-body">
 
-                <?php if (count($logs) == 0): ?>
-                    <div class="empty-history">
-                        <i class="bi bi-inboxes"></i><br>
-                        No activity history yet.
+                <!-- TABS -->
+                <ul class="nav nav-tabs mb-3 flex-wrap">
+                    <?php
+                    $tabs = ['all' => 'All', 'pending' => 'Pending', 'approved' => 'Approved', 'completed' => 'Completed', 'cancelled' => 'Cancelled'];
+                    foreach ($tabs as $key => $label):
+                        ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($statusFilter === $key ? 'active' : '') ?>" href="?status=<?= $key ?>">
+                                <?= $label ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+
+                <!-- FILTERS -->
+                <form method="GET" class="row g-2 mb-3">
+
+                    <div class="col-md-3">
+                        <select name="pet" class="form-select">
+                            <option value="">All Pets</option>
+                            <?php foreach ($pets as $p): ?>
+                                <option value="<?= $p['pet_id'] ?>" <?= ($petFilter == $p['pet_id'] ? 'selected' : '') ?>>
+                                    <?= htmlspecialchars($p['pet_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
 
+                    <div class="col-md-3">
+                        <select name="clinic" class="form-select">
+                            <option value="">All Clinics</option>
+                            <?php foreach ($clinics as $c): ?>
+                                <option value="<?= $c['clinic_id'] ?>" <?= ($clinicFilter == $c['clinic_id'] ? 'selected' : '') ?>>
+                                    <?= htmlspecialchars($c['clinic_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <input type="text" name="search" placeholder="Search Pets..."
+                            value="<?= htmlspecialchars($search) ?>" class="form-control">
+                    </div>
+
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
+                    </div>
+
+                </form>
+
+                <!-- APPOINTMENT LIST -->
+                <?php if ($totalRows == 0): ?>
+                    <div class="empty-history">
+                        <i class="bi bi-inboxes"></i><br>
+                        No appointment history found.
+                    </div>
                 <?php else: ?>
-                    <?php foreach ($logs as $log): ?>
+                    <?php foreach ($appointments as $a): ?>
                         <div class="history-item shadow-sm">
-                            <div class="history-type text-primary"><?= htmlspecialchars($log['activity_type']) ?></div>
-                            <div><?= htmlspecialchars($log['description']) ?></div>
+
+                            <div class="history-type text-primary">
+                                <?= ucfirst($a['status']) ?> Appointment
+                            </div>
+
+                            <div><strong><?= $a['pet_name'] ?></strong> • <?= $a['service_name'] ?></div>
+
+                            <div class="text-muted small">
+                                <i class="bi bi-hospital"></i> <?= $a['clinic_name'] ?>
+                            </div>
+
+                            <?php if ($a['doctor_name']): ?>
+                                <div class="text-muted small">
+                                    <i class="bi bi-person-video2"></i>
+                                    Dr. <?= $a['doctor_name'] ?>
+                                </div>
+                            <?php endif; ?>
+
                             <div class="text-muted small mt-1">
                                 <i class="bi bi-clock"></i>
-                                <?= date("F d, Y • h:i A", strtotime($log['created_at'])) ?>
+                                <?= date("F d, Y", strtotime($a['appointment_date'])) ?>
+                                • <?= date("h:i A", strtotime($a['appointment_start'])) ?>
+                                - <?= date("h:i A", strtotime($a['appointment_end'])) ?>
                             </div>
+
+                            <?php if (!empty($a['message'])): ?>
+                                <div class="mt-2">
+                                    <i class="bi bi-chat-left-text"></i>
+                                    <?= htmlspecialchars($a['message']) ?>
+                                </div>
+                            <?php endif; ?>
+
                         </div>
                     <?php endforeach; ?>
+                <?php endif; ?>
+
+                <!-- PAGINATION -->
+                <?php if ($totalPages > 1): ?>
+                    <nav>
+                        <ul class="pagination justify-content-center mt-3">
+
+                            <!-- Prev -->
+                            <li class="page-item <?= ($page <= 1 ? 'disabled' : '') ?>">
+                                <a class="page-link" href="?page=<?= $page - 1 ?>&<?= http_build_query($_GET) ?>">
+                                    Previous
+                                </a>
+                            </li>
+
+                            <!-- Numbers -->
+                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                <li class="page-item <?= ($i == $page ? 'active' : '') ?>">
+                                    <a class="page-link" href="?page=<?= $i ?>&<?= http_build_query($_GET) ?>">
+                                        <?= $i ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <!-- Next -->
+                            <li class="page-item <?= ($page >= $totalPages ? 'disabled' : '') ?>">
+                                <a class="page-link" href="?page=<?= $page + 1 ?>&<?= http_build_query($_GET) ?>">
+                                    Next
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
                 <?php endif; ?>
 
             </div>
         </div>
     </div>
+    <br><br>
 
-    <!-- FOOTER (same as dashboard) -->
-    <footer class="mt-auto bg-dark text-white py-3">
-        <div class="container text-center small">
-            All Rights Reserved. &copy; 2025 VetCareSys
-        </div>
-    </footer>
+    <?php include 'footer.php' ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            loadAdminNotifications();
-
-            // Load when bell icon is clicked
-            document.getElementById("notifDropdown").addEventListener("click", loadAdminNotifications);
-
-            // 💡 NEW: Listener for Mark All button
-            document.getElementById("mark_all_btn").addEventListener("click", markAllAsRead);
-        });
-
-        function loadAdminNotifications() {
-            fetch(`../petowner_fetch_notifications.php?user_id=` + `<?= ($user_id) ?>`)
-                .then(res => res.json())
-                .then(data => {
-                    const list = document.getElementById("notif_list");
-                    const count = document.getElementById("notif_count");
-                    const markAllBtn = document.getElementById("mark_all_btn"); // Get the button
-
-                    list.innerHTML = "";
-                    let unreadCount = 0;
-
-                    if (!data || data.length === 0) {
-                        list.innerHTML = `<li class="text-center text-muted py-3">No notifications</li>`;
-                        count.textContent = "";
-                        markAllBtn.disabled = true; // Disable button if no notifs
-                        return;
-                    }
-
-                    // Locate the loadAdminNotifications function and replace the following loop:
-                    data.forEach(n => {
-                        if (n.status === "unread") unreadCount++;
-
-                        list.innerHTML += `
-                        <li>
-                            <a href="${n.link ?? '#'}" class="dropdown-item d-flex justify-content-between align-items-start notif-item ${n.status === "unread" ? 'bg-light' : ''}"
-                            data-id="${n.notif_id}">
-                                <div class="w-100"> 
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <small class="text-secondary fw-semibold" style="font-size: 0.75rem;">
-                                            <i class="bi bi-calendar"></i> ${n.display_date}
-                                        </small>
-                                        <small class="text-muted" style="font-size: 0.7rem;">
-                                            <i class="bi bi-clock"></i> ${n.display_time}
-                                        </small>
-                                    </div>
-
-                                    <span style="
-                                        font-size: 0.85rem; 
-                                        max-width: 100%; 
-                                        display: block; 
-                                        overflow: hidden; 
-                                        text-overflow: ellipsis; 
-                                        white-space: nowrap;
-                                        /* Conditional Style: Use font-weight: bold (700) if unread, normal (400) if read */
-                                        font-weight: ${n.status === "unread" ? '700' : '400'};
-                                    ">
-                                    ${n.status === "unread" ? `<span class="badge bg-danger ms-2">New</span>` : ""}
-
-                                        ${n.subject}
-
-                                    </span>
-                                    
-                                    <small class="text-muted" style="font-size: 0.78rem;">${n.message}</small>
-                                </div>
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider my-0"></li>
-                    `;
-                    });
-
-                    count.textContent = unreadCount > 0 ? unreadCount : "";
-                    markAllBtn.disabled = (unreadCount === 0); // Enable button only if there are unread notifications
-                });
-        }
-
-        // 💡 NEW: Function to mark all notifications as read
-        function markAllAsRead() {
-            Swal.fire({
-                title: 'Mark all as read?',
-                text: "All current unread notifications will be marked as read.",
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, Mark All'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Fetch the new PHP endpoint to update the database
-                    fetch(`../petowner_mark_all_as_read.php?user_id=` + `<?= ($user_id) ?>`, { method: 'POST' })
-                        .then(response => {
-                            if (response.ok) {
-                                Swal.fire('Success!', 'All notifications marked as read.', 'success');
-                                // Reload the notifications immediately after success
-                                loadAdminNotifications();
-                            } else {
-                                Swal.fire('Error!', 'Could not mark all as read.', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Fetch error:', error);
-                            Swal.fire('Error!', 'Network or server issue.', 'error');
-                        });
-                }
-            });
-        }
-
-        // Mark as read when opening a notification (Your original function, updated for clarity)
-        document.addEventListener("click", function (e) {
-            if (e.target.closest(".notif-item")) {
-                const notifItem = e.target.closest(".notif-item");
-                const id = notifItem.dataset.id;
-
-                // Only send the request if it's currently marked as unread
-                if (notifItem.classList.contains('bg-light')) {
-                    fetch(`../mark_as_read.php?id=${id}`);
-                    // Simple visual update after click
-                    notifItem.classList.remove('bg-light');
-                    notifItem.querySelector('.badge')?.remove();
-                    loadAdminNotifications(); // Reload count
-                }
-            }
-        });
-    </script>
 </body>
 
 </html>

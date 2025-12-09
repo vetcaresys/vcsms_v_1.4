@@ -39,13 +39,37 @@
                         <td><?= htmlspecialchars($v['start_time']) ?></td>
                         <td><?= htmlspecialchars($v['end_time']) ?></td>
                         <td>
-                            <form action="delete_visit.php" method="POST" class="d-inline">
-                                <input type="hidden" name="visit_id" value="<?= $v['visit_id'] ?>">
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </form>
+
+                            <button class="btn btn-danger btn-sm deleteVisit" data-id="<?= $v['visit_id']; ?>">
+                                Delete
+                            </button>
+
+
                         </td>
                     </tr>
                 <?php endforeach; endif; ?>
         </tbody>
     </table>
 </div>
+
+<script>
+document.querySelectorAll(".deleteVisit").forEach(btn => {
+    btn.addEventListener("click", function() {
+        let id = this.dataset.id;
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This visitation will be permanently deleted!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location = "delete_visit.php?id=" + id;
+            }
+        });
+    });
+});
+</script>

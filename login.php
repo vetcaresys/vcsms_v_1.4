@@ -95,6 +95,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['name'] = $staff['name'];
         $_SESSION['role'] = $staff['role'];
 
+        // ✅ Fetch clinic name using clinic_id
+        $stmtClinicName = $pdo->prepare("SELECT clinic_name FROM clinics WHERE clinic_id = ?");
+        $stmtClinicName->execute([$staff['clinic_id']]);
+        $clinicData = $stmtClinicName->fetch();
+
+        if ($clinicData) {
+          $_SESSION['clinic_name'] = $clinicData['clinic_name'];
+        }
+
         // ✅ Add this success message
         $_SESSION['success'] = "Login successful! Welcome, " . $staff['name'] . ".";
 

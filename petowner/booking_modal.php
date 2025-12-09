@@ -42,9 +42,9 @@
                     </select>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Clinic Schedule</label>
-                    <div id="clinicScheduleDisplay" class="border rounded p-3 bg-light text-muted">
+                <div class="col-15">
+                    <label class="form-label fw-semibold">Clinic Schedule</label>
+                    <div id="clinicScheduleDisplay" class="clinic-sched-box">
                         Please select a clinic to view available schedules.
                     </div>
                 </div>
@@ -137,31 +137,102 @@
 
 <script>
     // When clinic changes, load doctors for that clinic
-document.getElementById('clinicSelect').addEventListener('change', function () {
-    const clinicId = this.value;
+    document.getElementById('clinicSelect').addEventListener('change', function () {
+        const clinicId = this.value;
 
-    // Reset doctor fields
-    document.getElementById('doctorSelect').innerHTML = '<option value="">Select Doctor</option>';
-    document.getElementById('doctorSpecialization').style.display = 'none';
-    document.getElementById('doctorScheduleDisplay').innerHTML = 'Select a doctor to view schedule.';
+        // Reset doctor fields
+        document.getElementById('doctorSelect').innerHTML = '<option value="">Select Doctor</option>';
+        document.getElementById('doctorSpecialization').style.display = 'none';
+        document.getElementById('doctorScheduleDisplay').innerHTML = 'Select a doctor to view schedule.';
 
-    if (clinicId === '') return;
+        if (clinicId === '') return;
 
-    // Fetch doctors
-    fetch('ajax_get_doctors.php?clinic_id=' + clinicId)
-        .then(response => response.json())
-        .then(data => {
-            const doctorSelect = document.getElementById('doctorSelect');
-            doctorSelect.innerHTML = '<option value="">Select Doctor</option>';
+        // Fetch doctors
+        fetch('ajax_get_doctors.php?clinic_id=' + clinicId)
+            .then(response => response.json())
+            .then(data => {
+                const doctorSelect = document.getElementById('doctorSelect');
+                doctorSelect.innerHTML = '<option value="">Select Doctor</option>';
 
-            data.forEach(doc => {
-                doctorSelect.innerHTML += `
+                data.forEach(doc => {
+                    doctorSelect.innerHTML += `
                     <option value="${doc.staff_id}" data-specialization="${doc.specialization}">
                         ${doc.name}
                     </option>
                 `;
+                });
             });
-        });
-});
+    });
 
 </script>
+<style>
+    /* Clinic schedule responsive box */
+    .clinic-sched-box {
+        border: 1px solid #dee2e6;
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 15px;
+        min-height: 80px;
+    }
+
+    /* Mobile improvements */
+    @media (max-width: 768px) {
+        .clinic-sched-box {
+            font-size: 0.9rem;
+            padding: 12px;
+        }
+
+        #bookingModal .modal-dialog {
+            margin: 10px;
+        }
+
+        #bookingModal .modal-content {
+            border-radius: 10px;
+        }
+
+        #bookingModal .form-label {
+            font-size: 0.9rem;
+        }
+
+        #bookingModal select,
+        #bookingModal input,
+        #bookingModal textarea {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .clinic-sched-box {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    }
+
+    /* Reduce spacing inside booking modal on mobile */
+    @media (max-width: 768px) {
+        #bookingModal .row {
+            --bs-gutter-x: 0.75rem !important;
+            /* reduce left-right spacing */
+        }
+
+        #bookingModal .col-md-6,
+        #bookingModal .col-12 {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }
+
+
+        .clinic-sched-box {
+            font-size: 0.9rem;
+            max-height: 140px;
+            /* smaller on mobile */
+            padding: 10px 12px;
+
+        }
+
+    }
+
+    #bookingModal .row.g-3 {
+        --bs-gutter-x: 0.5rem !important;
+    }
+</style>

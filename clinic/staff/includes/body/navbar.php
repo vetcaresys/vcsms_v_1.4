@@ -26,6 +26,24 @@
                     <a href="manage_inventory.php" class="nav-link text-white">Inventory</a>
                 </li>
             </ul>
+            <?php if (!empty($_SESSION['clinic_name']) && !empty($_SESSION['clinic_logo'])): ?>
+                <span class="px-3 py-2 rounded-3 text-white fw-semibold d-flex align-items-center" style="
+              background: url('<?= htmlspecialchars($_SESSION['clinic_logo']) ?>') no-repeat center center;
+              background-size: contain;
+              font-size: 0.9rem;
+              gap: 0.5rem;
+              min-width: 120px;
+              height: 40px;
+          ">
+                    <span><?= htmlspecialchars($_SESSION['clinic_name']) ?></span>
+                </span>
+            <?php elseif (!empty($_SESSION['clinic_name'])): ?>
+                <span class="px-3 py-2 rounded-3 text-white fw-semibold"
+                    style="background: rgba(255,255,255,0.2); backdrop-filter: blur(6px); font-size: 0.9rem;">
+                    <?= htmlspecialchars($_SESSION['clinic_name']) ?>
+                </span>
+            <?php endif; ?>
+
             <ul class="navbar-nav mb-2 mb-lg-0">
                 <li class="nav-item dropdown me-3">
                     <a class="nav-link position-relative" href="#" id="notifDropdown" data-bs-toggle="dropdown">
@@ -102,7 +120,8 @@
                     <img src="<?= htmlspecialchars($profilePicPath) ?>" alt="Profile Picture"
                         class="rounded-circle border border-3 border-primary mb-3" width="130" height="130"
                         style="object-fit: cover;">
-                    <h4 class="fw-bold text-primary mb-3 justify-content-start"><?= htmlspecialchars($staff['name']) ?></h4>
+                    <h4 class="fw-bold text-primary mb-3 justify-content-start"><?= htmlspecialchars($staff['name']) ?>
+                    </h4>
 
                     <!-- 🧾 Info Table -->
                     <div class="table-responsive">

@@ -27,7 +27,32 @@ $stmt = $pdo->query($sql);
 $pending_clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch all system users (users table)
-$users = $pdo->query("SELECT * FROM users ORDER BY user_id DESC")->fetchAll(PDO::FETCH_ASSOC);
+$users = $pdo->query("
+    SELECT 
+        user_id AS id, 
+        name, 
+        email, 
+        role, 
+        contact_number, 
+        address,
+        created_at
+    FROM users
+
+    UNION ALL
+
+    SELECT 
+        staff_id AS id, 
+        name, 
+        email, 
+        role, 
+        contact_number, 
+        '' AS address, 
+        'N/A' AS created_at
+    FROM staff
+
+    ORDER BY id DESC
+")->fetchAll(PDO::FETCH_ASSOC);
+
 
 // Fetch all staff (staff table)
 $staffs = $pdo->query("
@@ -36,6 +61,28 @@ $staffs = $pdo->query("
     LEFT JOIN clinics c ON s.clinic_id = c.clinic_id
     ORDER BY s.staff_id DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
+
+
+// COUNT ALL USERS (staff + doctors)
+$all_users = $pdo->query("SELECT COUNT(*) FROM staff")->fetchColumn();
+
+// OPTIONAL: count doctors only
+$doctors = $pdo->query("SELECT COUNT(*) FROM staff WHERE role='doctor'")->fetchColumn();
+
+// OPTIONAL: count staff only
+$staff = $pdo->query("SELECT COUNT(*) FROM staff WHERE role='staff'")->fetchColumn();
+
+// echo json_encode([
+//     'all_users' => $all_users,
+//     'doctors' => $doctors,
+//     'staff' => $staff
+// ]);
+
+// Count from users table
+$admins = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'admin'")->fetchColumn();
+$owners = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'owner'")->fetchColumn();
+$pet_owners = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'pet_owner'")->fetchColumn();
+
 
 ?>
 <!DOCTYPE html>
@@ -50,7 +97,7 @@ $staffs = $pdo->query("
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
@@ -247,7 +294,7 @@ $staffs = $pdo->query("
                     <tbody>
                         <?php foreach ($users as $u): ?>
                             <tr>
-                                <td><?= $u['user_id'] ?></td>
+                                <td><?= $u['id'] ?></td>
                                 <td><?= htmlspecialchars($u['name']) ?></td>
                                 <td><?= htmlspecialchars($u['email']) ?></td>
                                 <td><?= htmlspecialchars(ucfirst($u['role'])) ?></td>
@@ -291,7 +338,16 @@ $staffs = $pdo->query("
             </div>
         </div>
 
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-info text-white fw-bold">System Users Chart</div>
+            <div class="card-body">
+                <canvas id="usersChart" height="110"></canvas>
+            </div>
+        </div>
+
     </div>
+
+
 
     <footer class="bg-dark text-white py-3 mt-auto">
         <div class="container text-center small">
@@ -480,6 +536,63 @@ $staffs = $pdo->query("
             }
         });
     </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById("usersChart");
+
+    new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: [
+                "Doctors",
+                "Staff",
+                "Admins",
+                "Clinic Owners",
+                "Pet Owners",
+                "All Staff Users"
+            ],
+            datasets: [{
+                label: "User Count",
+                data: [
+                    chartData.doctors,
+                    chartData.staff,
+                    chartData.admins,
+                    chartData.clinicOwners,   // ✔ repaired
+                    chartData.petOwners,
+                    chartData.totalStaffUsers
+                ],
+                backgroundColor: [
+                    "rgba(13, 110, 253, 0.6)",
+                    "rgba(25, 135, 84, 0.6)",
+                    "rgba(220, 53, 69, 0.6)",
+                    "rgba(255, 193, 7, 0.6)",
+                    "rgba(111, 66, 193, 0.6)",
+                    "rgba(102, 16, 242, 0.6)"
+                ],
+                borderColor: [
+                    "rgba(13, 110, 253, 1)",
+                    "rgba(25, 135, 84, 1)",
+                    "rgba(220, 53, 69, 1)",
+                    "rgba(255, 193, 7, 1)",
+                    "rgba(111, 66, 193, 1)",
+                    "rgba(102, 16, 242, 1)"
+                ],
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+});
+
+    </script>
+
     <script>
         /**
          * Function to silently execute the PHP reminder script via AJAX.
@@ -520,6 +633,19 @@ $staffs = $pdo->query("
         console.log(`Reminder script set to run every ${intervalInMilliseconds / 1000} seconds.`);
 
     </script>
+    
+    <script>
+        const chartData = {
+            doctors: <?= $doctors ?>,
+            staff: <?= $staff ?>,
+            admins: <?= $admins ?>,
+            clinicOwners: <?= $owners ?>,   // ✔ correct for clinic owners
+            petOwners: <?= $pet_owners ?>,
+            totalStaffUsers: <?= $all_users ?>,
+        };
+    </script>
+
+
 </body>
 
 </html>

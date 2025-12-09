@@ -110,7 +110,8 @@ $clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <?php foreach ($schedules as $sc): ?>
                                         <li class="list-group-item"><?= $sc['day_of_week'] ?>:
                                             <?= date("h:i A", strtotime($sc['open_time'])) ?> -
-                                            <?= date("h:i A", strtotime($sc['close_time'])) ?></li>
+                                            <?= date("h:i A", strtotime($sc['close_time'])) ?>
+                                        </li>
                                     <?php endforeach; ?>
                                 </ul>
                             <?php else: ?>
@@ -138,10 +139,17 @@ $clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php else: ?>
                                 <p class="text-muted">No doctors registered in this clinic.</p>
                             <?php endif; ?>
+
+                            <button class="btn btn-success"
+                                onclick="getDirections(<?= $clinic['latitude'] ?>, <?= $clinic['longitude'] ?>)">
+                                Get Directions
+                            </button>
+
                         </div>
                     </div>
                 </div>
             </div>
+            <br><br>
 
             <script>
                 document.getElementById('clinicModal<?= $clinic['clinic_id'] ?>').addEventListener('shown.bs.modal', function () {
@@ -186,3 +194,28 @@ $clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let userLocation = null;
+
+function getDirections(destLat, destLng) {
+    if (userLocation) {
+        const [userLat, userLng] = userLocation;
+        const url = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${destLat},${destLng}`;
+        window.open(url, "_blank");
+        return;
+    }
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                userLocation = [pos.coords.latitude, pos.coords.longitude];
+                const url = `https://www.google.com/maps/dir/?api=1&origin=${userLocation[0]},${userLocation[1]}&destination=${destLat},${destLng}`;
+                window.open(url, "_blank");
+            },
+            (err) => alert("Unable to get your location.")
+        );
+    } else {
+        alert("Geolocation not supported.");
+    }
+}
+</script>
