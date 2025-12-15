@@ -276,88 +276,76 @@ $totalItems = $stmt->fetchColumn();
                   <th>Action</th>
 
                   <!-- Normal Item Fields -->
-                  <th>Qty Added</th>
+                  <!-- <th>Qty Added</th>
                   <th>Previous Qty</th>
-                  <th>New Qty</th>
+                  <th>New Qty</th> -->
 
                   <!-- Consumable Fields -->
-                  <th>Volume Used (ml)</th>
+                  <!-- <th>Volume Used (ml)</th>
                   <th>Previous Volume (ml)</th>
                   <th>New Volume (ml)</th>
                   <th>Total Volume (ml)</th>
-                  <th>Volume per Bottle (ml)</th>
+                  <th>Volume per Bottle (ml)</th> -->
 
                   <th>Performed By</th>
                 </tr>
               </thead>
               <tbody>
                 <?php
-                // ✅ Filter logs to show ONLY the logged-in clinic's inventory
                 $stmt = $pdo->prepare("
-                        SELECT 
-                            l.*, 
-                            i.item_name, 
-                            i.is_consumable,
-                            i.total_volume_ml,
-                            i.volume_per_bottle_ml,
-                            s.name AS staff_name
-                        FROM inventory_activity_log l
-                        JOIN inventory i ON l.item_id = i.item_id
-                        JOIN staff s ON l.staff_id = s.staff_id
-                        WHERE i.clinic_id = ?
-                        ORDER BY l.date_action DESC
-                    ");
+    SELECT 
+        l.log_id,
+        l.action_type,
+        l.quantity_added,
+        l.previous_quantity,
+        l.new_quantity,
+        l.remarks,
+        l.date_action,
+        i.item_name,
+        s.name AS staff_name
+    FROM inventory_activity_log l
+    JOIN inventory i ON l.item_id = i.item_id
+    JOIN staff s ON l.staff_id = s.staff_id
+    WHERE i.clinic_id = ?
+    ORDER BY l.date_action DESC
+");
                 $stmt->execute([$clinic_id]);
-                $logs = $stmt->fetchAll();
+                $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 if ($logs):
                   foreach ($logs as $log):
-
-                    $isConsumable = $log['is_consumable'] == 1;
-
-                    // Normal item fields
-                    $qtyAdded = $isConsumable ? 0 : $log['quantity_added'];
-                    $prevQty = $isConsumable ? 0 : $log['previous_quantity'];
-                    $newQty = $isConsumable ? 0 : $log['new_quantity'];
-
-                    // Consumable item fields
-                    $usedML = $log['volume_used'] ?? 0;
-                    $prevVol = $log['previous_volume_ml'] ?? 0;
-                    $newVol = $log['new_remaining_volume'] ?? 0;
-                    $totalVol = $log['total_volume_ml'] ?? 0;
-                    $volPerBottle = $log['volume_per_bottle_ml'] ?? 0;
                     ?>
                     <tr>
                       <td><?= date('M d, Y h:i A', strtotime($log['date_action'])) ?></td>
-                      <td class="fw-semibold"><?= htmlspecialchars($log['item_name']) ?></td>
+
+                      <td class="fw-semibold">
+                        <?= htmlspecialchars($log['item_name']) ?>
+                      </td>
+
                       <td>
-                        <span
-                          class="badge 
-                                    <?= $log['action_type'] == 'add' ? 'bg-success' : ($log['action_type'] == 'use' ? 'bg-info' : 'bg-danger') ?>">
+                        <span class="badge 
+            <?=
+              $log['action_type'] === 'add' ? 'bg-success' :
+              ($log['action_type'] === 'restock' ? 'bg-info' :
+                ($log['action_type'] === 'edit' ? 'bg-warning' : 'bg-danger'))
+              ?>">
                           <?= ucfirst($log['action_type']) ?>
                         </span>
                       </td>
 
-                      <!-- Normal Item Values -->
-                      <td><?= $qtyAdded ?></td>
-                      <td><?= $prevQty ?></td>
-                      <td><?= $newQty ?></td>
-
-                      <!-- Consumable Item Values -->
-                      <td><?= $usedML ?></td>
-                      <td><?= $prevVol ?></td>
-                      <td><?= $newVol ?></td>
-                      <td><?= $totalVol ?></td>
-                      <td><?= $volPerBottle ?></td>
-
-                      <td class="fw-semibold"><?= htmlspecialchars($log['staff_name']) ?></td>
+                      <td class="fw-semibold">
+                        <?= htmlspecialchars($log['staff_name']) ?>
+                      </td>
                     </tr>
-                  <?php endforeach; ?>
-                <?php else: ?>
+                    <?php
+                  endforeach;
+                else:
+                  ?>
                   <tr>
-                    <td colspan="13" class="text-center text-muted">No activity logs found</td>
+                    <td colspan="4" class="text-center text-muted">No activity logs found</td>
                   </tr>
                 <?php endif; ?>
+
               </tbody>
             </table>
           </div>
@@ -401,7 +389,7 @@ $totalItems = $stmt->fetchColumn();
       </style>
 
     </div> <!-- END OF MAIN PAGE CONTENT -->
-
+    <br><br>
     <footer class="footer-light">
       <div class="container text-center small">
         All Rights Reserved. &copy; 2025 VetCareSys

@@ -154,12 +154,16 @@
                         <div class="mb-3">
                             <label class="form-label">Password</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" name="password" id="editStaffPassword"
+                                <input type="password" class="form-control" name="password"
+                                    id="editStaffPassword<?= $staff['staff_id'] ?>"
                                     placeholder="Enter new password (leave blank to keep current)" minlength="8"
                                     pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
                                     title="Must be at least 8 characters, include uppercase, lowercase, number, and special character.">
-                                <button type="button" class="btn btn-outline-secondary" id="toggleEditStaffPassword">
-                                    Show</button>
+
+                                <button type="button" class="btn btn-outline-secondary"
+                                    id="toggleEditStaffPassword<?= $staff['staff_id'] ?>">
+                                    Show
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -171,4 +175,17 @@
             </div>
         </div>
     </div>
+<?php endforeach; ?>
+
+<?php foreach ($staffMembers as $staff): ?>
+<script>
+    const pwField<?= $staff['staff_id'] ?> = document.getElementById('editStaffPassword<?= $staff['staff_id'] ?>');
+    const toggleBtn<?= $staff['staff_id'] ?> = document.getElementById('toggleEditStaffPassword<?= $staff['staff_id'] ?>');
+
+    toggleBtn<?= $staff['staff_id'] ?>.addEventListener('click', function () {
+        const isHidden = pwField<?= $staff['staff_id'] ?>.type === 'password';
+        pwField<?= $staff['staff_id'] ?>.type = isHidden ? 'text' : 'password';
+        this.textContent = isHidden ? 'Hide' : 'Show';
+    });
+</script>
 <?php endforeach; ?>

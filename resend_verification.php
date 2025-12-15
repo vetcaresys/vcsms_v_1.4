@@ -18,27 +18,52 @@ function buildVerificationEmail($name, $email, $token, $extraParams = '') {
     $verifyUrl = "https://vetcaresys-001-site1.ntempurl.com/verify.php?email=" . urlencode($email) . "&token=$token" . $extraParams; 
 
     return "
-    <div style='font-family: Arial, sans-serif; padding:20px; background:#f4f6f9;'>
-        <div style='max-width:600px; margin:0 auto; background:#fff; border-radius:8px; overflow:hidden;'>
-            <div style='background:#0984e3; color:white; text-align:center; padding:15px;'>
-                <h2 style='margin:10px 0;'>VetCareSys</h2>
+    <div style='font-family: \"Inter\", \"Poppins\", Arial, sans-serif; padding:20px; background:#eef2f7;'>
+        <div style='max-width:600px; margin:0 auto; background:#ffffff; border-radius:12px; 
+                    box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow:hidden;'>
+
+            <div style='background:#0a84ff; color:white; text-align:center; padding:20px 15px;'>
+                <h2 style='margin:0; font-size:24px; font-weight:600; font-family:\"Poppins\", sans-serif;'>
+                    VetCareSys
+                </h2>
+                <p style='margin:5px 0 0; font-size:14px; opacity:0.9;'>Account Verification</p>
             </div>
-            <div style='padding:20px; color:#333;'>
-                <p>Hi <strong>" . htmlspecialchars($name) . "</strong>,</p>
-                <p>Thanks for registering with <b>VetCareSys</b>! Please confirm your account by clicking the button below:</p>
-                <p style='text-align:center;'>
-                    <a href='$verifyUrl' 
-                       style='display:inline-block; background:#0984e3; color:white; padding:12px 20px; 
-                              text-decoration:none; border-radius:6px; font-weight:bold;'>
+
+            <div style='padding:25px; color:#333; font-size:15px; line-height:1.6;'>
+                <p style='margin-bottom:10px;'>Hello <strong style=\"font-weight:600;\">"
+                    . htmlspecialchars($name) . 
+                "</strong>,</p>
+
+                <p style='margin-bottom:15px;'>
+                    Thanks for signing up at 
+                    <strong style='color:#0a84ff;'>VetCareSys</strong>. 
+                    Please confirm your email address by clicking the button below:
+                </p>
+
+                <div style='text-align:center; margin:25px 0;'>
+                    <a href='$verifyUrl'
+                       style='display:inline-block; padding:14px 28px; background:#0a84ff; 
+                              color:white; text-decoration:none; border-radius:8px;
+                              font-size:16px; font-weight:600; font-family:\"Poppins\", sans-serif;
+                              letter-spacing:0.3px;'>
                         Verify My Account
                     </a>
+                </div>
+
+                <p style='margin-top:10px; color:#555;'>
+                    If you did not create this account, kindly ignore this email.
                 </p>
-                <p>If you did not create this account, you can safely ignore this email.</p>
-                <p style='font-size:12px; color:#888; text-align:center;'>VetCareSys © " . date('Y') . "</p>
+
+                <hr style='border:none; border-top:1px solid #e5e7eb; margin:25px 0;'>
+
+                <p style='font-size:12px; color:#888; text-align:center;'>
+                    VetCareSys © " . date('Y') . " — All Rights Reserved
+                </p>
             </div>
         </div>
     </div>";
 }
+
 
 /**
  * 🔹 Reusable email sender

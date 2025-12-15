@@ -102,6 +102,10 @@
 
                             <td class="text-center">
                                 <div class="d-flex gap-2 justify-content-center">
+                                <a href="view_pet_records.php?pet_id=<?= $pet['pet_id'] ?>" 
+                                        class="btn btn-sm btn-info" title="View Records">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
                                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
                                         data-bs-target="#editPetModal<?= $pet['pet_id']; ?>">
                                         <i class="bi bi-pencil-square"></i>

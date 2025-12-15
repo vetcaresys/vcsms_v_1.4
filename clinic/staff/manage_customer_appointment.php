@@ -149,7 +149,7 @@ if (isset($_GET['update'], $_GET['status'])) {
     $notifStmt->execute([
         $petowner_id,
         'pet_owner',
-        $clinic_id,
+        $clinic_id ,
         $notification_message,
         $notification_subject,
         substr($appointment_date, 0, 10),
@@ -181,29 +181,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'])) {
     sendAppointmentEmail($pdo, $appointment_id, $clinic_id);
 }
 
-// --- Fetch specific clinic appointments ---
+// --- Fetch all appointments ---
 $stmt = $pdo->prepare("
-    SELECT 
-        a.appointment_id,
-        a.clinic_id,
-        a.pet_id,
-        a.owner_id,
-        a.service_id,
-        a.doctor_id,
-        a.appointment_date,
-        a.appointment_start,
-        a.appointment_end,
-        a.status,
-        a.updated_at,
-        p.pet_name,
-        u.name AS owner_name,
-        u.email AS owner_email,
-        u.contact_number AS owner_contact,
-        s.service_name
+    SELECT a.*, p.pet_name, p.owner_id, s.service_name, 
+           u.name AS owner_name, u.email AS owner_email, u.contact_number AS owner_contact
     FROM appointments a
     JOIN pets p ON a.pet_id = p.pet_id
-    JOIN users u ON a.owner_id = u.user_id
     JOIN clinic_services s ON a.service_id = s.service_id
+    JOIN users u ON p.owner_id = u.user_id
     WHERE a.clinic_id = ?
     ORDER BY 
         CASE a.status
@@ -212,27 +197,10 @@ $stmt = $pdo->prepare("
             WHEN 'completed' THEN 3
             WHEN 'cancelled' THEN 4
             ELSE 5
-        END ASC,
-        a.appointment_date ASC,
-        a.appointment_start ASC
+        END ASC
 ");
 $stmt->execute([$clinic_id]);
 $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-if (isset($_POST['doctor_id'])) {
-    $doctor_id = $_POST['doctor_id'];
-
-    $stmt = $pdo->prepare("
-        SELECT day_of_week, start_time, end_time
-        FROM doctor_visits
-        WHERE doctor_id = ? AND clinic_id = ?
-        ORDER BY FIELD(day_of_week, 'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')
-    ");
-    $stmt->execute([$doctor_id, $clinic_id]);
-
-    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
-    exit;
-}
 
 // --- Staff profile info ---
 $staff_id = $_SESSION['staff_id'];
@@ -243,6 +211,7 @@ $staff = $stmt->fetch(PDO::FETCH_ASSOC);
 $name = htmlspecialchars($staff['name']);
 $profilePic = !empty($staff['profile_picture']) ? $staff['profile_picture'] : 'default.png';
 $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
+
 ?>
 
 <!DOCTYPE html>
@@ -732,7 +701,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                 <td><?= htmlspecialchars($appt['pet_name']); ?></td>
                                 <td><?= htmlspecialchars($appt['owner_name']); ?></td>
                                 <td><?= htmlspecialchars($appt['service_name']); ?></td>
-                                <td><?= date("M d, Y - h:i A", strtotime($appt['appointment_date'])); ?></td>
+                                <td><?= date("M d, Y", strtotime($appt['appointment_date'])); ?></td>
                                 <td>
                                     <span class="badge 
                             <?php
@@ -759,16 +728,26 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                                 <td>
                                     <?php if ($appt['status'] === 'pending'): ?>
                                         <a href="#" class="btn btn-sm btn-info text-white view-appointment"
-                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle=" tooltip"
-                                            data-bs-placement="top" title="View Record">
-                                            <i class="bi bi-eye"></i>
+                                            data-id="<?= $appt['appointment_id']; ?>">
+                                            <i class="bi bi-eye"></i> View
                                         </a>
                                         <a href="?update=<?= $appt['appointment_id']; ?>&status=approved"
                                             class="btn btn-sm btn-success me-1 action-appointment" data-status="approved"
-                                            data-id="<?= $appt['appointment_id']; ?> data-bs-toggle=" tooltip"
+                                            data-id="<?= $appt['appointment_id']; ?>">
+                                            Approve
+                                        </a>
+                                        <!-- <a href="#" class="btn btn-sm btn-info text-white view-appointment"
+                                            data-id="<?= $appt['appointment_id']; ?>" data-bs-toggle="tooltip"
+                                            data-bs-placement="top" title="View Record">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        <a href="?update=<?= $appt['appointment_id']; ?>&status=approved"
+                                            class="btn btn-sm btn-success me-1 action-appointment" data-status="approved"
+                                            data-id="<?= $appt['appointment_id']; ?>" data-bs-toggle="tooltip"
                                             data-bs-placement="top" title="Approve Record">
                                             <i class="bi bi-check-circle-fill"></i>
-                                        </a>
+                                        </a> -->
                                     <?php elseif ($appt['status'] === 'approved'): ?>
                                         <a href="?update=<?= $appt['appointment_id']; ?>&status=completed"
                                             class="btn btn-sm btn-primary me-1 action-appointment" data-status="completed"

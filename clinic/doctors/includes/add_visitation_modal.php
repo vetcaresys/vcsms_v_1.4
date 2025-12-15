@@ -20,11 +20,11 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Start Time</label>
-                    <input type="text" name="start_time" id="editStartTime" class="form-control timepicker" required>
+                    <input type="time" name="start_time" class="form-control" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">End Time</label>
-                    <input type="text" name="end_time" id="editEndTime" class="form-control timepicker" required>
+                    <input type="time" name="end_time" class="form-control" required>
                 </div>
             </div>
             <div class="modal-footer">

@@ -80,14 +80,14 @@ if (isset($_GET['id']) && isset($_GET['action'])) {
                         <h2>Good news, {$ownerName}!</h2>
                         <p>Your clinic <strong>{$clinicName}</strong> has been <span style='color:green;'>approved</span>.</p>
                         <p>You may now log in and manage your clinic on 
-                        <a href='http://localhost/vcsms_v_1.4/'>VetCareSys</a>.</p>
+                        <a href='https://vetcaresys-001-site1.ntempurl.com/'>VetCareSys</a>.</p>
                         <br><p>Thank you,<br>VetCareSys Team</p>
                     ";
-                    $altBody = "Hello {$ownerName},\n\nYour clinic '{$clinicName}' has been approved.\n\nLogin here: http://localhost/vcsms_v_1.4/\n\nVetCareSys Team";
+                    $altBody = "Hello {$ownerName},\n\nYour clinic '{$clinicName}' has been approved.\n\nLogin here: https://vetcaresys-001-site1.ntempurl.com\n\nVetCareSys Team";
                 } 
                 else {
                     // ✅ Rejection + resubmission link
-                    $editLink = "http://localhost/vcsms_v_1.4/clinic/edit_clinic.php?token={$resubmitToken}";
+                    $editLink = "https://vetcaresys-001-site1.ntempurl.com/clinic/edit_clinic.php?token={$resubmitToken}";
                     $body = "
                         <h2>Hello, {$ownerName}</h2>
                         <p>We reviewed your clinic <strong>{$clinicName}</strong> and found missing or incomplete details.</p>
