@@ -47,7 +47,7 @@ if ($stmt->rowCount()) {
     $mail->addAddress($email);
     $mail->Subject = "VetCareSys Password Reset Request";
 
-    $resetLink = "https://localhost/vcsms_v_1.4/reset_password.php?token=$token";
+    $resetLink = "https://vetcaresys-001-site1.ntempurl.com/reset_password.php?token=$token";
     $mail->Body = <<<HTML
         <p>Dear User,</p>
         <p>We received a request to reset the password associated with this email address. 
