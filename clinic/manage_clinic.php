@@ -45,7 +45,6 @@ $branchClinic = $stmt->fetch();
 
 <body>
 
-    <?php include 'assets/body/manage_clinic_alert.php' ?>
     <?php include 'assets/body/navbar.php' ?>
     <?php include 'assets/body/manage_clinic_modal.php' ?>
     <?php include 'assets/body/edit_user_modal.php' ?>

@@ -12,6 +12,7 @@
                 <li class="nav-item"><a href="index.php" class="nav-link">Dashboard</a></li>
                 <li class="nav-item"><a href="manage_pets.php" class="nav-link">Manage Pets</a></li>
                 <li class="nav-item"><a href="book_appointment.php" class="nav-link">Book Appointment</a></li>
+                <li class="nav-item"><a href="inquiry_form.php" class="nav-link">Inquires</a></li>
             </ul>
 
             <ul class="navbar-nav mb-2 mb-lg-0">

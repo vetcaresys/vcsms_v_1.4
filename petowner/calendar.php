@@ -255,12 +255,61 @@
     // Start the process: fetch data, then render the calendar.
     fetchAppointments(); 
 </script>
-
 <style>
-    /* 📱 CLEAN MOBILE VIEW — FullCalendar only, NO custom calendar CSS */
+    /* =========================
+   DESKTOP DEFAULT STYLES
+   ========================= */
+    .containers {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        gap: 20px;
+    }
+
+    .calendar,
+    .appointments {
+        width: 50%;
+    }
+
+    /* Day cells */
+    .day {
+        background: #ffffff;
+        min-height: 60px;
+        padding: 5px;
+        border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    .day-number {
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    /* Appointment cards */
+    .appointment-card {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+    }
+
+    .appointment-card h4 {
+        font-size: 1.1rem;
+    }
+
+    .appointment-card p {
+        font-size: 0.9rem;
+    }
+
+    /* =========================
+   MOBILE STYLES (≤768px)
+   ========================= */
     @media (max-width: 768px) {
 
-        /* Navbar */
+        /* Navbar adjustments */
         .navbar-brand img {
             width: 32px;
             height: 32px;
@@ -270,13 +319,13 @@
             font-size: 1rem;
         }
 
-        /* Main container spacing */
+        /* Main container padding */
         .container {
             padding-left: 10px;
             padding-right: 10px;
         }
 
-        /* Dashboard cards become full width */
+        /* Dashboard cards full width */
         #dashboardStats .col-md-3,
         #dashboardStats .col-md-4,
         #dashboardStats .col-md-6 {
@@ -284,19 +333,87 @@
             flex: 0 0 100%;
         }
 
-        /* Calendar + Appointments stack vertically */
+        /* Stack calendar and appointments vertically */
         .containers {
+            display: flex;
             flex-direction: column;
             width: 100%;
-            gap: 20px;
+            max-width: 100%;
+            gap: 15px;
         }
 
         .calendar,
         .appointments {
-            width: 100% !important;
+            width: 100%;
+            max-width: 100%;
         }
 
-        /* FULLCALENDAR ONLY */
+        /* Calendar header */
+        .calendar header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+        }
+
+        /* Day grid */
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            width: 100%;
+            gap: 3px;
+            box-sizing: border-box;
+        }
+
+        /* Day cells size */
+        .day {
+            min-height: 48px;
+            max-height: 48px;
+            padding: 3px;
+        }
+
+        /* Day number */
+        .day-number {
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        /* Hide mini previews */
+        .mini-appt {
+            display: none !important;
+        }
+
+        /* Highlight today and selected day */
+        .day.today {
+            background: #f2f8ff;
+            border: 1px solid #c6ddff;
+        }
+
+        .day.selected {
+            outline: 2px solid #3b82f6;
+            background: #e8f1ff;
+        }
+
+        /* Appointment cards */
+        .appointment-card {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .appointment-card h4 {
+            font-size: 1rem;
+        }
+
+        .appointment-card p {
+            font-size: 0.85rem;
+        }
+
+        .time-status span {
+            font-size: 0.8rem;
+        }
+
+        /* FullCalendar adjustments */
         .fc-daygrid-day-frame {
             height: 90px !important;
             padding: 6px !important;
@@ -321,36 +438,7 @@
             padding: 2px 4px !important;
         }
 
-        /* Appointment cards */
-        .appointment-card {
-            padding: 12px;
-        }
-
-        .appointment-card h4 {
-            font-size: 1rem;
-        }
-
-        .appointment-card p {
-            font-size: 0.85rem;
-        }
-    }
-
-    /* ===== DESKTOP STAYS NORMAL ===== */
-
-    /* 📱 FULLY FIXED CLEAN MOBILE CALENDAR */
-    @media (max-width: 768px) {
-
-        /* Container layout */
-        .containers {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 100%;
-            overflow: hidden;
-            gap: 15px;
-        }
-
-        /* Make empty day cells same size as real days */
+        /* Empty day cells consistent size */
         .days div:not(.day-number):empty,
         .days .empty {
             min-height: 48px !important;
@@ -359,90 +447,5 @@
             border-radius: 6px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-
-        .calendar,
-        .appointments {
-            width: 100% !important;
-            max-width: 100%;
-        }
-
-        /* Calendar month header */
-        .calendar header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-        }
-
-        /* Fix the day grid */
-        .days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            width: 100%;
-            gap: 3px;
-            box-sizing: border-box;
-        }
-
-        /* Consistent day box size for ALL months */
-        .day {
-            background: #ffffff;
-            min-height: 48px;
-            max-height: 48px;
-            padding: 3px;
-            border-radius: 6px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-sizing: border-box;
-        }
-
-        /* Day number */
-        .day-number {
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-
-        /* No tiny previews on mobile */
-        .mini-appt {
-            display: none !important;
-        }
-
-        /* Selected day highlight */
-        .day.selected {
-            outline: 2px solid #3b82f6;
-            background: #e8f1ff;
-        }
-
-        /* Today highlight */
-        .day.today {
-            background: #f2f8ff;
-            border: 1px solid #c6ddff;
-        }
-
-        /* Appointment list formatting */
-        .appointment-card {
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .appointment-card h4 {
-            font-size: 1rem;
-        }
-
-        .appointment-card p {
-            font-size: 0.85rem;
-        }
-
-        .time-status span {
-            font-size: 0.8rem;
-        }
     }
-
-
-
-
-    /* DESKTOP view stays normal */
 </style>

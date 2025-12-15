@@ -133,6 +133,15 @@ $pet_owners = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'pet_owner'")
         .table tbody tr:hover {
             background-color: #f2f7ff;
         }
+
+        /* FOOTER */
+        footer {
+            background: #0a1f4b !important;
+            padding: 12px;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -347,13 +356,12 @@ $pet_owners = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'pet_owner'")
 
     </div>
 
-
-
-    <footer class="bg-dark text-white py-3 mt-auto">
-        <div class="container text-center small">
-            All Rights Reserved. &copy; 2025 VetCareSys
-        </div>
+<!-- FOOTER -->
+<footer class="mt-auto">
+        All Rights Reserved. © 2025 VetCareSys
     </footer>
+
+    
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

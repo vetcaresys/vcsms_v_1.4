@@ -3,7 +3,7 @@
 include '../../config.php';
 session_start();
 
-$alert = null; // initialize so it's always defined
+$alert = null;
 
 // Ensure staff is logged in
 if (!isset($_SESSION['staff_id']) || $_SESSION['role'] !== 'staff') {
@@ -11,63 +11,107 @@ if (!isset($_SESSION['staff_id']) || $_SESSION['role'] !== 'staff') {
     exit;
 }
 
+/* ===================== ADD PET ===================== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Staff selects which pet owner this pet belongs to
-    $owner_id = isset($_POST['owner_id']) ? $_POST['owner_id'] : null;
 
-    if ($owner_id === null) {
-        echo "<p style='color:red;'>Please select a pet owner.</p>";
+    $owner_id = $_POST['owner_id'] ?? null;
+
+    if (!$owner_id) {
+        $alert = ['type' => 'error', 'message' => 'Please select a pet owner.'];
     } else {
-        $pet_name = trim($_POST['pet_name']);
-        $species = trim($_POST['species']);
-        $breed = trim($_POST['breed']);
-        $birth_date = !empty($_POST['birth_date']) ? $_POST['birth_date'] : null;
-        $description = trim($_POST['description']);
-        $status = "alive";
-        $photo = null;
 
-        // Handle photo upload
-        if (!empty($_FILES['photo']['name'])) {
-            $target_dir = "../../uploads/pets/";
-            if (!is_dir($target_dir)) {
-                mkdir($target_dir, 0777, true);
-            }
-            $photo_name = time() . "_" . basename($_FILES["photo"]["name"]);
-            $target_file = $target_dir . $photo_name;
+        $pet_name = trim($_POST['pet_name'] ?? '');
 
-            if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
-                $photo = $photo_name;
-            }
+        /* ---- SPECIES (Others support) ---- */
+        if (($_POST['species'] ?? '') === 'Others') {
+            $species = trim($_POST['species_other'] ?? '');
+        } else {
+            $species = trim($_POST['species'] ?? '');
         }
 
-        // Insert into database using PDO
-        $sql = "INSERT INTO pets (owner_id, pet_name, species, photo, breed, birth_date, description, status) 
-                VALUES (:owner_id, :pet_name, :species, :photo, :breed, :birth_date, :description, :status)";
-
-        $stmt = $pdo->prepare($sql);
-        $success = $stmt->execute([
-            ':owner_id' => $owner_id,
-            ':pet_name' => $pet_name,
-            ':species' => $species,
-            ':photo' => $photo,
-            ':breed' => $breed,
-            ':birth_date' => $birth_date,
-            ':description' => $description,
-            ':status' => $status
-        ]);
-
-        if ($success) {
-            $alert = ['type' => 'success', 'message' => 'Pet added successfully!'];
+        /* ---- BREED (Others support) ---- */
+        if (($_POST['breed'] ?? '') === 'Others') {
+            $breed = trim($_POST['breed_other'] ?? '');
         } else {
-            $alert = ['type' => 'error', 'message' => 'Error adding pet.'];
+            $breed = trim($_POST['breed'] ?? '');
+        }
+
+        $birth_date = !empty($_POST['birth_date']) ? $_POST['birth_date'] : null;
+        $description = trim($_POST['description'] ?? '');
+        $status = 'alive';
+        $photo = null;
+
+        /* ---- VALIDATION ---- */
+        if (!$pet_name) {
+            $alert = ['type' => 'error', 'message' => 'Pet name is required.'];
+        } elseif (!$species) {
+            $alert = ['type' => 'error', 'message' => 'Please enter species.'];
+        } elseif (($_POST['breed'] ?? '') === 'Others' && !$breed) {
+            $alert = ['type' => 'error', 'message' => 'Please enter breed.'];
+        } else {
+
+            /* ---- DUPLICATE CHECK (OWNER + PET NAME ONLY) ---- */
+            $check = $pdo->prepare("
+                SELECT 1 FROM pets
+                WHERE owner_id = ?
+                AND LOWER(pet_name) = LOWER(?)
+            ");
+            $check->execute([$owner_id, $pet_name]);
+
+            if ($check->rowCount() > 0) {
+                $alert = [
+                    'type' => 'error',
+                    'message' => 'This owner already has a pet with the same name.'
+                ];
+            } else {
+
+                /* ---- PHOTO UPLOAD ---- */
+                if (!empty($_FILES['photo']['name'])) {
+                    $target_dir = "../../uploads/pets/";
+                    if (!is_dir($target_dir)) {
+                        mkdir($target_dir, 0777, true);
+                    }
+
+                    $photo_name = time() . "_" . basename($_FILES["photo"]["name"]);
+                    $target_file = $target_dir . $photo_name;
+
+                    if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
+                        $photo = $photo_name;
+                    }
+                }
+
+                /* ---- INSERT PET ---- */
+                $stmt = $pdo->prepare("
+                    INSERT INTO pets
+                    (owner_id, pet_name, species, photo, breed, birth_date, description, status)
+                    VALUES
+                    (:owner_id, :pet_name, :species, :photo, :breed, :birth_date, :description, :status)
+                ");
+
+                $success = $stmt->execute([
+                    ':owner_id'   => $owner_id,
+                    ':pet_name'   => $pet_name,
+                    ':species'    => $species,
+                    ':photo'      => $photo,
+                    ':breed'      => $breed,
+                    ':birth_date' => $birth_date,
+                    ':description'=> $description,
+                    ':status'     => $status
+                ]);
+
+                if ($success) {
+                    $alert = ['type' => 'success', 'message' => 'Pet added successfully!'];
+                } else {
+                    $alert = ['type' => 'error', 'message' => 'Error adding pet.'];
+                }
+            }
         }
     }
 }
 
-// -------------------- STAFF INFO --------------------
+/* ===================== STAFF INFO ===================== */
 $staff_id = $_SESSION['staff_id'];
 $clinic_id = $_SESSION['clinic_id'];
-$staff_name = htmlspecialchars($_SESSION['name']);
 
 $stmt = $pdo->prepare("SELECT * FROM staff WHERE staff_id = ?");
 $stmt->execute([$staff_id]);
@@ -452,7 +496,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                             echo "<td><span class='badge bg-" .
                                 ($pet['status'] === 'alive' ? "success" : "secondary") . "'>" .
                                 htmlspecialchars($pet['status']) . "</span></td>";
-                            echo "<td>";       
+                            echo "<td>";
                             if (!empty($pet['photo'])) {
                                 echo "<img src='../../uploads/pets/" . htmlspecialchars($pet['photo']) . "' 
                                        alt='Pet Photo' class='img-thumbnail' style='width:60px;height:60px;'>";
@@ -569,6 +613,20 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         }
     </script>
 
+    <script>
+        function toggleSpeciesInput(select) {
+            const otherInput = document.getElementById('species_other');
+            if (select.value === 'Others') {
+                otherInput.classList.remove('d-none');
+                otherInput.required = true;
+            } else {
+                otherInput.classList.add('d-none');
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        }
+
+    </script>
 </body>
 
 </html>

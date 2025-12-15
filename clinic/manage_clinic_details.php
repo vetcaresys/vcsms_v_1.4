@@ -116,7 +116,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </script>
     <?php endif; ?>
 
-    <?php include 'assets/body/alert_popup.php' ?>
     <?php include 'assets/body/navbar.php' ?>
     <?php include 'assets/body/clinic_form.php' ?>
     <?php include 'assets/body/edit_user_modal.php' ?>

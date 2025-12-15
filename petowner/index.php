@@ -104,8 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/navbar.css">
     <style>
         #calendar {
-            max-width: 100%;
-            margin: 0 auto;
+            width: 100%;
+    max-width: 100%;
         }
 
         .fc-daygrid-event {
@@ -143,6 +143,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
+
+
 
     <main class="container mt-4">
         <div class="row g-4" id="dashboardStats">

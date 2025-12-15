@@ -213,7 +213,6 @@ $end_default = date('Y-m-d');
 
 <body>
 
-    <?php include 'assets/body/alert_popup.php' ?>
     <?php include 'assets/body/navbar.php' ?>
     <?php include 'assets/body/dashboard.php' ?>
     <?php include 'assets/body/edit_user_modal.php' ?>

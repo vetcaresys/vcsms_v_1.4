@@ -44,7 +44,16 @@ $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $templates = $pdo->query("SELECT template_id, template_name FROM record_templates")->fetchAll(PDO::FETCH_ASSOC);
 
 // 🐕 Fetch all pets
-$pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->fetchAll(PDO::FETCH_ASSOC);
+$stmt = $pdo->prepare("
+    SELECT DISTINCT p.pet_id, p.pet_name
+    FROM pets p
+    JOIN appointments a ON a.pet_id = p.pet_id
+    WHERE a.clinic_id = ?
+    ORDER BY p.pet_name ASC
+");
+$stmt->execute([$clinic_id]);
+$pets = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <!DOCTYPE html>
@@ -88,6 +97,26 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
         </script>
     <?php endif; ?>
 
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'duplicate'): ?>
+<script>
+    Swal.fire({
+        icon: 'warning',
+        title: 'Duplicate Record',
+        text: 'This pet already has a medical record for today. Only one record per pet per day is allowed.',
+        confirmButtonColor: '#dc3545'
+    }).then(() => {
+        // Clean URL
+        if (window.history.replaceState) {
+            const url = new URL(window.location);
+            url.searchParams.delete('error');
+            window.history.replaceState({}, document.title, url.pathname);
+        }
+    });
+</script>
+<?php endif; ?>
+
+
+
     <?php include 'includes/body/navbar.php' ?>
 
     <div class="container py-5">
@@ -110,7 +139,7 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                                 <th>Pet Name</th>
                                 <th>Age</th>
                                 <th>Record Type</th>
-                                <th>Date Recorded</th>
+                                <!-- <th>Date Recorded</th> -->
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -124,7 +153,7 @@ $pets = $pdo->query("SELECT pet_id, pet_name FROM pets ORDER BY pet_name ASC")->
                                     <td><?= htmlspecialchars($r['pet_name']) ?></td>
                                     <td><?= $age ?></td>
                                     <td><?= htmlspecialchars($r['template_name']) ?></td>
-                                    <td><?= date("M d, Y h:i A", strtotime($r['date_recorded'])) ?></td>
+                                    <!-- <td><?= date("M d, Y h:i A", strtotime($r['date_recorded'])) ?></td> -->
                                     <td>
                                         <button class="btn btn-primary btn-sm viewRecordBtn me-2"
                                             data-id="<?= $r['record_id'] ?>" data-bs-toggle="tooltip"
