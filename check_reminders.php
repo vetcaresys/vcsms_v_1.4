@@ -2,20 +2,29 @@
 session_start();
 require 'config.php'; // This file provides the $pdo object
 
+// --- GLOBAL SETUP (Execute once) ---
+// Set the default time zone to Manila
+date_default_timezone_set('Asia/Manila');
+
+// Calculate tomorrow's date based on Manila Time (CRITICAL FIX: This happens once)
+$tomorrow = new DateTime('tomorrow'); 
+$tomorrow_date_sql = $tomorrow->format('Y-m-d'); 
+
 // --- Configuration ---
 $apiKey = '836eff6e31b18cbd39e1e33c3b24c29f'; // **CRITICAL: Replace with your actual Semaphore API KEY**
 $senderName ='VetCareSys'; // Your preferred sender name.
 
 // --- 1. Reminder Generation Function (Creates the SMS records) ---
-function generate_reminders($pdo) {
-    global $current_datetime;
-    $current_datetime = date('Y-m-d H:i:s'); // Ensure this is available
+// The date is passed as an argument.
+function generate_reminders($pdo, $tomorrow_date) { // Renamed parameter for clarity
 
-    // ... [Your existing Reminder Generation logic goes here] ...
-    // This part should only run once a day, or when needed.
-    // However, if it must run every 10 seconds, it's fine as long as it's fast.
+    // **FIXED:** Removed redundant $tomorrow calculation. Using $tomorrow_date argument.
+    
+    global $current_datetime;
+    $current_datetime = date('Y-m-d H:i:s'); 
 
     echo "--- Running Reminder Generation ---\n";
+    echo "Querying for schedule_date = " . $tomorrow_date . "\n"; 
 
     $sql_select = "
         SELECT 
@@ -23,13 +32,15 @@ function generate_reminders($pdo) {
         FROM 
             `notifications` 
         WHERE 
-            DATE(`schedule_date`) = DATE(NOW() + INTERVAL 1 DAY) 
+            DATE(`schedule_date`) = :tomorrow_date  
         AND 
-            `sms` = '1'
+            `sms` = 1
     ";
 
     try {
         $stmt_select = $pdo->prepare($sql_select);
+        // Binding the date passed as an argument to the function
+        $stmt_select->bindParam(':tomorrow_date', $tomorrow_date); 
         $stmt_select->execute();
         $results = $stmt_select->fetchAll(PDO::FETCH_ASSOC);
 
@@ -82,7 +93,7 @@ function generate_reminders($pdo) {
                 $stmt_update->execute([$row['notif_id']]);
             }
         } else {
-            echo "No new reminders to generate today.\n";
+            echo "wwwwNo new reminders to generate today.\n";
         }
     } catch (PDOException $e) {
         echo "🚨 Database Error in Generation: " . $e->getMessage() . "\n";
@@ -176,7 +187,7 @@ function send_sms_reminders($pdo) {
 }
 
 // --- Execute the two separate, independent jobs ---
-generate_reminders($pdo);
+generate_reminders($pdo, $tomorrow_date_sql);
 send_sms_reminders($pdo);
 // No need to wrap in a single function anymore; just execute the separate jobs.
 
