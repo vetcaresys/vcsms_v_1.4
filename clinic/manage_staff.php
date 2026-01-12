@@ -141,7 +141,12 @@ if (isset($_GET['delete'])) {
 }
 
 // ✅ FETCH STAFF LIST
-$staffList = $pdo->prepare("SELECT * FROM staff WHERE clinic_id = ?");
+$staffList = $pdo->prepare("
+    SELECT * 
+    FROM staff 
+    WHERE clinic_id = ? 
+    ORDER BY staff_id DESC
+");
 $staffList->execute([$clinic_id]);
 $staffMembers = $staffList->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -174,6 +179,7 @@ $staffMembers = $staffList->fetchAll(PDO::FETCH_ASSOC);
     <script src="assets/js/staff_form_validation.js"></script>
     <script src="assets/js/delete_staff.js"></script>
     <script src="assets/js/staff_password_toggle.js"></script>
+    <script src="assets/js/staff_table.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script></script>
 </body>

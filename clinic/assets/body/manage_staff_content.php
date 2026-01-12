@@ -25,11 +25,27 @@
                 <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i> Registered Staff Members</h5>
             </div>
 
+            <!-- search bar -->
+            <div class="d-flex justify-content-between align-items-center p-3">
+                <div>
+                    <label class="me-2">Show</label>
+                    <select id="rowsPerPage" class="form-select d-inline-block w-auto">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                    </select>
+                    <span class="ms-2">entries</span>
+                </div>
+
+                <input type="text" id="searchInput" class="form-control w-25" placeholder="Search staff...">
+            </div>
+
+
             <!-- Card Body -->
             <div class="card-body p-0">
                 <?php if (count($staffMembers) > 0): ?>
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
+                        <table class="table table-hover align-middle mb-0" id="staffTable">
                             <thead class="table-light">
                                 <tr>
                                     <th class="px-4">Name</th>
@@ -93,6 +109,12 @@
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
+                        <div class="d-flex justify-content-between align-items-center p-3">
+                            <span id="tableInfo" class="text-muted"></span>
+                            <nav>
+                                <ul class="pagination mb-0" id="pagination"></ul>
+                            </nav>
+                        </div>
                     </div>
                 <?php else: ?>
                     <p class="p-3 mb-0 text-center text-muted">No staff registered yet.</p>
@@ -178,14 +200,14 @@
 <?php endforeach; ?>
 
 <?php foreach ($staffMembers as $staff): ?>
-<script>
-    const pwField<?= $staff['staff_id'] ?> = document.getElementById('editStaffPassword<?= $staff['staff_id'] ?>');
-    const toggleBtn<?= $staff['staff_id'] ?> = document.getElementById('toggleEditStaffPassword<?= $staff['staff_id'] ?>');
+    <script>
+        const pwField<?= $staff['staff_id'] ?> = document.getElementById('editStaffPassword<?= $staff['staff_id'] ?>');
+        const toggleBtn<?= $staff['staff_id'] ?> = document.getElementById('toggleEditStaffPassword<?= $staff['staff_id'] ?>');
 
-    toggleBtn<?= $staff['staff_id'] ?>.addEventListener('click', function () {
-        const isHidden = pwField<?= $staff['staff_id'] ?>.type === 'password';
-        pwField<?= $staff['staff_id'] ?>.type = isHidden ? 'text' : 'password';
-        this.textContent = isHidden ? 'Hide' : 'Show';
-    });
-</script>
+        toggleBtn<?= $staff['staff_id'] ?>.addEventListener('click', function () {
+            const isHidden = pwField<?= $staff['staff_id'] ?>.type === 'password';
+            pwField<?= $staff['staff_id'] ?>.type = isHidden ? 'text' : 'password';
+            this.textContent = isHidden ? 'Hide' : 'Show';
+        });
+    </script>
 <?php endforeach; ?>

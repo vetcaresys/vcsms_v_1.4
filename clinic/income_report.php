@@ -110,7 +110,7 @@ $end_default = date('Y-m-d');
                         <h5 class="mb-0">Detailed Income Table</h5>
                         <div class="no-print">
                             <button id="printBtn" class="btn btn-outline-secondary btn-sm me-2"><i class="bi bi-printer"></i> Print</button>
-                            <button id="exportPdfBtn" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
+                            <!-- <button id="exportPdfBtn" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button> -->
                         </div>
                     </div>
 
@@ -150,8 +150,8 @@ $end_default = date('Y-m-d');
 
     <!-- Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
 
     <script>
     // Helpers
@@ -234,23 +234,23 @@ $end_default = date('Y-m-d');
         window.print();
     });
 
-    // Export PDF (jsPDF + html2canvas)
-    document.getElementById('exportPdfBtn').addEventListener('click', async () => {
-        const optTitle = `Income_Report_${document.getElementById('startDate').value}_${document.getElementById('endDate').value}`;
-        const element = document.querySelector('.container');
-        // capture
-        const canvas = await html2canvas(element, { scale: 2 });
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        // Calculate width and height to fit A4
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
-        pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pdfHeight);
-        pdf.save(optTitle + '.pdf');
-    });
+    // // Export PDF (jsPDF + html2canvas)
+    // document.getElementById('exportPdfBtn').addEventListener('click', async () => {
+    //     const optTitle = `Income_Report_${document.getElementById('startDate').value}_${document.getElementById('endDate').value}`;
+    //     const element = document.querySelector('.container');
+    //     // capture
+    //     const canvas = await html2canvas(element, { scale: 2 });
+    //     const imgData = canvas.toDataURL('image/png');
+    //     const { jsPDF } = window.jspdf;
+    //     const pdf = new jsPDF('p', 'mm', 'a4');
+    //     // Calculate width and height to fit A4
+    //     const pageWidth = pdf.internal.pageSize.getWidth();
+    //     const pageHeight = pdf.internal.pageSize.getHeight();
+    //     const imgProps = pdf.getImageProperties(imgData);
+    //     const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
+    //     pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pdfHeight);
+    //     pdf.save(optTitle + '.pdf');
+    // });
 
     // quick range logic
     document.getElementById('quickRange').addEventListener('change', (e) => {

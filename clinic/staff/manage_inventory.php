@@ -109,7 +109,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         </div>
       </div>
     </div>
-    
+
     <!-- category management section -->
     <div class="card shadow-sm mt-5">
       <div class="card-body">
@@ -123,7 +123,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         <table id="categoryTable" class="table table-bordered table-striped align-middle" style="width:100%">
           <thead class="table-primary">
             <tr>
-              <th>ID</th>
+              <!-- <th>ID</th> -->
               <th>Category Name</th>
               <th>Actions</th>
             </tr>
@@ -131,7 +131,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
           <tbody>
             <?php foreach ($categories as $category): ?>
               <tr>
-                <td><?= $category['category_id'] ?></td>
+                <!-- <td><?= $category['category_id'] ?></td> -->
                 <td><?= htmlspecialchars($category['category_name']) ?></td>
                 <td>
                   <button class="btn btn-sm btn-warning" data-bs-toggle="modal"
@@ -181,7 +181,8 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                       </div>
 
                       <div class="modal-footer">
-                        <button type="submit" name="update_category" class="btn btn-primary"><i class='bi bi-save'></i> Save</button>
+                        <button type="submit" name="update_category" class="btn btn-primary"><i class='bi bi-save'></i>
+                          Save</button>
                       </div>
                     </form>
                   </div>
@@ -223,7 +224,8 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
               </datalist>
             </div>
             <div class="modal-footer">
-              <button type="submit" name="add_category" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add</button>
+              <button type="submit" name="add_category" class="btn btn-primary"><i class="bi bi-plus-circle"></i>
+                Add</button>
             </div>
           </form>
         </div>
@@ -333,9 +335,113 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                     <i class="bi bi-box-arrow-down"></i>
                   </button>
 
+                  <button class="btn btn-sm btn-info" data-bs-toggle="modal"
+                    data-bs-target="#viewItemModal<?= $item['item_id'] ?>" title="View">
+                    <i class="bi bi-eye"></i>
+                  </button>
+
                   <!-- <button class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $item['item_id'] ?>)">🗑</button> -->
                 </td>
               </tr>
+
+              <!-- View Item Modal -->
+              <div class="modal fade" id="viewItemModal<?= $item['item_id'] ?>" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+
+                    <div class="modal-header bg-info text-white">
+                      <h5 class="modal-title">
+                        <i class="bi bi-eye"></i> View Item - <?= htmlspecialchars($item['item_name']) ?>
+                      </h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body row g-3">
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-bold">Item Name</label>
+                        <input type="text" class="form-control" value="<?= htmlspecialchars($item['item_name']) ?>"
+                          readonly>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-bold">Category</label>
+                        <input type="text" class="form-control"
+                          value="<?= htmlspecialchars($item['category_name'] ?? 'Uncategorized') ?>" readonly>
+                      </div>
+
+                      <div class="col-md-4">
+                        <label class="form-label fw-bold">Quantity</label>
+                        <input type="text" class="form-control" value="<?= $item['quantity'] ?>" readonly>
+                      </div>
+
+                      <div class="col-md-4">
+                        <label class="form-label fw-bold">Unit</label>
+                        <input type="text" class="form-control" value="<?= htmlspecialchars($item['unit']) ?>" readonly>
+                      </div>
+
+                      <div class="col-md-4">
+                        <label class="form-label fw-bold">Status</label>
+                        <input type="text" class="form-control" value="<?= ucfirst($item['status']) ?>" readonly>
+                      </div>
+
+                      <?php if ($item['is_consumable']): ?>
+                        <div class="col-md-4">
+                          <label class="form-label fw-bold">Volume / Bottle (ml)</label>
+                          <input type="text" class="form-control" value="<?= $item['volume_per_bottle_ml'] ?>" readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                          <label class="form-label fw-bold">Total Volume (ml)</label>
+                          <input type="text" class="form-control" value="<?= $item['total_volume_ml'] ?>" readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                          <label class="form-label fw-bold">Remaining Volume (ml)</label>
+                          <input type="text" class="form-control" value="<?= $item['remaining_volume_ml'] ?>" readonly>
+                        </div>
+                      <?php endif; ?>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-bold">Cost Price</label>
+                        <input type="text" class="form-control" value="₱<?= number_format($item['cost_price'], 2) ?>"
+                          readonly>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-bold">Selling Price</label>
+                        <input type="text" class="form-control" value="₱<?= number_format($item['selling_price'], 2) ?>"
+                          readonly>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-bold">Expiration Date</label>
+                        <input type="text" class="form-control" value="<?= $item['expiration_date'] ?>" readonly>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label fw-bold">Location</label>
+                        <input type="text" class="form-control" value="<?= htmlspecialchars($item['location']) ?>"
+                          readonly>
+                      </div>
+
+                      <div class="col-md-12">
+                        <label class="form-label fw-bold">Notes</label>
+                        <textarea class="form-control" rows="3"
+                          readonly><?= htmlspecialchars($item['notes']) ?></textarea>
+                      </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Close
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
 
               <!-- edit item modal -->
               <div class="modal fade" id="editItemModal<?= $item['item_id'] ?>" tabindex="-1">
@@ -461,7 +567,8 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                       </div>
 
                       <div class="modal-footer">
-                        <button type="submit" name="update_item" class="btn btn-primary"><i class="bi bi-save"></i> Save Changes</button>
+                        <button type="submit" name="update_item" class="btn btn-primary"><i class="bi bi-save"></i> Save
+                          Changes</button>
                       </div>
 
                     </form>
@@ -540,7 +647,8 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                       </div>
 
                       <div class="modal-footer">
-                        <button type="submit" name="restock" class="btn btn-primary"><i class="bi bi-save"></i> Save Restock</button>
+                        <button type="submit" name="restock" class="btn btn-primary"><i class="bi bi-save"></i> Save
+                          Restock</button>
                       </div>
                     </form>
                   </div>

@@ -108,9 +108,10 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="card shadow-sm p-4">
             <h4 class="text-primary mb-4"><i class="bi bi-list-ul"></i> Registered Pet Owner</h4>
             <div class="table-responsive">
-                <table id="ownersTable" class="table table-hover align-middle text-center">
+                <table id="ownersTable" class="table table-hover">
                     <thead class="table-light sticky-top">
                         <tr>
+                            <th>ID</th> <!-- hidden -->
                             <th>#</th>
                             <th>Full Name</th>
                             <th>Email</th>
@@ -124,6 +125,7 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php if (!empty($owners)): ?>
                             <?php foreach ($owners as $index => $o): ?>
                                 <tr>
+                                    <td><?= $o['user_id'] ?></td> <!-- real ID -->
                                     <td><?= $index + 1 ?></td>
                                     <td class="fw-semibold"><?= htmlspecialchars($o['name']) ?></td>
                                     <td><?= htmlspecialchars($o['email']) ?></td>
@@ -133,15 +135,20 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
                                             class="badge bg-light text-dark"><?= htmlspecialchars($o['created_at'] ?? '') ?></span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-warning btn-sm d-flex align-items-center gap-1"
-                                            data-bs-toggle="modal" data-bs-target="#editOwnerModal"
-                                            data-id="<?= $o['user_id'] ?>" data-name="<?= htmlspecialchars($o['name']) ?>"
-                                            data-email="<?= htmlspecialchars($o['email']) ?>"
-                                            data-contact="<?= htmlspecialchars($o['contact_number']) ?>"
-                                            data-address="<?= htmlspecialchars($o['address']) ?>" data-bs-toggle="tooltip"
-                                            data-bs-placement="top" title="Edit">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <button class="btn btn-info btn-sm viewOwnerBtn" data-id="<?= $o['user_id'] ?>"
+                                                title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#editOwnerModal" data-id="<?= $o['user_id'] ?>"
+                                                data-name="<?= htmlspecialchars($o['name']) ?>"
+                                                data-email="<?= htmlspecialchars($o['email']) ?>"
+                                                data-contact="<?= htmlspecialchars($o['contact_number']) ?>"
+                                                data-address="<?= htmlspecialchars($o['address']) ?>" title="Edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -266,6 +273,51 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
+    <!-- View Pet Owner Modal -->
+    <div class="modal fade" id="viewOwnerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-lines-fill"></i> Pet Owner Details
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th width="30%">Full Name</th>
+                            <td id="view_name"></td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td id="view_email"></td>
+                        </tr>
+                        <tr>
+                            <th>Contact Number</th>
+                            <td id="view_contact"></td>
+                        </tr>
+                        <tr>
+                            <th>Address</th>
+                            <td id="view_address"></td>
+                        </tr>
+                        <tr>
+                            <th>Date Registered</th>
+                            <td id="view_created"></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="footer-light">
         <div class="container text-center small">
             All Rights Reserved. &copy; 2025 VetCareSys
@@ -294,6 +346,33 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
+        document.querySelectorAll(".viewOwnerBtn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                let userId = btn.getAttribute("data-id");
+
+                fetch("view_petowner.php?id=" + userId)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.error) {
+                            Swal.fire("Error", data.error, "error");
+                            return;
+                        }
+
+                        document.getElementById("view_name").textContent = data.name;
+                        document.getElementById("view_email").textContent = data.email;
+                        document.getElementById("view_contact").textContent = data.contact_number;
+                        document.getElementById("view_address").textContent = data.address;
+                        document.getElementById("view_created").textContent = data.created_at;
+
+                        new bootstrap.Modal(
+                            document.getElementById("viewOwnerModal")
+                        ).show();
+                    });
+            });
+        });
+    </script>
+
+    <script>
         var editModal = document.getElementById('editOwnerModal');
         editModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
@@ -308,7 +387,12 @@ $owners = $ownersStmt->fetchAll(PDO::FETCH_ASSOC);
 
     <script>
         $(document).ready(function () {
-            $('#ownersTable').DataTable();
+            $('#ownersTable').DataTable({
+                order: [[0, 'desc']], // sort by user_id
+                columnDefs: [
+                    { targets: 0, visible: false } // hide ID column
+                ]
+            });
         });
     </script>
     <script>

@@ -89,14 +89,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ");
 
                 $success = $stmt->execute([
-                    ':owner_id'   => $owner_id,
-                    ':pet_name'   => $pet_name,
-                    ':species'    => $species,
-                    ':photo'      => $photo,
-                    ':breed'      => $breed,
+                    ':owner_id' => $owner_id,
+                    ':pet_name' => $pet_name,
+                    ':species' => $species,
+                    ':photo' => $photo,
+                    ':breed' => $breed,
                     ':birth_date' => $birth_date,
-                    ':description'=> $description,
-                    ':status'     => $status
+                    ':description' => $description,
+                    ':status' => $status
                 ]);
 
                 if ($success) {
@@ -462,7 +462,7 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                 <table id="petsTable" class="table table-striped table-bordered">
                     <thead class="table-primary">
                         <tr>
-                            <th>Pet ID</th>
+                            <th>#</th>
                             <th>Owner</th>
                             <th>Pet Name</th>
                             <th>Species</th>
@@ -478,15 +478,18 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                         <?php
                         // Fetch all pets with owner info
                         $sql = "SELECT p.*, u.name AS owner_name 
-                            FROM pets p 
-                            LEFT JOIN users u ON p.owner_id = u.user_id";
+                                FROM pets p 
+                                LEFT JOIN users u ON p.owner_id = u.user_id
+                                ORDER BY p.pet_id DESC";
                         $stmt = $pdo->query($sql);
                         $pets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+                        $counter = 1;
                         foreach ($pets as $pet) {
-                            $pet_id = htmlspecialchars($pet['pet_id']);
+                            $pet_id = $pet['pet_id']; // KEEP for edit/update, pero hidden
                             echo "<tr>";
-                            echo "<td>{$pet_id}</td>";
+                            echo "<td>{$counter}</td>"; // # column
+                            $counter++;
                             echo "<td>" . htmlspecialchars($pet['owner_name']) . "</td>";
                             echo "<td>" . htmlspecialchars($pet['pet_name']) . "</td>";
                             echo "<td>" . htmlspecialchars($pet['species']) . "</td>";
@@ -505,12 +508,17 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
                             }
                             echo "</td>";
 
-                            // Edit Button
+                            // Actions: Edit + View
                             echo "<td>
-                                <button class='btn btn-warning btn-sm' data-bs-toggle='modal' data-bs-target='#editPet{$pet_id}' >
-                                    <i class='bi bi-pencil-square'></i>
-                                </button>
-                            </td>";
+                                    <div class='d-flex gap-2'>
+                                        <button class='btn btn-info btn-sm viewPetBtn' data-id='{$pet_id}' title='View'>
+                                            <i class='bi bi-eye'></i>
+                                        </button>
+                                        <button class='btn btn-warning btn-sm' data-bs-toggle='modal' data-bs-target='#editPet{$pet_id}' title='Edit'>
+                                            <i class='bi bi-pencil-square'></i>
+                                        </button>
+                                    </div>
+                                    </td>";
                             echo "</tr>";
 
                             // Edit Modal
@@ -574,16 +582,105 @@ $profilePicPath = "../../uploads/profiles/" . $profilePic . "?t=" . time();
         </div>
     </div>
 
+    <!-- View Pet Modal -->
+    <div class="modal fade" id="viewPetModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="bi bi-eye"></i> Pet Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Owner</th>
+                            <td id="view_owner"></td>
+                        </tr>
+                        <tr>
+                            <th>Pet Name</th>
+                            <td id="view_pet_name"></td>
+                        </tr>
+                        <tr>
+                            <th>Species</th>
+                            <td id="view_species"></td>
+                        </tr>
+                        <tr>
+                            <th>Breed</th>
+                            <td id="view_breed"></td>
+                        </tr>
+                        <tr>
+                            <th>Birth Date</th>
+                            <td id="view_birth_date"></td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td id="view_description"></td>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td id="view_status"></td>
+                        </tr>
+                        <tr>
+                            <th>Photo</th>
+                            <td id="view_photo"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         $(document).ready(function () {
-            $('#petsTable').DataTable({
-                pageLength: 5,
-                lengthMenu: [5, 10, 25, 50],
-                order: [[0, 'asc']]
+            $('.viewPetBtn').on('click', function () {
+                let petId = $(this).data('id');
+
+                // Fetch pet details via AJAX
+                $.ajax({
+                    url: 'view_pet.php', // create this PHP file
+                    method: 'GET',
+                    data: { id: petId },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.error) {
+                            Swal.fire('Error', data.error, 'error');
+                            return;
+                        }
+
+                        $('#view_owner').text(data.owner_name);
+                        $('#view_pet_name').text(data.pet_name);
+                        $('#view_species').text(data.species);
+                        $('#view_breed').text(data.breed);
+                        $('#view_birth_date').text(data.birth_date);
+                        $('#view_description').text(data.description);
+                        $('#view_status').text(data.status);
+
+                        if (data.photo) {
+                            $('#view_photo').html('<img src=\"../../uploads/pets/' + data.photo + '\" class=\"img-fluid\" style=\"max-height:150px;\">');
+                        } else {
+                            $('#view_photo').text('No photo');
+                        }
+
+                        $('#viewPetModal').modal('show');
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Unable to fetch pet details.', 'error');
+                    }
+                });
             });
+        });
+    </script>
+    <script>
+        $('#petsTable').DataTable({
+            pageLength: 5,
+            lengthMenu: [5, 10, 25, 50],
+            ordering: false // IMPORTANT
         });
     </script>
 

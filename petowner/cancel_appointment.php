@@ -2,56 +2,62 @@
 session_start();
 require '../config.php';
 
+// 🔒 Only pet owners allowed
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'pet_owner') {
     header('Location: ../login.php');
     exit;
 }
 
-if (isset($_GET['id'])) {
-    $appointment_id = intval($_GET['id']);
+// ✅ POST only
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['appointment_id'])) {
+
+    $appointment_id = intval($_POST['appointment_id']);
     $user_id = $_SESSION['user_id'];
 
-    // ✅ Only cancel if status is 'pending'
-    $stmt = $pdo->prepare("
-        UPDATE appointments a
+    // 🔍 Get appointment details (for validation + notification)
+    $fetch = $pdo->prepare("
+        SELECT a.appointment_date, u.name AS owner_name
+        FROM appointments a
         JOIN pets p ON a.pet_id = p.pet_id
-        SET a.status = 'cancelled'
-        WHERE a.appointment_id = ? 
-          AND p.owner_id = ? 
+        JOIN users u ON u.user_id = p.owner_id
+        WHERE a.appointment_id = ?
+          AND p.owner_id = ?
           AND a.status = 'pending'
     ");
-    $stmt->execute([$appointment_id, $user_id]);
-    // Fetch appointment date for notification
-    $appointment_name_stmt = $pdo->prepare("SELECT name FROM users WHERE user_id = ?");
-    $appointment_name_stmt->execute([$user_id]);
-    $appointment_name = $appointment_name_stmt->fetchColumn();
+    $fetch->execute([$appointment_id, $user_id]);
+    $appointment = $fetch->fetch(PDO::FETCH_ASSOC);
 
-    $message = "Appointment from $appointment_name has been cancelled.";
-    if ($stmt->rowCount()) {
-        $_SESSION['msg'] = "Appointment has been cancelled.";
-         // 🔔 Create notification for employee/admin
-            $notif = $pdo->prepare("
-                INSERT INTO notifications 
-                (user_id, role, message, subject, link, schedule_date, sms, number, status, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-            $notif->execute([
-                $user_id,
-                'employee',
-                $message ?: 'New appointment cancelled.',
-                'Cancelled Book Appointment',
-                null,
-                $appointment_date,
-                null,
-                null,
-                'unread',
-                date('Y-m-d H:i:s')
-            ]);
+    if ($appointment) {
+
+        // ❌ Cancel pending appointment
+        $cancel = $pdo->prepare("
+            UPDATE appointments
+            SET status = 'cancelled'
+            WHERE appointment_id = ?
+        ");
+        $cancel->execute([$appointment_id]);
+
+        // 🔔 Optional: notify clinic/employee
+        $message = "Pending appointment from {$appointment['owner_name']} has been cancelled.";
+
+        $notif = $pdo->prepare("
+            INSERT INTO notifications
+            (user_id, role, message, subject, status, created_at)
+            VALUES (?, 'employee', ?, 'Cancelled Pending Appointment', 'unread', NOW())
+        ");
+        $notif->execute([
+            $user_id,
+            $message
+        ]);
+
+        $_SESSION['booking_msg'] = 'cancelled';
+
     } else {
-        $_SESSION['msg'] = "Unable to cancel appointment. Only pending appointments can be cancelled.";
+        $_SESSION['booking_msg'] = 'error';
+        $_SESSION['booking_error_text'] = 'Unable to cancel. Only pending appointments can be cancelled.';
     }
 }
 
-header("Location: book_appointment.php");
+header('Location: book_appointment.php');
 exit;
 ?>

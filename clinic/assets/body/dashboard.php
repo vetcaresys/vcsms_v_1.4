@@ -212,9 +212,9 @@
                         <button id="printBtn" class="btn btn-outline-secondary btn-sm me-2">
                             <i class="bi bi-printer"></i> Print
                         </button>
-                        <button id="exportPdfBtn" class="btn btn-outline-primary btn-sm">
+                        <!-- <button id="exportPdfBtn" class="btn btn-outline-primary btn-sm">
                             <i class="bi bi-file-earmark-pdf"></i> Export PDF
-                        </button>
+                        </button> -->
                     </div>
                     <!-- Table first -->
                     <div class="col-12" id="exportSection">
@@ -265,6 +265,74 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const startInput = document.getElementById("startDate");
+    const endInput = document.getElementById("endDate");
+    const quickRange = document.getElementById("quickRange");
+    const applyBtn = document.getElementById("applyBtn");
+
+    // Quick range change
+    quickRange.addEventListener("change", () => {
+        if (!quickRange.value) return;
+
+        const days = parseInt(quickRange.value);
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - days);
+
+        startInput.value = start.toISOString().split("T")[0];
+        endInput.value = end.toISOString().split("T")[0];
+    });
+
+    // Apply button
+    applyBtn.addEventListener("click", () => {
+        loadIncomeReport(startInput.value, endInput.value);
+    });
+
+    // Auto-load on page open
+    loadIncomeReport(startInput.value, endInput.value);
+});
+
+async function loadIncomeReport(start, end) {
+    const res = await fetch("fetch_income_report.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ start, end })
+    });
+
+    const data = await res.json();
+
+    // Summary
+    document.getElementById("totalIncome").innerText = "₱" + data.total.toFixed(2);
+    document.getElementById("totalCount").innerText = data.count + " items";
+    document.getElementById("averageDay").innerText = "₱" + data.average.toFixed(2);
+    document.getElementById("daysCount").innerText = data.days + " days";
+    document.getElementById("highestDay").innerText = data.highest_day ?? "—";
+    document.getElementById("highestAmount").innerText = "₱" + data.highest_amount.toFixed(2);
+
+    // Table
+    const tbody = document.getElementById("reportTableBody");
+    tbody.innerHTML = "";
+
+    data.rows.forEach(r => {
+        tbody.innerHTML += `
+        <tr>
+            <td>${r.date_used}</td>
+            <td>${r.record_id}</td>
+            <td>${r.pet}</td>
+            <td>${r.owner}</td>
+            <td>${r.item}</td>
+            <td>${r.qty}</td>
+            <td>₱${parseFloat(r.unit_price).toFixed(2)}</td>
+            <td>₱${parseFloat(r.income).toFixed(2)}</td>
+            <td>${r.staff}</td>
+            <td>${r.notes ?? ""}</td>
+        </tr>`;
+    });
+}
+</script>
 
 <script>
     document.getElementById('printBtn').addEventListener('click', async () => {

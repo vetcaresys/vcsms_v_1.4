@@ -98,22 +98,22 @@ $pets = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php endif; ?>
 
     <?php if (isset($_GET['error']) && $_GET['error'] === 'duplicate'): ?>
-<script>
-    Swal.fire({
-        icon: 'warning',
-        title: 'Duplicate Record',
-        text: 'This pet already has a medical record for today. Only one record per pet per day is allowed.',
-        confirmButtonColor: '#dc3545'
-    }).then(() => {
-        // Clean URL
-        if (window.history.replaceState) {
-            const url = new URL(window.location);
-            url.searchParams.delete('error');
-            window.history.replaceState({}, document.title, url.pathname);
-        }
-    });
-</script>
-<?php endif; ?>
+        <script>
+            Swal.fire({
+                icon: 'warning',
+                title: 'Duplicate Record',
+                text: 'This pet already has a medical record for today. Only one record per pet per day is allowed.',
+                confirmButtonColor: '#dc3545'
+            }).then(() => {
+                // Clean URL
+                if (window.history.replaceState) {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('error');
+                    window.history.replaceState({}, document.title, url.pathname);
+                }
+            });
+        </script>
+    <?php endif; ?>
 
 
 
@@ -432,7 +432,7 @@ $pets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $('#recordsTable').DataTable({
                 "pageLength": 5,
                 "lengthMenu": [5, 10, 25, 50, 100],
-                "order": [[4, "desc"]], // sort by date
+                "ordering": false, // Use PHP ordering (latest first)
                 "language": {
                     "search": "Search Records:",
                     "lengthMenu": "Show _MENU_ entries"
@@ -460,7 +460,6 @@ $pets = $stmt->fetchAll(PDO::FETCH_ASSOC);
             });
         });
     </script>
-
 
     <script>
         document.querySelectorAll('.viewRecordBtn').forEach(btn => {
